@@ -1,0 +1,467 @@
+swagger: '2.0'
+######################################################
+# Prolog
+######################################################
+info:
+  version: "1.0.0"
+  title: "WSO2 Identity Server Configuration Management Rest API"
+  description: |
+    This document specifies a **Configurations Management RESTfulAPI** for WSO2 **Identity Server** .
+    It is written with [swagger 2](http://swagger.io/).
+  contact:
+    name: "WSO2"
+    url: "http://wso2.com/products/identity-server/"
+    email: "architecture@wso2.com"
+  license:
+    name: "Apache 2.0"
+    url: "http://www.apache.org/licenses/LICENSE-2.0.html"
+
+######################################################
+# The fixed parts of the URLs of the API
+######################################################
+
+# The schemes supported by the API
+schemes:
+- https
+
+# The domain of the API.
+# This is configured by the customer during deployment.
+# The given host is just an example.
+# host: apis.is.com
+
+# The base path of the API.
+# Will be prefixed to all paths.
+# if the tenant domain is carbon.super basepath can be /api/identity/consent-mgt/v1.0 like this too.
+
+basePath: /t/{tenant-domain}/api/identity/config-mgt/v1.0
+
+# The following media types can be passed as input in message bodies of the API.
+# The actual media type must be specified in the Content-Type header field of the request.
+# The default is json, i.e. the Content-Type header is not needed to
+# be set, but supporting it serves extensibility.
+consumes:
+- application/json
+
+# The following media types may be passed as output in message bodies of the API.
+# The media type(s) consumable by the requester is specified in the Accept header field
+# of the corresponding request.
+# The actual media type returned will be specified in the Content-Type header field
+# of the of the response.
+# The default of the Accept header is json, i.e. there is not needed to
+# set the value, but supporting it serves extensibility.
+produces:
+- application/json
+paths:
+  # Endpoint used to add tenant configurations
+  "/configuration":
+    post:
+      description: |
+        This API is used to store configurations given by the user.
+      x-wso2-request:
+      x-wso2-curl:
+      x-wso2-response:
+      summary: |
+        Add configurations
+      # post parameters:
+      parameters:
+      - name: configurations
+        in: body
+        description:  This represents the set of configurations that needs to be stored.
+        required: true
+        schema:
+          $ref: '#/definitions/TenantConfigurations'
+      responses:
+        201:
+          description: Successful response
+        400:
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/Error'
+        401:
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/Error'
+        409:
+          description: Conflict
+          schema:
+            $ref: '#/definitions/Error'
+        500:
+          description: Server Error
+          schema:
+            $ref: '#/definitions/Error'
+      tags:
+      - Configuration
+    put:
+      description: |
+        This API is used to store or replace configurations given by the user.
+      x-wso2-request:
+      x-wso2-curl:
+      x-wso2-response:
+      summary: |
+        Add or Replace configurations
+      # put parameters:
+      parameters:
+      - name: configurations
+        in: body
+        description:  This represents the set of configurations that needs to be stored or replaced.
+        required: true
+        schema:
+          $ref: '#/definitions/TenantConfigurations'
+      responses:
+        201:
+          description: Successful response
+        400:
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/Error'
+        401:
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/Error'
+        500:
+          description: Server Error
+          schema:
+            $ref: '#/definitions/Error'
+      tags:
+      - Configuration
+    patch:
+      description: |
+        This API is used to update existing configurations given by the user.
+      x-wso2-request:
+      x-wso2-curl:
+      x-wso2-response:
+      summary: |
+        Update existing configurations
+      # patch parameters:
+      parameters:
+      - name: configurations
+        in: body
+        description:  This represents the set of configurations that needs to be updated.
+        required: true
+        schema:
+          $ref: '#/definitions/TenantConfigurations'
+      responses:
+        201:
+          description: Successful response
+        400:
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/Error'
+        401:
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: Not Found
+          schema:
+            $ref: '#/definitions/Error'
+        500:
+          description: Server Error
+          schema:
+            $ref: '#/definitions/Error'
+      tags:
+      - Configuration
+    get:
+      description: |
+        This API is used to retrieve configurations for the tenant domain.
+      x-wso2-request:
+      x-wso2-curl:
+      x-wso2-response:
+      summary: |
+        Retrieve configurations
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/TenantConfigurations'
+        400:
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/Error'
+        401:
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/Error'
+        500:
+          description: Server Error
+          schema:
+            $ref: '#/definitions/Error'
+      tags:
+      - Configuration
+    delete:
+      description: |
+        This API is used to revoke the configurations.
+      x-wso2-request:
+      x-wso2-curl:
+      x-wso2-response:
+      summary: |
+        Revoke configurations
+      responses:
+        200:
+          description: OK
+        404:
+          description: Not Found
+          schema:
+            $ref: '#/definitions/Error'
+        400:
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/Error'
+        401:
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/Error'
+        500:
+          description: Server Error
+          schema:
+            $ref: '#/definitions/Error'
+      tags:
+      - Configuration
+
+  "/configuration/{name}":
+    post:
+      description: |
+        This API is used to store the configuration given by the user.
+      x-wso2-request:
+      x-wso2-curl:
+      x-wso2-response:
+      summary: |
+        Add the configuration
+      # post parameters:
+      parameters:
+      - name: name
+        in: path
+        description:  This represents the name of the configuration to be added.
+        required: true
+        type: 'string'
+      - name: configurations
+        in: body
+        description:  This represents the configuration that needs to be stored.
+        required: true
+        schema:
+          $ref: '#/definitions/Configuration'
+      responses:
+        201:
+          description: Successful response
+        400:
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/Error'
+        401:
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/Error'
+        409:
+          description: Conflict
+          schema:
+            $ref: '#/definitions/Error'
+        500:
+          description: Server Error
+          schema:
+            $ref: '#/definitions/Error'
+      tags:
+      - Configuration
+    put:
+      description: |
+        This API is used to store or replace the configuration given by the user.
+      x-wso2-request:
+      x-wso2-curl:
+      x-wso2-response:
+      summary: |
+        Add or Replace the configuration
+      # put parameters:
+      parameters:
+      - name: name
+        in: path
+        description:  This represents the name of the configuration to be added or replaced.
+        required: true
+        type: 'string'
+      - name: configurations
+        in: body
+        description:  This represents the set of configurations that needs to be stored or replaced.
+        required: true
+        schema:
+          $ref: '#/definitions/Configuration'
+      responses:
+        201:
+          description: Successful response
+        400:
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/Error'
+        401:
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/Error'
+        500:
+          description: Server Error
+          schema:
+            $ref: '#/definitions/Error'
+      tags:
+      - Configuration
+    patch:
+      description: |
+        This API is used to update an existing configuration given by the user.
+      x-wso2-request:
+      x-wso2-curl:
+      x-wso2-response:
+      summary: |
+        Update existing configuration
+      # patch parameters:
+      parameters:
+      - name: name
+        in: path
+        description:  This represents the name of the configuration to be added or updated.
+        required: true
+        type: 'string'
+      - name: configurationsties
+        in: body
+        description:  This represents the configuration that needs to be updated.
+        required: true
+        schema:
+          $ref: '#/definitions/TenantConfigurations'
+      responses:
+        201:
+          description: Successful response
+        400:
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/Error'
+        401:
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: Not Found
+          schema:
+            $ref: '#/definitions/Error'
+        500:
+          description: Server Error
+          schema:
+            $ref: '#/definitions/Error'
+      tags:
+      - Configuration
+    get:
+      description: |
+        This API is used to retrieve a configuration for the tenant domain given by the user.
+      x-wso2-request:
+      x-wso2-curl:
+      x-wso2-response:
+      summary: |
+        Retrieve the configuration
+      parameters:
+      - name: name
+        in: path
+        description:  This represents the name of the configuration to be retrieved.
+        required: true
+        type: 'string'
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/Configuration'
+        400:
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/Error'
+        401:
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/Error'
+        500:
+          description: Server Error
+          schema:
+            $ref: '#/definitions/Error'
+      tags:
+      - Configuration
+    delete:
+      description: |
+        This API is used to revoke a configuration in the tenant domain given by the user.
+      x-wso2-request:
+      x-wso2-curl:
+      x-wso2-response:
+      summary: |
+        Revoke the configuration
+      parameters:
+      - name: name
+        in: path
+        description:  This represents the name of the configuration to be retrieved.
+        required: true
+        type: 'string'
+      responses:
+        200:
+          description: OK
+        404:
+          description: Not Found
+          schema:
+            $ref: '#/definitions/Error'
+        400:
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/Error'
+        401:
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/Error'
+        500:
+          description: Server Error
+          schema:
+            $ref: '#/definitions/Error'
+      tags:
+      - Configuration
+
+
+
+definitions:
+  #-----------------------------------------------------
+  # The Error Response  object
+  #-----------------------------------------------------
+  Error:
+    type: object
+    properties:
+      code:
+        type: string
+      message:
+        type: string
+      description:
+        type: string
+  #-----------------------------------------------------
+  # Configuration Attribute Object
+  #-----------------------------------------------------
+  Attribute:
+    type: object
+    required:
+    - key
+    - value
+    properties:
+      key:
+        type: string
+      value:
+        type: string
+  #-----------------------------------------------------
+  # Configuration object
+  #-----------------------------------------------------
+  Configuration:
+    type: object
+    required:
+    - configurationName
+    - attributes
+    properties:
+      name:
+        type: string
+      attributes:
+        type: array
+        items:
+          $ref: '#/definitions/Attribute'
+  #-----------------------------------------------------
+  # Tenant Configurations object
+  #-----------------------------------------------------
+  TenantConfigurations:
+    type: object
+    required:
+    - configurations
+    properties:
+      configurations:
+        type: array
+        items:
+          $ref: '#/definitions/Configuration'
