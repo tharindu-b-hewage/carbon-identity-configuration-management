@@ -18,13 +18,14 @@ package org.wso2.carbon.identity.configuration.mgt.endpoint.impl;
 
 import org.wso2.carbon.identity.configuration.mgt.endpoint.ApiResponseMessage;
 import org.wso2.carbon.identity.configuration.mgt.endpoint.ConfigurationApiService;
-import org.wso2.carbon.identity.configuration.mgt.endpoint.dto.AttributeDTO;
 import org.wso2.carbon.identity.configuration.mgt.endpoint.dto.ConfigurationDTO;
 import org.wso2.carbon.identity.configuration.mgt.endpoint.dto.TenantConfigurationsDTO;
+import org.wso2.carbon.identity.configuration.mgt.core.ConfigurationManager;
 
-import java.util.ArrayList;
-import java.util.List;
 import javax.ws.rs.core.Response;
+
+import static org.wso2.carbon.identity.configuration.mgt.endpoint.util.ConfigurationEndpointUtils.getConfigurationDTO;
+import static org.wso2.carbon.identity.configuration.mgt.endpoint.util.ConfigurationEndpointUtils.getConfigurationManager;
 
 public class ConfigurationApiServiceImpl extends ConfigurationApiService {
 
@@ -49,19 +50,8 @@ public class ConfigurationApiServiceImpl extends ConfigurationApiService {
     @Override
     public Response configurationNameGet(String name) {
 
-        List<AttributeDTO> attributeDTOS = new ArrayList<>(2);
-        for (int i = 0; i < 2; i++) {
-            attributeDTOS.add(new AttributeDTO());
-        }
-        attributeDTOS.get(0).setKey("mail.smtp.from");
-        attributeDTOS.get(0).setValue("abc@gmail.com");
-        attributeDTOS.get(1).setKey("mail.smtp.host");
-        attributeDTOS.get(1).setValue("smtp.gmail.com");
-
-        ConfigurationDTO configurationDTO = new ConfigurationDTO();
-        configurationDTO.setName("email");
-        configurationDTO.setAttributes(attributeDTOS);
-
+        ConfigurationManager configurationManager = getConfigurationManager();
+        ConfigurationDTO configurationDTO = getConfigurationDTO(configurationManager.getConfiguration());
         return Response.ok().entity(configurationDTO).build();
     }
 
