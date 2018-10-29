@@ -29,7 +29,8 @@ public class Configuration {
 
     /**
      * Initialize a Configuration object.
-     * @param name Name of the configuration.
+     *
+     * @param name       Name of the configuration.
      * @param attributes Collection of attributes in the configuration.
      */
     public Configuration(String name, List<Attribute> attributes) {

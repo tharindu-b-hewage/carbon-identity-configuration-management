@@ -27,10 +27,12 @@ public class Attribute {
 
     /**
      * Initialize an Attribute object with a key,value pair.
-     * @param key Name identifier for the Attribute object.
+     *
+     * @param key   Name identifier for the Attribute object.
      * @param value Value for the Attribute object.
      */
     public Attribute(String key, String value) {
+
         this.key = key;
         this.value = value;
     }

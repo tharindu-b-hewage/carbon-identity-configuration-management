@@ -16,6 +16,7 @@
 
 package org.wso2.carbon.identity.configuration.mgt.core;
 
+import org.wso2.carbon.identity.configuration.mgt.core.exception.ConfigurationManagementException;
 import org.wso2.carbon.identity.configuration.mgt.core.model.Configuration;
 
 /**
@@ -24,8 +25,19 @@ import org.wso2.carbon.identity.configuration.mgt.core.model.Configuration;
 public interface ConfigurationManager {
 
     /**
-     * Get a sample configuration.
-     * @return Sample configuration.
+     * This API is used to get the configuration by configuration name
+     *
+     * @param name Name id of the configuration.
+     * @return 200 OK with configuration element.
+     * @throws Configuration Management Exception.
      */
-    public Configuration getConfiguration();
+    Configuration getConfiguration(String name) throws ConfigurationManagementException;
+
+    /**
+     * This API is used to delete the configuration by configuration name
+     *
+     * @param name Name  id of the configuration.
+     * @throws ConfigurationManagementException Configuration management exception.
+     */
+    void deleteConfiguration(String name) throws ConfigurationManagementException;
 }

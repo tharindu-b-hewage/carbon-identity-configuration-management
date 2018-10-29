@@ -216,10 +216,16 @@
                 <artifactId>httpcore</artifactId>
                 <version>${apache.httpcore.version}</version>
             </dependency>
+            <dependency>
+                <groupId>commons-lang.wso2</groupId>
+                <artifactId>commons-lang</artifactId>
+                <version>${commons-lang.wso2.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
     <properties>
+        <commons-lang.wso2.version>2.6.0.wso2v1</commons-lang.wso2.version>
         <json.wso2.version>3.0.0.wso2v1</json.wso2.version>
         <jackson-databind.version>2.9.6</jackson-databind.version>
         <apache.tomcat-catalina.version>9.0.11</apache.tomcat-catalina.version>

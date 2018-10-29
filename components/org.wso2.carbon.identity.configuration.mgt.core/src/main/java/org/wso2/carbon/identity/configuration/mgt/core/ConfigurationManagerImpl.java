@@ -16,39 +16,51 @@
 
 package org.wso2.carbon.identity.configuration.mgt.core;
 
-import org.wso2.carbon.identity.configuration.mgt.core.model.Attribute;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages;
+import org.wso2.carbon.identity.configuration.mgt.core.dao.ConfigurationDAO;
+import org.wso2.carbon.identity.configuration.mgt.core.dao.impl.ConfigurationDAOImpl;
+import org.wso2.carbon.identity.configuration.mgt.core.exception.ConfigurationManagementException;
 import org.wso2.carbon.identity.configuration.mgt.core.model.Configuration;
-
-import java.util.ArrayList;
-import java.util.List;
+import org.wso2.carbon.identity.configuration.mgt.core.util.ConsentUtils;
 
 /**
  * Configuration Manager service implementation.
  */
 public class ConfigurationManagerImpl implements ConfigurationManager {
 
-    private Configuration sampleConfiguration;
+    private static final Log log = LogFactory.getLog(ConfigurationManagerImpl.class);
+    private ConfigurationDAO configurationDAO = new ConfigurationDAOImpl();
 
-    /**
-     * Initialize with a sample configuration
-     */
     public ConfigurationManagerImpl() {
 
-        List<Attribute> attributes = new ArrayList<>(2);
-        attributes.add(new Attribute("mail.from", "abc@gmail.com"));
-        attributes.add(new Attribute("mail.host", "smtp.gmai.com"));
-
-        this.sampleConfiguration = new Configuration("email", attributes);
     }
 
-    @Override
-    public Configuration getConfiguration() {
+    /**
+     * {@inheritDoc}
+     */
+    public Configuration getConfiguration(String name) throws ConfigurationManagementException {
 
-        return this.sampleConfiguration;
+        Configuration configuration = this.configurationDAO.getConfiguration(name);
+        if (configuration == null) {
+            if (log.isDebugEnabled()) {
+                log.debug("No configuration found for the name " + name);
+            }
+            throw ConsentUtils.handleClientException(ErrorMessages.ERROR_CODE_CONFIGURATION_NAME_INVALID, null);
+        }
+        return configuration;
     }
 
-    public void setSampleConfiguration(Configuration sampleConfiguration) {
+    /**
+     * {@inheritDoc}
+     */
+    public void deleteConfiguration(String name) throws ConfigurationManagementException {
 
-        this.sampleConfiguration = sampleConfiguration;
+        // TODO: 10/29/18 DAO will handle the record not found error
+        this.configurationDAO.deleteConfiguration(name);
+        if (log.isDebugEnabled()) {
+            log.debug(name + " Configuration deleted successfully.");
+        }
     }
 }
