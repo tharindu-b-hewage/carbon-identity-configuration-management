@@ -11,6 +11,13 @@ import org.wso2.carbon.identity.configuration.mgt.core.model.Configuration;
 public interface ConfigurationDAO {
 
     /**
+     * Get priority value for the {@link ConfigurationDAO}.
+     *
+     * @return Priority value for the DAO.
+     */
+    int getPriority();
+
+    /**
      * Returns {@link Configuration} by name;
      *
      * @param name Name id of the {@link Configuration} to retrieve.

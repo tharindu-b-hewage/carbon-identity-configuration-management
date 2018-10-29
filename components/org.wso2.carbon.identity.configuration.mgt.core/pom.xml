@@ -48,7 +48,7 @@
                         <Private-Package>org.wso2.carbon.identity.configuration.mgt.core.internal</Private-Package>
                         <Import-Package>
                             org.wso2.carbon.identity.configuration.mgt.core.*; version="${project.version}",
-                            org.wso2.carbon.context.*; version="${org.wso2.carbon.utils.version}",
+                            org.wso2.carbon.context.*; version="${org.wso2.carbon.context.version}",
                             org.osgi.framework,
                             org.osgi.service.component,
                             org.apache.commons.logging.*; version="${commons.logging.version.range}",

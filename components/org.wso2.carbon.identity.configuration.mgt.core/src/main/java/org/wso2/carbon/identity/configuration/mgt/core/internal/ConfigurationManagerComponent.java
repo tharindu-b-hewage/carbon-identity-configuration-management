@@ -27,8 +27,13 @@ import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
 import org.wso2.carbon.identity.configuration.mgt.core.ConfigurationManager;
 import org.wso2.carbon.identity.configuration.mgt.core.ConfigurationManagerImpl;
-import org.wso2.carbon.identity.configuration.mgt.core.dao.AttributeDAO;
-import org.wso2.carbon.identity.configuration.mgt.core.dao.impl.AttributeDAOImpl;
+import org.wso2.carbon.identity.configuration.mgt.core.dao.ConfigurationDAO;
+import org.wso2.carbon.identity.configuration.mgt.core.dao.impl.ConfigurationDAOImpl;
+import org.wso2.carbon.identity.configuration.mgt.core.model.ConfigurationManagerConfigurationHolder;
+
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 
 /**
  * OSGi declarative services component which handles registration and un-registration of configuration management service.
@@ -40,7 +45,7 @@ import org.wso2.carbon.identity.configuration.mgt.core.dao.impl.AttributeDAOImpl
 public class ConfigurationManagerComponent {
 
     private static final Log log = LogFactory.getLog(ConfigurationManager.class);
-    private AttributeDAO attributeDAO;
+    private List<ConfigurationDAO> configurationDAOS = new ArrayList<>();
 
     /**
      * Register ConfigurationManager as an OSGI service.
@@ -52,34 +57,45 @@ public class ConfigurationManagerComponent {
 
         try {
             BundleContext bundleContext = componentContext.getBundleContext();
-//            bundleContext.registerService(AttributeDAO.class.getName(), new AttributeDAOImpl(), null);
-            bundleContext.registerService(ConfigurationManager.class.getName(), new ConfigurationManagerImpl(),
+            bundleContext.registerService(ConfigurationDAO.class.getName(), new ConfigurationDAOImpl(),
                     null);
+
+            ConfigurationManagerConfigurationHolder configurationManagerConfigurationHolder =
+                    new ConfigurationManagerConfigurationHolder();
+            configurationManagerConfigurationHolder.setConfigurationDAOS(configurationDAOS);
+
+            bundleContext.registerService(ConfigurationManager.class.getName(),
+                    new ConfigurationManagerImpl(configurationManagerConfigurationHolder), null);
+
         } catch (Throwable e) {
             log.error("Error while activating ConfigurationManagerComponent.", e);
         }
     }
 
-//    @Reference(
-//            name = "attribute.dao",
-//            service = AttributeDAO.class,
-//            cardinality = ReferenceCardinality.MANDATORY,
-//            policy = ReferencePolicy.DYNAMIC,
-//            unbind = "unsetAttribute"
-//    )
-//    protected void setAttribute(AttributeDAO attributeDAO) {
-//
-//        this.attributeDAO = attributeDAO;
-//        if (this.attributeDAO != null) {
-//            log.debug("SampleAttributeDAO is registered in ConfigurationManager service.");
-//        }
-//    }
-//
-//    protected void unsetAttribute(AttributeDAO attributeDAO) {
-//
-//        if (log.isDebugEnabled()) {
-//            log.debug("SampleAttributeDAO is unregistered in ConfigurationManager service.");
-//        }
-//        this.attributeDAO = null;
-//    }
+    @Reference(
+            name = "configuration.dao",
+            service = org.wso2.carbon.identity.configuration.mgt.core.dao.ConfigurationDAO.class,
+            cardinality = ReferenceCardinality.MULTIPLE,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetConfiguration"
+    )
+    protected void setPurpose(ConfigurationDAO configurationDAO) {
+
+        if (configurationDAO != null) {
+            if (log.isDebugEnabled()) {
+                log.debug("Configuration DAO is registered in ConfigurationManager service.");
+            }
+
+            this.configurationDAOS.add(configurationDAO);
+            this.configurationDAOS.sort(Comparator.comparingInt(ConfigurationDAO::getPriority));
+        }
+    }
+
+    protected void unsetConfiguration(ConfigurationDAO configurationDAO) {
+
+        if (log.isDebugEnabled()) {
+            log.debug("Purpose DAO is unregistered in ConsentManager service.");
+        }
+        this.configurationDAOS.remove(configurationDAO);
+    }
 }

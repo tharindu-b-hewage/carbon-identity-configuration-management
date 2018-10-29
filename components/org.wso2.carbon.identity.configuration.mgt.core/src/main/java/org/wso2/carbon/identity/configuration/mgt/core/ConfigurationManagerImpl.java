@@ -22,17 +22,19 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages;
 import org.wso2.carbon.identity.configuration.mgt.core.dao.ConfigurationDAO;
-import org.wso2.carbon.identity.configuration.mgt.core.dao.impl.ConfigurationDAOImpl;
 import org.wso2.carbon.identity.configuration.mgt.core.exception.ConfigurationManagementException;
 import org.wso2.carbon.identity.configuration.mgt.core.model.Configuration;
 import org.wso2.carbon.identity.configuration.mgt.core.model.ConfigurationChangeResponse;
+import org.wso2.carbon.identity.configuration.mgt.core.model.ConfigurationManagerConfigurationHolder;
 import org.wso2.carbon.identity.configuration.mgt.core.util.ConsentUtils;
 
-import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants
-        .STATE_ADD_CONFIGURATION_CHANGE_RESPONSE;
-import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants
-        .STATE_REPLACE_CONFIGURATION_CHANGE_RESPONSE;
+import java.util.List;
+
+import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_GET_DAO;
+import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.STATE_ADD_CONFIGURATION_CHANGE_RESPONSE;
+import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.STATE_REPLACE_CONFIGURATION_CHANGE_RESPONSE;
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.STATE_UPDATE_CONFIGURATION_CHANGE_RESPONSE;
+import static org.wso2.carbon.identity.configuration.mgt.core.util.ConsentUtils.handleServerException;
 
 /**
  * Configuration Manager service implementation.
@@ -40,10 +42,13 @@ import static org.wso2.carbon.identity.configuration.mgt.core.constant.Configura
 public class ConfigurationManagerImpl implements ConfigurationManager {
 
     private static final Log log = LogFactory.getLog(ConfigurationManagerImpl.class);
-    private ConfigurationDAO configurationDAO = new ConfigurationDAOImpl();
+    private ConfigurationManagerConfigurationHolder configurationManagerConfigurationHolder;
+    private List<ConfigurationDAO> configurationDAOS;
+    private static final String CONFIGURATION_DAO = "configurationDAOs"; // TODO: 10/29/18 Why dont we move this to constants
 
-    public ConfigurationManagerImpl() {
+    public ConfigurationManagerImpl(ConfigurationManagerConfigurationHolder configurationManagerConfigurationHolder) {
 
+        this.configurationDAOS = configurationManagerConfigurationHolder.getConfigurationDAOS();
     }
 
     /**
@@ -51,7 +56,7 @@ public class ConfigurationManagerImpl implements ConfigurationManager {
      */
     public Configuration getConfiguration(String name) throws ConfigurationManagementException {
 
-        Configuration configuration = this.configurationDAO.getConfiguration(name);
+        Configuration configuration = this.getConfigurationDAO().getConfiguration(name);
         if (configuration == null) {
             if (log.isDebugEnabled()) {
                 log.debug("No configuration found for the name " + name);
@@ -67,7 +72,7 @@ public class ConfigurationManagerImpl implements ConfigurationManager {
     public void deleteConfiguration(String name) throws ConfigurationManagementException {
 
         // TODO: 10/29/18 DAO will handle the record not found error
-        this.configurationDAO.deleteConfiguration(name);
+        this.getConfigurationDAO().deleteConfiguration(name);
         if (log.isDebugEnabled()) {
             log.debug(StringUtils.capitalize(name) + " configuration deleted successfully.");
         }
@@ -80,7 +85,7 @@ public class ConfigurationManagerImpl implements ConfigurationManager {
             throws ConfigurationManagementException {
 
         // TODO: 10/29/18 DAO will handle conflict error
-        this.configurationDAO.addConfiguration(name, configuration);
+        this.getConfigurationDAO().addConfiguration(name, configuration);
         if (log.isDebugEnabled()) {
             log.debug(name + " configuration created successfully.");
         }
@@ -97,14 +102,14 @@ public class ConfigurationManagerImpl implements ConfigurationManager {
     public ConfigurationChangeResponse replaceConfiguration(String name, Configuration configuration)
             throws ConfigurationManagementException {
 
-        this.configurationDAO.replaceConfiguration(name, configuration);
+        this.getConfigurationDAO().replaceConfiguration(name, configuration);
         if (log.isDebugEnabled()) {
             log.debug(name + " configuration replaced successfully.");
         }
         return new ConfigurationChangeResponse(
-            name,
-            PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain(),
-            STATE_REPLACE_CONFIGURATION_CHANGE_RESPONSE
+                name,
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain(),
+                STATE_REPLACE_CONFIGURATION_CHANGE_RESPONSE
         );
     }
 
@@ -115,7 +120,7 @@ public class ConfigurationManagerImpl implements ConfigurationManager {
             throws ConfigurationManagementException {
 
         // TODO: 10/29/18 DAO will handle the record not found error
-        this.configurationDAO.updateConfiguration(name, configuration);
+        this.getConfigurationDAO().updateConfiguration(name, configuration);
         if (log.isDebugEnabled()) {
             log.debug(name + " configuration replaced successfully.");
         }
@@ -124,5 +129,19 @@ public class ConfigurationManagerImpl implements ConfigurationManager {
                 PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain(),
                 STATE_UPDATE_CONFIGURATION_CHANGE_RESPONSE
         );
+    }
+
+    /**
+     * Select highest priority Configuration DAO from an already sorted list of Configuration DAOs.
+     *
+     * @return Highest priority Configuration DAO.
+     */
+    private ConfigurationDAO getConfigurationDAO() throws ConfigurationManagementException {
+
+        if (!this.configurationDAOS.isEmpty()) {
+            return configurationDAOS.get(configurationDAOS.size() - 1);
+        } else {
+            throw handleServerException(ERROR_CODE_GET_DAO, CONFIGURATION_DAO);
+        }
     }
 }

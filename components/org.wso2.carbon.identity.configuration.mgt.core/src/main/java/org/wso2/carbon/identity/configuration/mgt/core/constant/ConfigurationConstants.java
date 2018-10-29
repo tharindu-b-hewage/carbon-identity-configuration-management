@@ -23,6 +23,7 @@ public class ConfigurationConstants {
         ERROR_CODE_UNEXPECTED("CONFIGM_00004", "Unexpected Error"),
         ERROR_CODE_CONFIGURATION_NAME_REQUIRED("CONFIGM_00005", "Configuration name is required."),
         ERROR_CODE_CONFIGURATION_NAME_INVALID("CONFIGM_00006", "Invalid Configuration Name: %s"),
+        ERROR_CODE_GET_DAO("CONFIGM_00007", "No %s are registered.")
         ;
 
         private final String code;

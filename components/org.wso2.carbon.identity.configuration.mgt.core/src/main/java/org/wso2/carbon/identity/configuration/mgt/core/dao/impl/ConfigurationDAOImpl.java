@@ -14,6 +14,15 @@ public class ConfigurationDAOImpl implements ConfigurationDAO {
     /**
      * {@inheritDoc}
      */
+    @Override
+    public int getPriority() {
+
+        return 1;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public Configuration getConfiguration(String name) throws ConfigurationManagementException {
 
         List<Attribute> attributes = new ArrayList<>(1);
