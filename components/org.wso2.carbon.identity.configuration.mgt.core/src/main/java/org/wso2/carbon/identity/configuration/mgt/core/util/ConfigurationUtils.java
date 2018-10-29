@@ -5,15 +5,15 @@ import org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationCon
 import org.wso2.carbon.identity.configuration.mgt.core.exception.ConfigurationManagementClientException;
 import org.wso2.carbon.identity.configuration.mgt.core.exception.ConfigurationManagementServerException;
 
-public class ConsentUtils {
+public class ConfigurationUtils {
 
     /**
-     * This method can be used to generate a ConsentManagementClientException from ConsentConstants.ErrorMessages
+     * This method can be used to generate a ConfigurationManagementClientException from ConfigurationConstants.ErrorMessages
      * object when no exception is thrown.
      *
-     * @param error ConsentConstants.ErrorMessages.
+     * @param error ConfigurationConstants.ErrorMessages.
      * @param data  data to replace if message needs to be replaced.
-     * @return ConsentManagementClientException.
+     * @return ConfigurationManagementClientException.
      */
     public static ConfigurationManagementClientException handleClientException(ConfigurationConstants.ErrorMessages error,
                                                                                String data) {

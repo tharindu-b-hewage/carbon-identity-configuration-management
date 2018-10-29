@@ -94,7 +94,7 @@ public class ConfigurationManagerComponent {
     protected void unsetConfiguration(ConfigurationDAO configurationDAO) {
 
         if (log.isDebugEnabled()) {
-            log.debug("Purpose DAO is unregistered in ConsentManager service.");
+            log.debug("Purpose DAO is unregistered in ConfigurationManager service.");
         }
         this.configurationDAOS.remove(configurationDAO);
     }

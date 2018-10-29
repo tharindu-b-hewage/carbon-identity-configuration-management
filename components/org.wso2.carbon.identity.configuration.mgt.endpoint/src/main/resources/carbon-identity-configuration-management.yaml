@@ -31,7 +31,7 @@ schemes:
 
 # The base path of the API.
 # Will be prefixed to all paths.
-# if the tenant domain is carbon.super basepath can be /api/identity/consent-mgt/v1.0 like this too.
+# if the tenant domain is carbon.super basepath can be /api/identity/config-mgt/v1.0 like this too.
 
 basePath: /t/{tenant-domain}/api/identity/config-mgt/v1.0
 

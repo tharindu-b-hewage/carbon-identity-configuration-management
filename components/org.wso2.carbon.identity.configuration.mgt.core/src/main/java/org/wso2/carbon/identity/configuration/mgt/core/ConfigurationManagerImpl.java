@@ -26,7 +26,7 @@ import org.wso2.carbon.identity.configuration.mgt.core.exception.ConfigurationMa
 import org.wso2.carbon.identity.configuration.mgt.core.model.Configuration;
 import org.wso2.carbon.identity.configuration.mgt.core.model.ConfigurationChangeResponse;
 import org.wso2.carbon.identity.configuration.mgt.core.model.ConfigurationManagerConfigurationHolder;
-import org.wso2.carbon.identity.configuration.mgt.core.util.ConsentUtils;
+import org.wso2.carbon.identity.configuration.mgt.core.util.ConfigurationUtils;
 
 import java.util.List;
 
@@ -34,7 +34,7 @@ import static org.wso2.carbon.identity.configuration.mgt.core.constant.Configura
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.STATE_ADD_CONFIGURATION_CHANGE_RESPONSE;
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.STATE_REPLACE_CONFIGURATION_CHANGE_RESPONSE;
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.STATE_UPDATE_CONFIGURATION_CHANGE_RESPONSE;
-import static org.wso2.carbon.identity.configuration.mgt.core.util.ConsentUtils.handleServerException;
+import static org.wso2.carbon.identity.configuration.mgt.core.util.ConfigurationUtils.handleServerException;
 
 /**
  * Configuration Manager service implementation.
@@ -61,7 +61,7 @@ public class ConfigurationManagerImpl implements ConfigurationManager {
             if (log.isDebugEnabled()) {
                 log.debug("No configuration found for the name " + name);
             }
-            throw ConsentUtils.handleClientException(ErrorMessages.ERROR_CODE_CONFIGURATION_NAME_INVALID, null);
+            throw ConfigurationUtils.handleClientException(ErrorMessages.ERROR_CODE_CONFIGURATION_NAME_INVALID, null);
         }
         return configuration;
     }
