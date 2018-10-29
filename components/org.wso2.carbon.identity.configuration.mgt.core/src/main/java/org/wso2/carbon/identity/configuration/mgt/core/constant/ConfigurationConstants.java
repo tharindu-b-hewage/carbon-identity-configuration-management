@@ -10,6 +10,10 @@ public class ConfigurationConstants {
     public static final String APPLICATION_JSON = "application/json";
     public static final String DEFAULT_RESPONSE_CONTENT_TYPE = APPLICATION_JSON;
     public static final String STATUS_INTERNAL_SERVER_ERROR_MESSAGE_DEFAULT = "Internal server error";
+    public static final String STATE_ADD_CONFIGURATION_CHANGE_RESPONSE = "add";
+    public static final String STATE_UPDATE_CONFIGURATION_CHANGE_RESPONSE = "update";
+    public static final String STATE_REPLACE_CONFIGURATION_CHANGE_RESPONSE = "replace";
+    public static final String BASE_PATH = "/api/identity/config-mgt/v1.0/configuration/";
 
     public enum ErrorMessages {
         ERROR_CODE_SELECT_CONFIGURATION_BY_ID("CONFIGM_00001", "Error occurred while retrieving configuration " +
@@ -18,7 +22,8 @@ public class ConfigurationConstants {
         ERROR_CODE_NO_USER_FOUND("CONFIGM_00003", "No authenticated user found to perform the operation: %s."),
         ERROR_CODE_UNEXPECTED("CONFIGM_00004", "Unexpected Error"),
         ERROR_CODE_CONFIGURATION_NAME_REQUIRED("CONFIGM_00005", "Configuration name is required."),
-        ERROR_CODE_CONFIGURATION_NAME_INVALID("CONFIGM_00006", "Invalid Configuration Name: %s"),;
+        ERROR_CODE_CONFIGURATION_NAME_INVALID("CONFIGM_00006", "Invalid Configuration Name: %s"),
+        ;
 
         private final String code;
         private final String message;

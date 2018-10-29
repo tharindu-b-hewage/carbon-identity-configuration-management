@@ -234,15 +234,17 @@ paths:
         description:  This represents the name of the configuration to be added.
         required: true
         type: 'string'
-      - name: configurations
+      - name: configuration
         in: body
-        description:  This represents the configuration that needs to be stored.
+        description:  This represents the configuration that needs to be added.
         required: true
         schema:
           $ref: '#/definitions/Configuration'
       responses:
         201:
           description: Successful response
+          schema:
+            $ref: "#/definitions/ConfigurationChangeResponse"
         400:
           description: Bad Request
           schema:
@@ -276,15 +278,17 @@ paths:
         description:  This represents the name of the configuration to be added or replaced.
         required: true
         type: 'string'
-      - name: configurations
+      - name: configuration
         in: body
-        description:  This represents the set of configurations that needs to be stored or replaced.
+        description:  This represents the configuration that need to be added or replaced.
         required: true
         schema:
           $ref: '#/definitions/Configuration'
       responses:
         201:
           description: Successful response
+          schema:
+            $ref: "#/definitions/ConfigurationChangeResponse"
         400:
           description: Bad Request
           schema:
@@ -314,15 +318,17 @@ paths:
         description:  This represents the name of the configuration to be added or updated.
         required: true
         type: 'string'
-      - name: configurationsties
+      - name: configuration
         in: body
         description:  This represents the configuration that needs to be updated.
         required: true
         schema:
-          $ref: '#/definitions/TenantConfigurations'
+          $ref: '#/definitions/Configuration'
       responses:
         201:
           description: Successful response
+          schema:
+            $ref: "#/definitions/ConfigurationChangeResponse"
         400:
           description: Bad Request
           schema:
@@ -425,6 +431,22 @@ definitions:
         type: string
       description:
         type: string
+  #-----------------------------------------------------
+  # Configuration Change response object
+  #-----------------------------------------------------
+  ConfigurationChangeResponse:
+    type: object
+    required:
+    - configurationNameID
+    - state
+    - tenantDomain
+    properties:
+      configurationNameID:
+        type: 'string'
+      state:
+        type: 'string'
+      tenantDomain:
+        type: 'string'
   #-----------------------------------------------------
   # Configuration Attribute Object
   #-----------------------------------------------------

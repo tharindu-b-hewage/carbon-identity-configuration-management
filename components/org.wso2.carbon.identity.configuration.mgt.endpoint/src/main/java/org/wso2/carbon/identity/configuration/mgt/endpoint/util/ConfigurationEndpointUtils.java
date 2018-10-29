@@ -22,7 +22,9 @@ import org.wso2.carbon.identity.configuration.mgt.core.ConfigurationManager;
 import org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants;
 import org.wso2.carbon.identity.configuration.mgt.core.model.Attribute;
 import org.wso2.carbon.identity.configuration.mgt.core.model.Configuration;
+import org.wso2.carbon.identity.configuration.mgt.core.model.ConfigurationChangeResponse;
 import org.wso2.carbon.identity.configuration.mgt.endpoint.dto.AttributeDTO;
+import org.wso2.carbon.identity.configuration.mgt.endpoint.dto.ConfigurationChangeResponseDTO;
 import org.wso2.carbon.identity.configuration.mgt.endpoint.dto.ConfigurationDTO;
 import org.wso2.carbon.identity.configuration.mgt.endpoint.dto.ErrorDTO;
 import org.wso2.carbon.identity.configuration.mgt.endpoint.exception.BadRequestException;
@@ -31,6 +33,7 @@ import org.wso2.carbon.identity.configuration.mgt.endpoint.exception.ForbiddenEx
 import org.wso2.carbon.identity.configuration.mgt.endpoint.exception.InternalServerErrorException;
 import org.wso2.carbon.identity.configuration.mgt.endpoint.exception.NotFoundException;
 
+import java.util.List;
 import java.util.stream.Collectors;
 
 /**
@@ -44,6 +47,15 @@ public class ConfigurationEndpointUtils {
                 .getOSGiService(ConfigurationManager.class, null);
     }
 
+    public static ConfigurationChangeResponseDTO getConfigurationChangeResponseDTO(ConfigurationChangeResponse configurationChangeResponse) {
+
+        ConfigurationChangeResponseDTO configurationChangeResponseDTO = new ConfigurationChangeResponseDTO();
+        configurationChangeResponseDTO.setConfigurationNameID(configurationChangeResponse.getConfigurationName());
+        configurationChangeResponseDTO.setTenantDomain(configurationChangeResponse.getTenantDomain());
+        configurationChangeResponseDTO.setState(configurationChangeResponse.getState());
+        return configurationChangeResponseDTO;
+    }
+
     public static ConfigurationDTO getConfigurationDTO(Configuration configuration) {
 
         ConfigurationDTO configurationDTO = new ConfigurationDTO();
@@ -54,6 +66,29 @@ public class ConfigurationEndpointUtils {
                 ).collect(Collectors.toList())
         );
         return configurationDTO;
+    }
+
+    public static Configuration getConfigurationFromDTO(ConfigurationDTO configurationDTO) {
+
+        Configuration configuration = new Configuration(
+                configurationDTO.getName(),
+                getAttributesFromDTO(configurationDTO.getAttributes())
+        );
+        return configuration;
+    }
+
+    private static List<Attribute> getAttributesFromDTO(List<AttributeDTO> attributeDTOS) {
+
+        return attributeDTOS.stream()
+                .map(attributeDTO -> {
+                    return getAttributeFromDTO(attributeDTO);
+                })
+                .collect(Collectors.toList());
+    }
+
+    private static Attribute getAttributeFromDTO(AttributeDTO attributeDTO) {
+
+        return new Attribute(attributeDTO.getKey(), attributeDTO.getValue());
     }
 
     private static AttributeDTO getAttributeDTO(Attribute attribute) {

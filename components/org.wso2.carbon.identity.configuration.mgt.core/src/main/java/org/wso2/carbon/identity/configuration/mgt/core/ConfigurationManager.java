@@ -18,6 +18,7 @@ package org.wso2.carbon.identity.configuration.mgt.core;
 
 import org.wso2.carbon.identity.configuration.mgt.core.exception.ConfigurationManagementException;
 import org.wso2.carbon.identity.configuration.mgt.core.model.Configuration;
+import org.wso2.carbon.identity.configuration.mgt.core.model.ConfigurationChangeResponse;
 
 /**
  * Configuration manager service interface.
@@ -40,4 +41,38 @@ public interface ConfigurationManager {
      * @throws ConfigurationManagementException Configuration management exception.
      */
     void deleteConfiguration(String name) throws ConfigurationManagementException;
+
+    /**
+     * This API is used to add the given configuration.
+     *
+     * @param name          Name id of the existing {@link Configuration}.
+     * @param configuration {@link Configuration} to be added.
+     * @return 201 created. Returns configuration change response with configuration name, tenant domain and change state.
+     * @throws ConfigurationManagementException Configuration management exception.
+     */
+    ConfigurationChangeResponse addConfiguration(String name, Configuration configuration)
+            throws ConfigurationManagementException;
+
+    /**
+     * This API is used to replace the existing configuration with the given configuration or add the given
+     * configuration if an existing configuration is not available.
+     *
+     * @param name          Name id of the existing {@link Configuration}.
+     * @param configuration New {@link Configuration} to replace the existing {@link Configuration}.
+     * @return 201 created. Returns configuration change response with configuration name, tenant domain and change state.
+     * @throws ConfigurationManagementException Configuration management exception.
+     */
+    ConfigurationChangeResponse replaceConfiguration(String name, Configuration configuration)
+            throws ConfigurationManagementException;
+
+    /**
+     * This API is used to update the existing configuration with the given configuration.
+     *
+     * @param name          Name id of the existing {@link Configuration}.
+     * @param configuration New {@link Configuration} to update the existing {@link Configuration}.
+     * @return 201 created. Returns configuration change response with configuration name, tenant domain and change state.
+     * @throws ConfigurationManagementException Configuration management exception.
+     */
+    ConfigurationChangeResponse updateConfiguration(String name, Configuration configuration)
+            throws ConfigurationManagementException;
 }

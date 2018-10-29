@@ -234,7 +234,7 @@
         <org.apache.felix.annotations.version>1.2.4</org.apache.felix.annotations.version>
         <maven.bundle.plugin.version>2.4.0</maven.bundle.plugin.version>
         <maven.scr.plugin.version>1.22.0</maven.scr.plugin.version>
-        <org.wso2.carbon.utils.version>4.4.32</org.wso2.carbon.utils.version>
+        <org.wso2.carbon.utils.version>[4.4.32, 4.4.35]</org.wso2.carbon.utils.version>
         <eclipse.osgi.version>3.5.100.v20160504-1419</eclipse.osgi.version>
         <org.apache.cxf.version>3.2.0</org.apache.cxf.version>
         <!--<org.springframework.version>3.2.18.RELEASE</org.springframework.version>-->

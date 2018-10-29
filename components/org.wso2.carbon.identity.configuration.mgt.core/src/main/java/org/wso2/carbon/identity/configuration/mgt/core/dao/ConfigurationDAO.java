@@ -26,4 +26,34 @@ public interface ConfigurationDAO {
      * @throws ConfigurationManagementException Configuration management exception.
      */
     String deleteConfiguration(String name) throws ConfigurationManagementException;
+
+    /**
+     * Add given {@link Configuration}.
+     *
+     * @param name Name id of the {@link Configuration}
+     * @param configuration {@link Configuration} to be added.
+     * @return Name id of the added {@link Configuration}.
+     * @throws ConfigurationManagementException Configuration management exception.
+     */
+    String addConfiguration(String name, Configuration configuration) throws ConfigurationManagementException;
+
+    /**
+     * Replace given {@link Configuration} or add if existing {@link Configuration} is not present.
+     *
+     * @param name Name id of the {@link Configuration}
+     * @param configuration New {@link Configuration} to replace the existing.
+     * @return Name id of the added {@link Configuration}.
+     * @throws ConfigurationManagementException Configuration management exception.
+     */
+    String replaceConfiguration(String name, Configuration configuration) throws ConfigurationManagementException;
+
+    /**
+     * Update given {@link Configuration}.
+     *
+     * @param name Name id of the {@link Configuration}
+     * @param configuration New {@link Configuration} to update the existing.
+     * @return Name id of the added {@link Configuration}.
+     * @throws ConfigurationManagementException Configuration management exception.
+     */
+    String updateConfiguration(String name, Configuration configuration) throws ConfigurationManagementException;
 }

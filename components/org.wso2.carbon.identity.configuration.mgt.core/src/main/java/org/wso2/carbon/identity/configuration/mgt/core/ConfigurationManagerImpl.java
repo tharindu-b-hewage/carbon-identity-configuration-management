@@ -16,14 +16,23 @@
 
 package org.wso2.carbon.identity.configuration.mgt.core;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages;
 import org.wso2.carbon.identity.configuration.mgt.core.dao.ConfigurationDAO;
 import org.wso2.carbon.identity.configuration.mgt.core.dao.impl.ConfigurationDAOImpl;
 import org.wso2.carbon.identity.configuration.mgt.core.exception.ConfigurationManagementException;
 import org.wso2.carbon.identity.configuration.mgt.core.model.Configuration;
+import org.wso2.carbon.identity.configuration.mgt.core.model.ConfigurationChangeResponse;
 import org.wso2.carbon.identity.configuration.mgt.core.util.ConsentUtils;
+
+import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants
+        .STATE_ADD_CONFIGURATION_CHANGE_RESPONSE;
+import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants
+        .STATE_REPLACE_CONFIGURATION_CHANGE_RESPONSE;
+import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.STATE_UPDATE_CONFIGURATION_CHANGE_RESPONSE;
 
 /**
  * Configuration Manager service implementation.
@@ -60,7 +69,60 @@ public class ConfigurationManagerImpl implements ConfigurationManager {
         // TODO: 10/29/18 DAO will handle the record not found error
         this.configurationDAO.deleteConfiguration(name);
         if (log.isDebugEnabled()) {
-            log.debug(name + " Configuration deleted successfully.");
+            log.debug(StringUtils.capitalize(name) + " configuration deleted successfully.");
         }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public ConfigurationChangeResponse addConfiguration(String name, Configuration configuration)
+            throws ConfigurationManagementException {
+
+        // TODO: 10/29/18 DAO will handle conflict error
+        this.configurationDAO.addConfiguration(name, configuration);
+        if (log.isDebugEnabled()) {
+            log.debug(name + " configuration created successfully.");
+        }
+        return new ConfigurationChangeResponse(
+                name,
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain(),
+                STATE_ADD_CONFIGURATION_CHANGE_RESPONSE
+        );
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public ConfigurationChangeResponse replaceConfiguration(String name, Configuration configuration)
+            throws ConfigurationManagementException {
+
+        this.configurationDAO.replaceConfiguration(name, configuration);
+        if (log.isDebugEnabled()) {
+            log.debug(name + " configuration replaced successfully.");
+        }
+        return new ConfigurationChangeResponse(
+            name,
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain(),
+            STATE_REPLACE_CONFIGURATION_CHANGE_RESPONSE
+        );
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public ConfigurationChangeResponse updateConfiguration(String name, Configuration configuration)
+            throws ConfigurationManagementException {
+
+        // TODO: 10/29/18 DAO will handle the record not found error
+        this.configurationDAO.updateConfiguration(name, configuration);
+        if (log.isDebugEnabled()) {
+            log.debug(name + " configuration replaced successfully.");
+        }
+        return new ConfigurationChangeResponse(
+                name,
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain(),
+                STATE_UPDATE_CONFIGURATION_CHANGE_RESPONSE
+        );
     }
 }

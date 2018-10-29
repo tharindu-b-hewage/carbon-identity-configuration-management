@@ -1,37 +1,26 @@
-/*
- * Copyright (c) 2018, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package org.wso2.carbon.identity.configuration.mgt.endpoint.impl;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages;
+import org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants;
 import org.wso2.carbon.identity.configuration.mgt.core.exception.ConfigurationManagementClientException;
 import org.wso2.carbon.identity.configuration.mgt.core.exception.ConfigurationManagementException;
 import org.wso2.carbon.identity.configuration.mgt.core.model.Configuration;
+import org.wso2.carbon.identity.configuration.mgt.core.model.ConfigurationChangeResponse;
 import org.wso2.carbon.identity.configuration.mgt.endpoint.ApiResponseMessage;
 import org.wso2.carbon.identity.configuration.mgt.endpoint.ConfigurationApiService;
 import org.wso2.carbon.identity.configuration.mgt.endpoint.dto.ConfigurationDTO;
 import org.wso2.carbon.identity.configuration.mgt.endpoint.dto.TenantConfigurationsDTO;
 import org.wso2.carbon.identity.configuration.mgt.endpoint.util.ConfigurationEndpointUtils;
 
+import java.net.URI;
 import javax.ws.rs.core.Response;
 
+import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.BASE_PATH;
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_UNEXPECTED;
+import static org.wso2.carbon.identity.configuration.mgt.endpoint.util.ConfigurationEndpointUtils.getConfigurationChangeResponseDTO;
 import static org.wso2.carbon.identity.configuration.mgt.endpoint.util.ConfigurationEndpointUtils.getConfigurationDTO;
+import static org.wso2.carbon.identity.configuration.mgt.endpoint.util.ConfigurationEndpointUtils.getConfigurationFromDTO;
 import static org.wso2.carbon.identity.configuration.mgt.endpoint.util.ConfigurationEndpointUtils.getConfigurationManager;
 
 public class ConfigurationApiServiceImpl extends ConfigurationApiService {
@@ -82,12 +71,13 @@ public class ConfigurationApiServiceImpl extends ConfigurationApiService {
     }
 
     @Override
-    public Response configurationNamePatch(String name, TenantConfigurationsDTO configurationsties) {
+    public Response configurationNamePatch(String name, ConfigurationDTO configuration) {
 
         try {
-            Configuration configuration = getConfigurationManager().getConfiguration(name);
-            ConfigurationDTO configurationDTO = getConfigurationDTO(configuration);
-            return Response.ok().entity(configurationDTO).build();
+            ConfigurationChangeResponse configurationChangeResponse = getConfigurationManager()
+                    .updateConfiguration(name, getConfigurationFromDTO(configuration));
+            return Response.created(new URI(BASE_PATH + name))
+                    .entity(getConfigurationChangeResponseDTO(configurationChangeResponse)).build();
         } catch (ConfigurationManagementClientException e) {
             return handleBadRequestResponse(e);
         } catch (ConfigurationManagementException e) {
@@ -98,15 +88,37 @@ public class ConfigurationApiServiceImpl extends ConfigurationApiService {
     }
 
     @Override
-    public Response configurationNamePost(String name, ConfigurationDTO configurations) {
-        // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+    public Response configurationNamePost(String name, ConfigurationDTO configuration) {
+
+        try {
+            ConfigurationChangeResponse configurationChangeResponse = getConfigurationManager()
+                    .addConfiguration(name, getConfigurationFromDTO(configuration));
+            return Response.created(new URI(BASE_PATH + name))
+                    .entity(getConfigurationChangeResponseDTO(configurationChangeResponse)).build();
+        } catch (ConfigurationManagementClientException e) {
+            return handleBadRequestResponse(e);
+        } catch (ConfigurationManagementException e) {
+            return handleServerErrorResponse(e);
+        } catch (Throwable throwable) {
+            return handleUnexpectedServerError(throwable);
+        }
     }
 
     @Override
-    public Response configurationNamePut(String name, ConfigurationDTO configurations) {
-        // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+    public Response configurationNamePut(String name, ConfigurationDTO configuration) {
+
+        try {
+            ConfigurationChangeResponse configurationChangeResponse = getConfigurationManager()
+                    .replaceConfiguration(name, getConfigurationFromDTO(configuration));
+            return Response.created(new URI(BASE_PATH + name))
+                    .entity(getConfigurationChangeResponseDTO(configurationChangeResponse)).build();
+        } catch (ConfigurationManagementClientException e) {
+            return handleBadRequestResponse(e);
+        } catch (ConfigurationManagementException e) {
+            return handleServerErrorResponse(e);
+        } catch (Throwable throwable) {
+            return handleUnexpectedServerError(throwable);
+        }
     }
 
     @Override
@@ -155,16 +167,16 @@ public class ConfigurationApiServiceImpl extends ConfigurationApiService {
 
     private boolean isNotFoundError(ConfigurationManagementClientException e) {
 
-        return ErrorMessages.ERROR_CODE_SELECT_CONFIGURATION_BY_ID.getCode().equals(e.getErrorCode());
+        return ConfigurationConstants.ErrorMessages.ERROR_CODE_SELECT_CONFIGURATION_BY_ID.getCode().equals(e.getErrorCode());
     }
 
     private boolean isConflictError(ConfigurationManagementClientException e) {
 
-        return ErrorMessages.ERROR_CODE_CONFIGURATION_ALREADY_EXIST.getCode().equals(e.getErrorCode());
+        return ConfigurationConstants.ErrorMessages.ERROR_CODE_CONFIGURATION_ALREADY_EXIST.getCode().equals(e.getErrorCode());
     }
 
     private boolean isForbiddenError(ConfigurationManagementClientException e) {
 
-        return ErrorMessages.ERROR_CODE_NO_USER_FOUND.getCode().equals(e.getErrorCode());
+        return ConfigurationConstants.ErrorMessages.ERROR_CODE_NO_USER_FOUND.getCode().equals(e.getErrorCode());
     }
 }
