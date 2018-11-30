@@ -14,6 +14,7 @@ public class ConfigurationConstants {
     public static final String STATE_UPDATE_CONFIGURATION_CHANGE_RESPONSE = "update";
     public static final String STATE_REPLACE_CONFIGURATION_CHANGE_RESPONSE = "replace";
     public static final String BASE_PATH = "/api/identity/config-mgt/v1.0/configuration/";
+    public static final String CONFIG_MANAGEMENT_CONFIG_XML = "config-mgt-config.xml";
 
     public enum ErrorMessages {
         ERROR_CODE_SELECT_CONFIGURATION_BY_ID("CONFIGM_00001", "Error occurred while retrieving configuration " +
@@ -23,7 +24,11 @@ public class ConfigurationConstants {
         ERROR_CODE_UNEXPECTED("CONFIGM_00004", "Unexpected Error"),
         ERROR_CODE_CONFIGURATION_NAME_REQUIRED("CONFIGM_00005", "Configuration name is required."),
         ERROR_CODE_CONFIGURATION_NAME_INVALID("CONFIGM_00006", "Invalid Configuration Name: %s"),
-        ERROR_CODE_GET_DAO("CONFIGM_00007", "No %s are registered.")
+        ERROR_CODE_GET_DAO("CONFIGM_00007", "No %s are registered."),
+        ERROR_CODE_DATABASE_INITIALIZATION("CONFIGM_00008", "Error while initializing the configuration management " +
+                "data source."),
+        ERROR_CODE_BUILDING_CONFIG("CONFIGM_00009", "Error occurred while building configuration from config-mgt-config" +
+                ".xml."),
         ;
 
         private final String code;

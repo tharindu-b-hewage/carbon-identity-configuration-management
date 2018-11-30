@@ -79,10 +79,9 @@ public class ConfigurationEndpointUtils {
 
     private static List<Attribute> getAttributesFromDTO(List<AttributeDTO> attributeDTOS) {
 
-        return attributeDTOS.stream()
-                .map(attributeDTO -> {
-                    return getAttributeFromDTO(attributeDTO);
-                })
+        return attributeDTOS
+                .stream()
+                .map(ConfigurationEndpointUtils::getAttributeFromDTO)
                 .collect(Collectors.toList());
     }
 

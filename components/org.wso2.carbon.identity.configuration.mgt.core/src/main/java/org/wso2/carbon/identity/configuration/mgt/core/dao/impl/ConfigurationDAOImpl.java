@@ -1,6 +1,5 @@
 package org.wso2.carbon.identity.configuration.mgt.core.dao.impl;
 
-import org.apache.commons.lang.StringUtils;
 import org.wso2.carbon.identity.configuration.mgt.core.dao.ConfigurationDAO;
 import org.wso2.carbon.identity.configuration.mgt.core.exception.ConfigurationManagementException;
 import org.wso2.carbon.identity.configuration.mgt.core.model.Attribute;

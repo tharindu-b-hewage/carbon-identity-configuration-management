@@ -8,8 +8,8 @@ import org.wso2.carbon.identity.configuration.mgt.core.exception.ConfigurationMa
 public class ConfigurationUtils {
 
     /**
-     * This method can be used to generate a ConfigurationManagementClientException from ConfigurationConstants.ErrorMessages
-     * object when no exception is thrown.
+     * This method can be used to generate a ConfigurationManagementClientException from
+     * ConfigurationConstants.ErrorMessages object when no exception is thrown.
      *
      * @param error ConfigurationConstants.ErrorMessages.
      * @param data  data to replace if message needs to be replaced.
@@ -37,7 +37,7 @@ public class ConfigurationUtils {
      * @return ConfigurationManagementServerException.
      */
     public static ConfigurationManagementServerException handleServerException(ConfigurationConstants.ErrorMessages error,
-                                                                         String data) {
+                                                                               String data) {
 
         String message;
         if (StringUtils.isNotBlank(data)) {
