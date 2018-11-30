@@ -79,7 +79,7 @@ public class ConfigurationManagerComponent {
             policy = ReferencePolicy.DYNAMIC,
             unbind = "unsetConfiguration"
     )
-    protected void setPurpose(ConfigurationDAO configurationDAO) {
+    protected void setConfiguration(ConfigurationDAO configurationDAO) {
 
         if (configurationDAO != null) {
             if (log.isDebugEnabled()) {
