@@ -4,7 +4,12 @@ import org.wso2.carbon.identity.configuration.mgt.core.dao.ConfigurationDAO;
 import org.wso2.carbon.identity.configuration.mgt.core.exception.ConfigurationManagementException;
 import org.wso2.carbon.identity.configuration.mgt.core.model.Attribute;
 import org.wso2.carbon.identity.configuration.mgt.core.model.Configuration;
+import org.wso2.carbon.identity.core.util.IdentityDatabaseUtil;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,6 +29,13 @@ public class ConfigurationDAOImpl implements ConfigurationDAO {
      */
     public Configuration getConfiguration(String name) throws ConfigurationManagementException {
 
+        Connection connection = IdentityDatabaseUtil.getDBConnection();
+        try {
+            PreparedStatement statement = connection.prepareStatement("SELECT * FROM IDN_CONFIG_RESOURCE");
+            ResultSet resultSet = statement.executeQuery();
+        } catch (SQLException e) {
+
+        }
         List<Attribute> attributes = new ArrayList<>(1);
         Attribute tempAttribute = new Attribute("from", "abc@gmail.com");
         attributes.add(tempAttribute);

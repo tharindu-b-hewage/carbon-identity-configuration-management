@@ -64,7 +64,7 @@ public class ConfigurationManagementConfigParser {
                 inputStream = new FileInputStream(configMgtConfigXml);
             }
             if (inputStream == null) {
-                String message = "Config management configuration not found";
+                String message = "Configuration management configs not found";
                 if (log.isDebugEnabled()) {
                     log.debug(message);
                 }
@@ -84,7 +84,8 @@ public class ConfigurationManagementConfigParser {
                     inputStream.close();
                 }
             } catch (IOException e) {
-                log.error("Error closing the input stream for config-mgt-config.xml", e);
+                log.error("Error closing the input stream for "
+                        + ConfigurationConstants.CONFIG_MANAGEMENT_CONFIG_XML, e);
             }
         }
     }

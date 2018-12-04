@@ -63,10 +63,15 @@ public class ConfigurationManagerComponent {
     protected void activate(ComponentContext componentContext) {
 
         try {
-            ConfigurationManagementConfigParser configParser = new ConfigurationManagementConfigParser();
-            DataSource dataSource = initDataSource(configParser);
-            initializeConfigDB(dataSource);
             BundleContext bundleContext = componentContext.getBundleContext();
+
+//            ConfigurationManagementConfigParser configParser = new ConfigurationManagementConfigParser();
+//            DataSource dataSource = initDataSource(configParser);
+//            /*
+//            DB structure verification is not handled in here.
+//             */
+//            setDataSourceToDataHolder(dataSource);
+
             bundleContext.registerService(ConfigurationDAO.class.getName(), new ConfigurationDAOImpl(),
                     null);
 
@@ -131,16 +136,11 @@ public class ConfigurationManagerComponent {
         }
     }
 
-    private void initializeConsentDB(DataSource dataSource) {
-
-        if (System.getProperty("setup") == null) {
-            if (log.isDebugEnabled()) {
-                log.debug("Config Database schema initialization check was skipped since " +
-                        "\'setup\' variable was not given during startup");
-            }
-        } else {
-            ConsentDBInitializer dbInitializer = new ConsentDBInitializer(dataSource);
-            dbInitializer.createConsentDatabase();
-        }
-    }
+//    private void setDataSourceToDataHolder(DataSource dataSource) {
+//
+//        ConfigurationManagerComponentDataHolder.getInstance().setDataSource(dataSource);
+//        if (log.isDebugEnabled()) {
+//            log.debug("Data Source is set to the Configuration Management Service.");
+//        }
+//    }
 }

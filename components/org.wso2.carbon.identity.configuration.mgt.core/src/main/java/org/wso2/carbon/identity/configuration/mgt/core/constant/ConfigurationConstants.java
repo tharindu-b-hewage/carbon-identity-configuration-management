@@ -14,7 +14,7 @@ public class ConfigurationConstants {
     public static final String STATE_UPDATE_CONFIGURATION_CHANGE_RESPONSE = "update";
     public static final String STATE_REPLACE_CONFIGURATION_CHANGE_RESPONSE = "replace";
     public static final String BASE_PATH = "/api/identity/config-mgt/v1.0/configuration/";
-    public static final String CONFIG_MANAGEMENT_CONFIG_XML = "config-mgt-config.xml";
+    public static final String CONFIG_MANAGEMENT_CONFIG_XML = "configuration-mgt-config.xml";
 
     public enum ErrorMessages {
         ERROR_CODE_SELECT_CONFIGURATION_BY_ID("CONFIGM_00001", "Error occurred while retrieving configuration " +
@@ -29,6 +29,12 @@ public class ConfigurationConstants {
                 "data source."),
         ERROR_CODE_BUILDING_CONFIG("CONFIGM_00009", "Error occurred while building configuration from config-mgt-config" +
                 ".xml."),
+        ERROR_CODE_UNSUPPORTED_DB("CONFIGM_00010", "Unsupported database: %s Database will not be created automatically. " +
+                "Please create the database using appropriate database scripts for " +
+                "the database."),
+        ERROR_CODE_GET_DB_TYPE("CONFIGM_00011", "Error while getting the database connection metadata."),
+        ERROR_CODE_DATABASE_CONNECTION("CONFIGM_00012", "Error when getting a database connection object from the " +
+                "Configuration data source."),
         ;
 
         private final String code;
