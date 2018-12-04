@@ -52,24 +52,273 @@ consumes:
 produces:
 - application/json
 paths:
-  # Endpoint used to add tenant configurations
-  "/configuration":
+  # Endpoint used to create resource types
+  "/resource-type":
     post:
       description: |
-        This API is used to store configurations given by the user.
+        This API is used to create a new resource type.
       x-wso2-request:
       x-wso2-curl:
       x-wso2-response:
       summary: |
-        Add configurations
-      # post parameters:
+        Create the resource type.
       parameters:
-      - name: configurations
+      - name: type
         in: body
-        description:  This represents the set of configurations that needs to be stored.
+        description: This represents the resource type to be added.
         required: true
         schema:
-          $ref: '#/definitions/TenantConfigurations'
+          $ref: '#/definitions/ResourceTypeCreate'
+      responses:
+        201:
+          description: Successful response
+          schema:
+            $ref: '#/definitions/ResourceType'
+        400:
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/Error'
+        401:
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/Error'
+        409:
+          description: Conflict
+          schema:
+            $ref: '#/definitions/Error'
+        500:
+          description: Server Error
+          schema:
+            $ref: '#/definitions/Error'
+      tags:
+      - Type
+    put:
+      description: |
+        This API is used to create or replace a new resource type.
+      x-wso2-request:
+      x-wso2-curl:
+      x-wso2-response:
+      summary: |
+        Create or replace the resource type.
+      parameters:
+      - name: type
+        in: body
+        description: This represents the resource type to be added.
+        required: true
+        schema:
+          $ref: '#/definitions/ResourceTypeCreate'
+      responses:
+        201:
+          description: Successful response
+          schema:
+            $ref: '#/definitions/ResourceType'
+        400:
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/Error'
+        401:
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/Error'
+        409:
+          description: Conflict
+          schema:
+            $ref: '#/definitions/Error'
+        500:
+          description: Server Error
+          schema:
+            $ref: '#/definitions/Error'
+      tags:
+      - Type
+    patch:
+      description: |
+        This API is used to update an existing resource type.
+      x-wso2-request:
+      x-wso2-curl:
+      x-wso2-response:
+      summary: |
+        Update existing resource type.
+      parameters:
+      - name: type
+        in: body
+        description: This represents the resource type to update the existing.
+        required: true
+        schema:
+          $ref: '#/definitions/ResourceTypeCreate'
+      responses:
+        201:
+          description: Successful response
+          schema:
+            $ref: '#/definitions/ResourceType'
+        400:
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/Error'
+        401:
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/Error'
+        409:
+          description: Conflict
+          schema:
+            $ref: '#/definitions/Error'
+        500:
+          description: Server Error
+          schema:
+            $ref: '#/definitions/Error'
+      tags:
+      - Type
+    get:
+      description: |
+        This API is used to get an existing resource type.
+      x-wso2-request:
+      x-wso2-curl:
+      x-wso2-response:
+      summary: |
+        Get the resource type.
+      parameters:
+      - name: type
+        in: body
+        description: This represents the resource type to be retrieved.
+        required: true
+        schema:
+          $ref: '#/definitions/ResourceTypeRequest'
+      responses:
+        200:
+          description: Ok
+          schema:
+            $ref: '#/definitions/ResourceType'
+        400:
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/Error'
+        401:
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/Error'
+        409:
+          description: Conflict
+          schema:
+            $ref: '#/definitions/Error'
+        500:
+          description: Server Error
+          schema:
+            $ref: '#/definitions/Error'
+      tags:
+      - Type
+    delete:
+      description: |
+        This API is used to delete an existing resource type.
+      x-wso2-request:
+      x-wso2-curl:
+      x-wso2-response:
+      summary: |
+        Revoke resource type.
+      parameters:
+      - name: type
+        in: body
+        description: This represents the resource type to be deleted.
+        required: true
+        schema:
+          $ref: '#/definitions/ResourceTypeRequest'
+      responses:
+        200:
+          description: Ok
+        400:
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/Error'
+        401:
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/Error'
+        409:
+          description: Conflict
+          schema:
+            $ref: '#/definitions/Error'
+        500:
+          description: Server Error
+          schema:
+            $ref: '#/definitions/Error'
+      tags:
+      - Type
+
+  # Endpoint used to add tenant resources
+  "/resource":
+    get:
+      description: |
+        This API is used to retrieve resources for the tenant domain based on the optional search parameters.
+      x-wso2-request:
+      x-wso2-curl:
+      x-wso2-response:
+      summary: |
+        Retrieve resources based on the optional search parmeters.
+      parameters:
+      - name: name
+        in: path
+        description:  This represents the name of the resource to be retrieved.
+        required: true
+        type: 'string'
+      - name: resourceName
+        in: query
+        description: This represents an optional search filer for resource names.
+        type: array
+        items:
+          type: string
+      - name: tenant
+        in: query
+        description: This represents an optional search filer for resource names.
+        type: array
+        items:
+          type: string
+      - name: type
+        in: query
+        description: This represents an optional search filer for resource names.
+        type: array
+        items:
+          type: string
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/ResourceSearchResponse'
+        400:
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/Error'
+        401:
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/Error'
+        500:
+          description: Server Error
+          schema:
+            $ref: '#/definitions/Error'
+      tags:
+      - Resource
+
+  "/resource/{name}":
+    post:
+      description: |
+        This API is used to store the resource given by the user.
+      x-wso2-request:
+      x-wso2-curl:
+      x-wso2-response:
+      summary: |
+        Create the resource
+      # post parameters:
+      parameters:
+      - name: name
+        in: path
+        description:  This represents the name of the resource to be added.
+        required: true
+        type: 'string'
+      - name: resource
+        in: body
+        description:  This represents the resource that needs to be added.
+        required: true
+        schema:
+          $ref: '#/definitions/Resource'
       responses:
         201:
           description: Successful response
@@ -90,205 +339,31 @@ paths:
           schema:
             $ref: '#/definitions/Error'
       tags:
-      - Configuration
+      - Resource
     put:
       description: |
-        This API is used to store or replace configurations given by the user.
+        This API is used to store or replace the resource given by the user.
       x-wso2-request:
       x-wso2-curl:
       x-wso2-response:
       summary: |
-        Add or Replace configurations
-      # put parameters:
-      parameters:
-      - name: configurations
-        in: body
-        description:  This represents the set of configurations that needs to be stored or replaced.
-        required: true
-        schema:
-          $ref: '#/definitions/TenantConfigurations'
-      responses:
-        201:
-          description: Successful response
-        400:
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/Error'
-        401:
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/Error'
-        500:
-          description: Server Error
-          schema:
-            $ref: '#/definitions/Error'
-      tags:
-      - Configuration
-    patch:
-      description: |
-        This API is used to update existing configurations given by the user.
-      x-wso2-request:
-      x-wso2-curl:
-      x-wso2-response:
-      summary: |
-        Update existing configurations
-      # patch parameters:
-      parameters:
-      - name: configurations
-        in: body
-        description:  This represents the set of configurations that needs to be updated.
-        required: true
-        schema:
-          $ref: '#/definitions/TenantConfigurations'
-      responses:
-        201:
-          description: Successful response
-        400:
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/Error'
-        401:
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/Error'
-        404:
-          description: Not Found
-          schema:
-            $ref: '#/definitions/Error'
-        500:
-          description: Server Error
-          schema:
-            $ref: '#/definitions/Error'
-      tags:
-      - Configuration
-    get:
-      description: |
-        This API is used to retrieve configurations for the tenant domain.
-      x-wso2-request:
-      x-wso2-curl:
-      x-wso2-response:
-      summary: |
-        Retrieve configurations
-      responses:
-        200:
-          description: OK
-          schema:
-            $ref: '#/definitions/TenantConfigurations'
-        400:
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/Error'
-        401:
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/Error'
-        500:
-          description: Server Error
-          schema:
-            $ref: '#/definitions/Error'
-      tags:
-      - Configuration
-    delete:
-      description: |
-        This API is used to revoke the configurations.
-      x-wso2-request:
-      x-wso2-curl:
-      x-wso2-response:
-      summary: |
-        Revoke configurations
-      responses:
-        200:
-          description: OK
-        404:
-          description: Not Found
-          schema:
-            $ref: '#/definitions/Error'
-        400:
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/Error'
-        401:
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/Error'
-        500:
-          description: Server Error
-          schema:
-            $ref: '#/definitions/Error'
-      tags:
-      - Configuration
-
-  "/configuration/{name}":
-    post:
-      description: |
-        This API is used to store the configuration given by the user.
-      x-wso2-request:
-      x-wso2-curl:
-      x-wso2-response:
-      summary: |
-        Add the configuration
-      # post parameters:
-      parameters:
-      - name: name
-        in: path
-        description:  This represents the name of the configuration to be added.
-        required: true
-        type: 'string'
-      - name: configuration
-        in: body
-        description:  This represents the configuration that needs to be added.
-        required: true
-        schema:
-          $ref: '#/definitions/Configuration'
-      responses:
-        201:
-          description: Successful response
-          schema:
-            $ref: "#/definitions/ConfigurationChangeResponse"
-        400:
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/Error'
-        401:
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/Error'
-        409:
-          description: Conflict
-          schema:
-            $ref: '#/definitions/Error'
-        500:
-          description: Server Error
-          schema:
-            $ref: '#/definitions/Error'
-      tags:
-      - Configuration
-    put:
-      description: |
-        This API is used to store or replace the configuration given by the user.
-      x-wso2-request:
-      x-wso2-curl:
-      x-wso2-response:
-      summary: |
-        Add or Replace the configuration
+        Add or Replace the resource
       # put parameters:
       parameters:
       - name: name
         in: path
-        description:  This represents the name of the configuration to be added or replaced.
+        description:  This represents the name of the resource to be added or replaced.
         required: true
         type: 'string'
-      - name: configuration
+      - name: resource
         in: body
-        description:  This represents the configuration that need to be added or replaced.
+        description:  This represents the resource that need to be added or replaced.
         required: true
         schema:
-          $ref: '#/definitions/Configuration'
+          $ref: '#/definitions/Resource'
       responses:
         201:
           description: Successful response
-          schema:
-            $ref: "#/definitions/ConfigurationChangeResponse"
         400:
           description: Bad Request
           schema:
@@ -302,33 +377,31 @@ paths:
           schema:
             $ref: '#/definitions/Error'
       tags:
-      - Configuration
+      - Resource
     patch:
       description: |
-        This API is used to update an existing configuration given by the user.
+        This API is used to update an existing resource given by the user.
       x-wso2-request:
       x-wso2-curl:
       x-wso2-response:
       summary: |
-        Update existing configuration
+        Update existing resource
       # patch parameters:
       parameters:
       - name: name
         in: path
-        description:  This represents the name of the configuration to be added or updated.
+        description:  This represents the name of the resource to be added or updated.
         required: true
         type: 'string'
-      - name: configuration
+      - name: resource
         in: body
-        description:  This represents the configuration that needs to be updated.
+        description:  This represents the resource that needs to be updated.
         required: true
         schema:
-          $ref: '#/definitions/Configuration'
+          $ref: '#/definitions/Resource'
       responses:
         201:
           description: Successful response
-          schema:
-            $ref: "#/definitions/ConfigurationChangeResponse"
         400:
           description: Bad Request
           schema:
@@ -346,26 +419,38 @@ paths:
           schema:
             $ref: '#/definitions/Error'
       tags:
-      - Configuration
+      - Resource
     get:
       description: |
-        This API is used to retrieve a configuration for the tenant domain given by the user.
+        This API is used to retrieve a resource based on optional search filters.
       x-wso2-request:
       x-wso2-curl:
       x-wso2-response:
       summary: |
-        Retrieve the configuration
+        Retrieve the resource based on optional search parameters.
       parameters:
       - name: name
         in: path
-        description:  This represents the name of the configuration to be retrieved.
+        description:  This represents the name of the resource to be retrieved.
         required: true
         type: 'string'
+      - name: tenant
+        in: query
+        description: This represents an optional search filer for resource names.
+        type: array
+        items:
+          type: string
+      - name: type
+        in: query
+        description: This represents an optional search filer for resource names.
+        type: array
+        items:
+          type: string
       responses:
         200:
           description: OK
           schema:
-            $ref: '#/definitions/Configuration'
+            $ref: '#/definitions/ResourceSearchResponse'
         400:
           description: Bad Request
           schema:
@@ -379,19 +464,19 @@ paths:
           schema:
             $ref: '#/definitions/Error'
       tags:
-      - Configuration
+      - Resource
     delete:
       description: |
-        This API is used to revoke a configuration in the tenant domain given by the user.
+        This API is used to revoke a resource in the tenant domain given by the user.
       x-wso2-request:
       x-wso2-curl:
       x-wso2-response:
       summary: |
-        Revoke the configuration
+        Revoke the resource
       parameters:
       - name: name
         in: path
-        description:  This represents the name of the configuration to be retrieved.
+        description:  This represents the name of the resource to be retrieved.
         required: true
         type: 'string'
       responses:
@@ -414,9 +499,7 @@ paths:
           schema:
             $ref: '#/definitions/Error'
       tags:
-      - Configuration
-
-
+      - Resource
 
 definitions:
   #-----------------------------------------------------
@@ -432,23 +515,7 @@ definitions:
       description:
         type: string
   #-----------------------------------------------------
-  # Configuration Change response object
-  #-----------------------------------------------------
-  ConfigurationChangeResponse:
-    type: object
-    required:
-    - configurationNameID
-    - state
-    - tenantDomain
-    properties:
-      configurationNameID:
-        type: 'string'
-      state:
-        type: 'string'
-      tenantDomain:
-        type: 'string'
-  #-----------------------------------------------------
-  # Configuration Attribute Object
+  # Resource Attribute Object
   #-----------------------------------------------------
   Attribute:
     type: object
@@ -461,29 +528,81 @@ definitions:
       value:
         type: string
   #-----------------------------------------------------
-  # Configuration object
+  # Type Create object
   #-----------------------------------------------------
-  Configuration:
+  ResourceTypeCreate:
     type: object
-    required:
-    - configurationName
-    - attributes
     properties:
       name:
+        type: string
+      description:
+        type: string
+  #-----------------------------------------------------
+  # Type Request object
+  #-----------------------------------------------------
+  ResourceTypeRequest:
+    type: object
+    properties:
+      name:
+        type: string
+      id:
+        type: string
+  #-----------------------------------------------------
+  # Type object
+  #-----------------------------------------------------
+  ResourceType:
+    type: object
+    properties:
+      name:
+        type: string
+      id:
+        type: string
+      description:
+        type: string
+  #-----------------------------------------------------
+  # Resource object
+  #-----------------------------------------------------
+  Resource:
+    type: object
+    required:
+    - resourceName
+    - type
+    properties:
+      resourceName:
         type: string
       attributes:
         type: array
         items:
           $ref: '#/definitions/Attribute'
+      type:
+        $ref: '#/definitions/ResourceTypeRequest'
+      file:
+        type: object
+        properties:
+          value:
+            type: string
   #-----------------------------------------------------
-  # Tenant Configurations object
+  # Resource Search Response Element object
   #-----------------------------------------------------
-  TenantConfigurations:
+  ResourceSearchResponseElement:
     type: object
     required:
-    - configurations
+    - resource
+    - tenantId
     properties:
-      configurations:
+      resource:
+        $ref: '#/definitions/Resource'
+      tenantId:
+        type: string
+  #-----------------------------------------------------
+  # Resource Search Response object
+  #-----------------------------------------------------
+  ResourceSearchResponse:
+    type: object
+    required:
+    - resources
+    properties:
+      resources:
         type: array
         items:
-          $ref: '#/definitions/Configuration'
+          $ref: '#/definitions/ResourceSearchResponseElement'

@@ -1,8 +1,5 @@
 package org.wso2.carbon.identity.configuration.mgt.endpoint.dto;
 
-import java.util.ArrayList;
-import java.util.List;
-import org.wso2.carbon.identity.configuration.mgt.endpoint.dto.AttributeDTO;
 
 import io.swagger.annotations.*;
 import com.fasterxml.jackson.annotation.*;
@@ -14,14 +11,17 @@ import javax.validation.constraints.NotNull;
 
 
 @ApiModel(description = "")
-public class ConfigurationDTO  {
+public class ResourceTypeDTO  {
   
   
   
   private String name = null;
   
-  @NotNull
-  private List<AttributeDTO> attributes = new ArrayList<AttributeDTO>();
+  
+  private String id = null;
+  
+  
+  private String description = null;
 
   
   /**
@@ -38,13 +38,25 @@ public class ConfigurationDTO  {
   
   /**
    **/
-  @ApiModelProperty(required = true, value = "")
-  @JsonProperty("attributes")
-  public List<AttributeDTO> getAttributes() {
-    return attributes;
+  @ApiModelProperty(value = "")
+  @JsonProperty("id")
+  public String getId() {
+    return id;
   }
-  public void setAttributes(List<AttributeDTO> attributes) {
-    this.attributes = attributes;
+  public void setId(String id) {
+    this.id = id;
+  }
+
+  
+  /**
+   **/
+  @ApiModelProperty(value = "")
+  @JsonProperty("description")
+  public String getDescription() {
+    return description;
+  }
+  public void setDescription(String description) {
+    this.description = description;
   }
 
   
@@ -52,10 +64,11 @@ public class ConfigurationDTO  {
   @Override
   public String toString()  {
     StringBuilder sb = new StringBuilder();
-    sb.append("class ConfigurationDTO {\n");
+    sb.append("class ResourceTypeDTO {\n");
     
     sb.append("  name: ").append(name).append("\n");
-    sb.append("  attributes: ").append(attributes).append("\n");
+    sb.append("  id: ").append(id).append("\n");
+    sb.append("  description: ").append(description).append("\n");
     sb.append("}\n");
     return sb.toString();
   }

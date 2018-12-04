@@ -14,6 +14,7 @@ import org.wso2.carbon.identity.configuration.mgt.endpoint.dto.TenantConfigurati
 import org.wso2.carbon.identity.configuration.mgt.endpoint.util.ConfigurationEndpointUtils;
 
 import java.net.URI;
+import java.util.List;
 import javax.ws.rs.core.Response;
 
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.BASE_PATH;
@@ -55,7 +56,7 @@ public class ConfigurationApiServiceImpl extends ConfigurationApiService {
     }
 
     @Override
-    public Response configurationNameGet(String name) {
+    public Response configurationNameGet(String name, List<String> tenant) {
 
         try {
             Configuration configuration = getConfigurationManager().getConfiguration(name);
