@@ -20,14 +20,18 @@ import org.apache.commons.logging.Log;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.identity.configuration.mgt.core.ConfigurationManager;
 import org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants;
+import org.wso2.carbon.identity.configuration.mgt.core.exception.ConfigurationManagementClientException;
+import org.wso2.carbon.identity.configuration.mgt.core.exception.ConfigurationManagementException;
 import org.wso2.carbon.identity.configuration.mgt.core.model.Attribute;
 import org.wso2.carbon.identity.configuration.mgt.core.model.Resource;
 import org.wso2.carbon.identity.configuration.mgt.core.model.ResourceFile;
 import org.wso2.carbon.identity.configuration.mgt.core.model.ResourceType;
+import org.wso2.carbon.identity.configuration.mgt.core.model.ResourceTypeCreate;
 import org.wso2.carbon.identity.configuration.mgt.endpoint.dto.AttributeDTO;
 import org.wso2.carbon.identity.configuration.mgt.endpoint.dto.ErrorDTO;
 import org.wso2.carbon.identity.configuration.mgt.endpoint.dto.ResourceDTO;
 import org.wso2.carbon.identity.configuration.mgt.endpoint.dto.ResourceFileDTO;
+import org.wso2.carbon.identity.configuration.mgt.endpoint.dto.ResourceTypeCreateDTO;
 import org.wso2.carbon.identity.configuration.mgt.endpoint.dto.ResourceTypeDTO;
 import org.wso2.carbon.identity.configuration.mgt.endpoint.exception.BadRequestException;
 import org.wso2.carbon.identity.configuration.mgt.endpoint.exception.ConflictRequestException;
@@ -37,6 +41,9 @@ import org.wso2.carbon.identity.configuration.mgt.endpoint.exception.NotFoundExc
 
 import java.util.List;
 import java.util.stream.Collectors;
+import javax.ws.rs.core.Response;
+
+import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_UNEXPECTED;
 
 //import org.wso2.carbon.identity.configuration.mgt.endpoint.dto.ConfigurationChangeResponseDTO;
 //import org.wso2.carbon.identity.configuration.mgt.endpoint.dto.ConfigurationDTO;
@@ -51,15 +58,6 @@ public class ConfigurationEndpointUtils {
         return (ConfigurationManager) PrivilegedCarbonContext.getThreadLocalCarbonContext()
                 .getOSGiService(ConfigurationManager.class, null);
     }
-
-//    public static ConfigurationChangeResponseDTO getConfigurationChangeResponseDTO(ConfigurationChangeResponse configurationChangeResponse) {
-//
-//        ConfigurationChangeResponseDTO configurationChangeResponseDTO = new ConfigurationChangeResponseDTO();
-//        configurationChangeResponseDTO.setConfigurationNameID(configurationChangeResponse.getConfigurationName());
-//        configurationChangeResponseDTO.setTenantDomain(configurationChangeResponse.getTenantDomain());
-//        configurationChangeResponseDTO.setState(configurationChangeResponse.getState());
-//        return configurationChangeResponseDTO;
-//    }
 
     public static ResourceDTO getResourceDTO(Resource resource) {
 
@@ -121,6 +119,14 @@ public class ConfigurationEndpointUtils {
         return resourceType;
     }
 
+    public static ResourceTypeCreate getResourceTypeCreateFromDTO(ResourceTypeCreateDTO resourceTypeCreateDTO) {
+
+        ResourceTypeCreate resourceTypeCreate = new ResourceTypeCreate();
+        resourceTypeCreate.setName(resourceTypeCreateDTO.getName());
+        resourceTypeCreate.setDescription(resourceTypeCreateDTO.getDescription());
+        return resourceTypeCreate;
+    }
+
     private static List<Attribute> getAttributesFromDTO(List<AttributeDTO> attributeDTOS) {
 
         return attributeDTOS
@@ -149,6 +155,47 @@ public class ConfigurationEndpointUtils {
         errorDTO.setMessage(message);
         errorDTO.setDescription(description);
         return errorDTO;
+    }
+
+    public static Response handleBadRequestResponse(ConfigurationManagementClientException e, Log LOG) {
+
+        if (isNotFoundError(e)) {
+            throw ConfigurationEndpointUtils.buildNotFoundRequestException(e.getMessage(), e.getErrorCode(), LOG, e);
+        }
+
+        if (isConflictError(e)) {
+            throw ConfigurationEndpointUtils.buildConflictRequestException(e.getMessage(), e.getErrorCode(), LOG, e);
+        }
+
+        if (isForbiddenError(e)) {
+            throw ConfigurationEndpointUtils.buildForbiddenException(e.getMessage(), e.getErrorCode(), LOG, e);
+        }
+        throw ConfigurationEndpointUtils.buildBadRequestException(e.getMessage(), e.getErrorCode(), LOG, e);
+    }
+
+    public static Response handleServerErrorResponse(ConfigurationManagementException e, Log LOG) {
+
+        throw ConfigurationEndpointUtils.buildInternalServerErrorException(e.getErrorCode(), LOG, e);
+    }
+
+    public static Response handleUnexpectedServerError(Throwable e, Log LOG) {
+
+        throw ConfigurationEndpointUtils.buildInternalServerErrorException(ERROR_CODE_UNEXPECTED.getCode(), LOG, e);
+    }
+
+    private static boolean isNotFoundError(ConfigurationManagementClientException e) {
+
+        return ConfigurationConstants.ErrorMessages.ERROR_CODE_SELECT_CONFIGURATION_BY_ID.getCode().equals(e.getErrorCode());
+    }
+
+    private static boolean isConflictError(ConfigurationManagementClientException e) {
+
+        return ConfigurationConstants.ErrorMessages.ERROR_CODE_CONFIGURATION_ALREADY_EXIST.getCode().equals(e.getErrorCode());
+    }
+
+    private static boolean isForbiddenError(ConfigurationManagementClientException e) {
+
+        return ConfigurationConstants.ErrorMessages.ERROR_CODE_NO_USER_FOUND.getCode().equals(e.getErrorCode());
     }
 
     public static NotFoundException buildNotFoundRequestException(String description, String code,

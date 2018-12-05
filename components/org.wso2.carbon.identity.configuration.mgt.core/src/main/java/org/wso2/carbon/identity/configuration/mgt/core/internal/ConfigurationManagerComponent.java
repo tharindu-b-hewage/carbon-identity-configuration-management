@@ -27,20 +27,13 @@ import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
 import org.wso2.carbon.identity.configuration.mgt.core.ConfigurationManager;
 import org.wso2.carbon.identity.configuration.mgt.core.ConfigurationManagerImpl;
-import org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants;
 import org.wso2.carbon.identity.configuration.mgt.core.dao.ConfigurationDAO;
 import org.wso2.carbon.identity.configuration.mgt.core.dao.impl.ConfigurationDAOImpl;
-import org.wso2.carbon.identity.configuration.mgt.core.exception.ConfigurationManagementRuntimeException;
 import org.wso2.carbon.identity.configuration.mgt.core.model.ConfigurationManagerConfigurationHolder;
-import org.wso2.carbon.identity.configuration.mgt.core.util.ConfigurationManagementConfigParser;
 
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import javax.naming.Context;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
-import javax.sql.DataSource;
 
 /**
  * OSGi declarative services component which handles registration and un-registration of configuration management service.
@@ -64,13 +57,6 @@ public class ConfigurationManagerComponent {
 
         try {
             BundleContext bundleContext = componentContext.getBundleContext();
-
-//            ConfigurationManagementConfigParser configParser = new ConfigurationManagementConfigParser();
-//            DataSource dataSource = initDataSource(configParser);
-//            /*
-//            DB structure verification is not handled in here.
-//             */
-//            setDataSourceToDataHolder(dataSource);
 
             bundleContext.registerService(ConfigurationDAO.class.getName(), new ConfigurationDAOImpl(),
                     null);
@@ -113,34 +99,4 @@ public class ConfigurationManagerComponent {
         }
         this.configurationDAOS.remove(configurationDAO);
     }
-
-    private DataSource initDataSource(ConfigurationManagementConfigParser configParser) {
-
-        String dataSourceName = configParser.getConfigDataSource();
-        DataSource dataSource;
-        Context ctx;
-        try {
-            ctx = new InitialContext();
-            dataSource = (DataSource) ctx.lookup(dataSourceName);
-
-            if (log.isDebugEnabled()) {
-                log.debug(String.format("Data source: %s found in context.", dataSourceName));
-            }
-
-            return dataSource;
-        } catch (NamingException e) {
-            throw new ConfigurationManagementRuntimeException(ConfigurationConstants.ErrorMessages
-                    .ERROR_CODE_DATABASE_INITIALIZATION.getMessage(),
-                    ConfigurationConstants.ErrorMessages
-                            .ERROR_CODE_DATABASE_INITIALIZATION.getCode(), e);
-        }
-    }
-
-//    private void setDataSourceToDataHolder(DataSource dataSource) {
-//
-//        ConfigurationManagerComponentDataHolder.getInstance().setDataSource(dataSource);
-//        if (log.isDebugEnabled()) {
-//            log.debug("Data Source is set to the Resource Management Service.");
-//        }
-//    }
 }

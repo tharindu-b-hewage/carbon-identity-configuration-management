@@ -19,23 +19,18 @@ package org.wso2.carbon.identity.configuration.mgt.core;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages;
 import org.wso2.carbon.identity.configuration.mgt.core.dao.ConfigurationDAO;
 import org.wso2.carbon.identity.configuration.mgt.core.exception.ConfigurationManagementException;
-import org.wso2.carbon.identity.configuration.mgt.core.model.Resource;
-import org.wso2.carbon.identity.configuration.mgt.core.model.ConfigurationChangeResponse;
 import org.wso2.carbon.identity.configuration.mgt.core.model.ConfigurationManagerConfigurationHolder;
+import org.wso2.carbon.identity.configuration.mgt.core.model.Resource;
+import org.wso2.carbon.identity.configuration.mgt.core.model.ResourceType;
+import org.wso2.carbon.identity.configuration.mgt.core.model.ResourceTypeCreate;
 import org.wso2.carbon.identity.configuration.mgt.core.util.ConfigurationUtils;
-import org.wso2.carbon.identity.configuration.mgt.core.util.model.ConfigurationSearchFilter;
 
 import java.util.List;
-import java.util.Map;
 
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_GET_DAO;
-import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.STATE_ADD_CONFIGURATION_CHANGE_RESPONSE;
-import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.STATE_REPLACE_CONFIGURATION_CHANGE_RESPONSE;
-import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.STATE_UPDATE_CONFIGURATION_CHANGE_RESPONSE;
 import static org.wso2.carbon.identity.configuration.mgt.core.util.ConfigurationUtils.handleServerException;
 
 /**
@@ -56,7 +51,7 @@ public class ConfigurationManagerImpl implements ConfigurationManager {
     /**
      * {@inheritDoc}
      */
-    public Resource getResource(String name, ConfigurationSearchFilter configurationSearchFilter)
+    public Resource getResource(String name)
             throws ConfigurationManagementException {
 
         Resource resource = this.getConfigurationDAO().getConfiguration(name);
@@ -84,8 +79,7 @@ public class ConfigurationManagerImpl implements ConfigurationManager {
     /**
      * {@inheritDoc}
      */
-    public void addResource(String name, Resource resource)
-            throws ConfigurationManagementException {
+    public void addResource(String name, Resource resource) throws ConfigurationManagementException {
 
         // TODO: 10/29/18 DAO will handle conflict error
         this.getConfigurationDAO().addConfiguration(name, resource);
@@ -97,8 +91,7 @@ public class ConfigurationManagerImpl implements ConfigurationManager {
     /**
      * {@inheritDoc}
      */
-    public void replaceResource(String name, Resource resource)
-            throws ConfigurationManagementException {
+    public void replaceResource(String name, Resource resource) throws ConfigurationManagementException {
 
         this.getConfigurationDAO().replaceConfiguration(name, resource);
         if (log.isDebugEnabled()) {
@@ -109,8 +102,7 @@ public class ConfigurationManagerImpl implements ConfigurationManager {
     /**
      * {@inheritDoc}
      */
-    public void updateResource(String name, Resource resource)
-            throws ConfigurationManagementException {
+    public void updateResource(String name, Resource resource) throws ConfigurationManagementException {
 
         // TODO: 10/29/18 DAO will handle the record not found error
         this.getConfigurationDAO().updateConfiguration(name, resource);
@@ -118,6 +110,44 @@ public class ConfigurationManagerImpl implements ConfigurationManager {
             log.debug(name + " resource replaced successfully.");
         }
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    public ResourceType getResourceType(String name, String id) throws ConfigurationManagementException {
+
+        return null;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void deleteResourceType(String name, String id) throws ConfigurationManagementException {
+
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void addResourceType(ResourceTypeCreate resourceTypeCreate) throws ConfigurationManagementException {
+
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void replaceResourceType(ResourceTypeCreate resourceTypeCreate) throws ConfigurationManagementException {
+
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void updateResourceType(ResourceTypeCreate resourceTypeCreate) throws ConfigurationManagementException {
+
+    }
+
+    ;
 
     /**
      * Select highest priority Resource DAO from an already sorted list of Resource DAOs.
