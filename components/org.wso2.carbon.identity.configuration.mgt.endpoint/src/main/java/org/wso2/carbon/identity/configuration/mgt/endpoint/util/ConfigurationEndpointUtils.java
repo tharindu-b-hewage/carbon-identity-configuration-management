@@ -21,12 +21,14 @@ import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.identity.configuration.mgt.core.ConfigurationManager;
 import org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants;
 import org.wso2.carbon.identity.configuration.mgt.core.model.Attribute;
-import org.wso2.carbon.identity.configuration.mgt.core.model.Configuration;
-import org.wso2.carbon.identity.configuration.mgt.core.model.ConfigurationChangeResponse;
+import org.wso2.carbon.identity.configuration.mgt.core.model.Resource;
+import org.wso2.carbon.identity.configuration.mgt.core.model.ResourceFile;
+import org.wso2.carbon.identity.configuration.mgt.core.model.ResourceType;
 import org.wso2.carbon.identity.configuration.mgt.endpoint.dto.AttributeDTO;
-import org.wso2.carbon.identity.configuration.mgt.endpoint.dto.ConfigurationChangeResponseDTO;
-import org.wso2.carbon.identity.configuration.mgt.endpoint.dto.ConfigurationDTO;
 import org.wso2.carbon.identity.configuration.mgt.endpoint.dto.ErrorDTO;
+import org.wso2.carbon.identity.configuration.mgt.endpoint.dto.ResourceDTO;
+import org.wso2.carbon.identity.configuration.mgt.endpoint.dto.ResourceFileDTO;
+import org.wso2.carbon.identity.configuration.mgt.endpoint.dto.ResourceTypeDTO;
 import org.wso2.carbon.identity.configuration.mgt.endpoint.exception.BadRequestException;
 import org.wso2.carbon.identity.configuration.mgt.endpoint.exception.ConflictRequestException;
 import org.wso2.carbon.identity.configuration.mgt.endpoint.exception.ForbiddenException;
@@ -35,6 +37,9 @@ import org.wso2.carbon.identity.configuration.mgt.endpoint.exception.NotFoundExc
 
 import java.util.List;
 import java.util.stream.Collectors;
+
+//import org.wso2.carbon.identity.configuration.mgt.endpoint.dto.ConfigurationChangeResponseDTO;
+//import org.wso2.carbon.identity.configuration.mgt.endpoint.dto.ConfigurationDTO;
 
 /**
  * Utility functions required for configuration endpoint
@@ -47,34 +52,73 @@ public class ConfigurationEndpointUtils {
                 .getOSGiService(ConfigurationManager.class, null);
     }
 
-    public static ConfigurationChangeResponseDTO getConfigurationChangeResponseDTO(ConfigurationChangeResponse configurationChangeResponse) {
+//    public static ConfigurationChangeResponseDTO getConfigurationChangeResponseDTO(ConfigurationChangeResponse configurationChangeResponse) {
+//
+//        ConfigurationChangeResponseDTO configurationChangeResponseDTO = new ConfigurationChangeResponseDTO();
+//        configurationChangeResponseDTO.setConfigurationNameID(configurationChangeResponse.getConfigurationName());
+//        configurationChangeResponseDTO.setTenantDomain(configurationChangeResponse.getTenantDomain());
+//        configurationChangeResponseDTO.setState(configurationChangeResponse.getState());
+//        return configurationChangeResponseDTO;
+//    }
 
-        ConfigurationChangeResponseDTO configurationChangeResponseDTO = new ConfigurationChangeResponseDTO();
-        configurationChangeResponseDTO.setConfigurationNameID(configurationChangeResponse.getConfigurationName());
-        configurationChangeResponseDTO.setTenantDomain(configurationChangeResponse.getTenantDomain());
-        configurationChangeResponseDTO.setState(configurationChangeResponse.getState());
-        return configurationChangeResponseDTO;
-    }
+    public static ResourceDTO getResourceDTO(Resource resource) {
 
-    public static ConfigurationDTO getConfigurationDTO(Configuration configuration) {
-
-        ConfigurationDTO configurationDTO = new ConfigurationDTO();
-        configurationDTO.setName(configuration.getName());
-        configurationDTO.setAttributes(
-                configuration.getAttributes().stream().map(
+        ResourceDTO resourceDTO = new ResourceDTO();
+        resourceDTO.setResourceName(resource.getResourceName());
+        resourceDTO.setAttributes(
+                resource.getResourceAttribute().stream().map(
                         ConfigurationEndpointUtils::getAttributeDTO
                 ).collect(Collectors.toList())
         );
-        return configurationDTO;
+        resourceDTO.setFile(getResourceFileDTO(resource.getResourceFile()));
+        resourceDTO.setType(getResourceTypeDTO(resource.getResourceType()));
+        return resourceDTO;
     }
 
-    public static Configuration getConfigurationFromDTO(ConfigurationDTO configurationDTO) {
+    public static ResourceTypeDTO getResourceTypeDTO(ResourceType resourceType) {
 
-        Configuration configuration = new Configuration(
-                configurationDTO.getName(),
-                getAttributesFromDTO(configurationDTO.getAttributes())
+        ResourceTypeDTO resourceTypeDTO = new ResourceTypeDTO();
+        resourceTypeDTO.setName(resourceType.getName());
+        resourceTypeDTO.setId(resourceType.getId());
+        resourceTypeDTO.setDescription(resourceType.getDescription());
+        return resourceTypeDTO;
+    }
+
+    public static ResourceFileDTO getResourceFileDTO(ResourceFile resourceFile) {
+
+        ResourceFileDTO resourceFileDTO = new ResourceFileDTO();
+        resourceFileDTO.setValue(resourceFile.getValue());
+        return resourceFileDTO;
+    }
+
+    public static Resource getResourceFromDTO(ResourceDTO resourceDTO) {
+
+        Resource resource = new Resource(
+                resourceDTO.getResourceName(),
+                getResourceTypeFromDTO(resourceDTO.getType())
         );
-        return configuration;
+        resource.setResourceFile(getResourceFileFromDTO(resourceDTO.getFile()));
+        resource.setResourceAttribute(
+                resourceDTO.getAttributes().stream().map(
+                        ConfigurationEndpointUtils::getAttributeFromDTO
+                ).collect(Collectors.toList())
+        );
+        return resource;
+    }
+
+    public static ResourceFile getResourceFileFromDTO(ResourceFileDTO resourceFileDTO) {
+
+        ResourceFile resourceFile = new ResourceFile();
+        resourceFile.setValue(resourceFileDTO.getValue());
+        return resourceFile;
+    }
+
+    public static ResourceType getResourceTypeFromDTO(ResourceTypeDTO resourceTypeDTO) {
+
+        ResourceType resourceType = new ResourceType(resourceTypeDTO.getName());
+        resourceType.setId(resourceTypeDTO.getId());
+        resourceType.setDescription(resourceTypeDTO.getDescription());
+        return resourceType;
     }
 
     private static List<Attribute> getAttributesFromDTO(List<AttributeDTO> attributeDTOS) {

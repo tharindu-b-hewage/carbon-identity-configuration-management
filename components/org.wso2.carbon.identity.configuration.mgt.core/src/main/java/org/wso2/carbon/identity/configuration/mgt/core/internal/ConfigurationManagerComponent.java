@@ -98,7 +98,7 @@ public class ConfigurationManagerComponent {
 
         if (configurationDAO != null) {
             if (log.isDebugEnabled()) {
-                log.debug("Configuration DAO is registered in ConfigurationManager service.");
+                log.debug("Resource DAO is registered in ConfigurationManager service.");
             }
 
             this.configurationDAOS.add(configurationDAO);
@@ -140,7 +140,7 @@ public class ConfigurationManagerComponent {
 //
 //        ConfigurationManagerComponentDataHolder.getInstance().setDataSource(dataSource);
 //        if (log.isDebugEnabled()) {
-//            log.debug("Data Source is set to the Configuration Management Service.");
+//            log.debug("Data Source is set to the Resource Management Service.");
 //        }
 //    }
 }

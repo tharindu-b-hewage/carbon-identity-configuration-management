@@ -23,12 +23,14 @@ import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages;
 import org.wso2.carbon.identity.configuration.mgt.core.dao.ConfigurationDAO;
 import org.wso2.carbon.identity.configuration.mgt.core.exception.ConfigurationManagementException;
-import org.wso2.carbon.identity.configuration.mgt.core.model.Configuration;
+import org.wso2.carbon.identity.configuration.mgt.core.model.Resource;
 import org.wso2.carbon.identity.configuration.mgt.core.model.ConfigurationChangeResponse;
 import org.wso2.carbon.identity.configuration.mgt.core.model.ConfigurationManagerConfigurationHolder;
 import org.wso2.carbon.identity.configuration.mgt.core.util.ConfigurationUtils;
+import org.wso2.carbon.identity.configuration.mgt.core.util.model.ConfigurationSearchFilter;
 
 import java.util.List;
+import java.util.Map;
 
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_GET_DAO;
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.STATE_ADD_CONFIGURATION_CHANGE_RESPONSE;
@@ -37,7 +39,7 @@ import static org.wso2.carbon.identity.configuration.mgt.core.constant.Configura
 import static org.wso2.carbon.identity.configuration.mgt.core.util.ConfigurationUtils.handleServerException;
 
 /**
- * Configuration Manager service implementation.
+ * Resource Manager service implementation.
  */
 public class ConfigurationManagerImpl implements ConfigurationManager {
 
@@ -54,22 +56,23 @@ public class ConfigurationManagerImpl implements ConfigurationManager {
     /**
      * {@inheritDoc}
      */
-    public Configuration getConfiguration(String name) throws ConfigurationManagementException {
+    public Resource getResource(String name, ConfigurationSearchFilter configurationSearchFilter)
+            throws ConfigurationManagementException {
 
-        Configuration configuration = this.getConfigurationDAO().getConfiguration(name);
-        if (configuration == null) {
+        Resource resource = this.getConfigurationDAO().getConfiguration(name);
+        if (resource == null) {
             if (log.isDebugEnabled()) {
-                log.debug("No configuration found for the name " + name);
+                log.debug("No resource found for the name " + name);
             }
             throw ConfigurationUtils.handleClientException(ErrorMessages.ERROR_CODE_CONFIGURATION_NAME_INVALID, null);
         }
-        return configuration;
+        return resource;
     }
 
     /**
      * {@inheritDoc}
      */
-    public void deleteConfiguration(String name) throws ConfigurationManagementException {
+    public void deleteResource(String name) throws ConfigurationManagementException {
 
         // TODO: 10/29/18 DAO will handle the record not found error
         this.getConfigurationDAO().deleteConfiguration(name);
@@ -81,60 +84,45 @@ public class ConfigurationManagerImpl implements ConfigurationManager {
     /**
      * {@inheritDoc}
      */
-    public ConfigurationChangeResponse addConfiguration(String name, Configuration configuration)
+    public void addResource(String name, Resource resource)
             throws ConfigurationManagementException {
 
         // TODO: 10/29/18 DAO will handle conflict error
-        this.getConfigurationDAO().addConfiguration(name, configuration);
+        this.getConfigurationDAO().addConfiguration(name, resource);
         if (log.isDebugEnabled()) {
-            log.debug(name + " configuration created successfully.");
+            log.debug(name + " resource created successfully.");
         }
-        return new ConfigurationChangeResponse(
-                name,
-                PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain(),
-                STATE_ADD_CONFIGURATION_CHANGE_RESPONSE
-        );
     }
 
     /**
      * {@inheritDoc}
      */
-    public ConfigurationChangeResponse replaceConfiguration(String name, Configuration configuration)
+    public void replaceResource(String name, Resource resource)
             throws ConfigurationManagementException {
 
-        this.getConfigurationDAO().replaceConfiguration(name, configuration);
+        this.getConfigurationDAO().replaceConfiguration(name, resource);
         if (log.isDebugEnabled()) {
-            log.debug(name + " configuration replaced successfully.");
+            log.debug(name + " resource replaced successfully.");
         }
-        return new ConfigurationChangeResponse(
-                name,
-                PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain(),
-                STATE_REPLACE_CONFIGURATION_CHANGE_RESPONSE
-        );
     }
 
     /**
      * {@inheritDoc}
      */
-    public ConfigurationChangeResponse updateConfiguration(String name, Configuration configuration)
+    public void updateResource(String name, Resource resource)
             throws ConfigurationManagementException {
 
         // TODO: 10/29/18 DAO will handle the record not found error
-        this.getConfigurationDAO().updateConfiguration(name, configuration);
+        this.getConfigurationDAO().updateConfiguration(name, resource);
         if (log.isDebugEnabled()) {
-            log.debug(name + " configuration replaced successfully.");
+            log.debug(name + " resource replaced successfully.");
         }
-        return new ConfigurationChangeResponse(
-                name,
-                PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain(),
-                STATE_UPDATE_CONFIGURATION_CHANGE_RESPONSE
-        );
     }
 
     /**
-     * Select highest priority Configuration DAO from an already sorted list of Configuration DAOs.
+     * Select highest priority Resource DAO from an already sorted list of Resource DAOs.
      *
-     * @return Highest priority Configuration DAO.
+     * @return Highest priority Resource DAO.
      */
     private ConfigurationDAO getConfigurationDAO() throws ConfigurationManagementException {
 

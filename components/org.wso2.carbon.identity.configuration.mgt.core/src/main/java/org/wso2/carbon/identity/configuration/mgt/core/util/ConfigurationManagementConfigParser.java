@@ -64,7 +64,7 @@ public class ConfigurationManagementConfigParser {
                 inputStream = new FileInputStream(configMgtConfigXml);
             }
             if (inputStream == null) {
-                String message = "Configuration management configs not found";
+                String message = "Resource management configs not found";
                 if (log.isDebugEnabled()) {
                     log.debug(message);
                 }

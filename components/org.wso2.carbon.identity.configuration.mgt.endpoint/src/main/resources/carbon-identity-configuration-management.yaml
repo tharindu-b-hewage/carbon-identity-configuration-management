@@ -4,7 +4,7 @@ swagger: '2.0'
 ######################################################
 info:
   version: "1.0.0"
-  title: "WSO2 Identity Server Configuration Management Rest API"
+  title: "WSO2 Identity Server Resource Management Rest API"
   description: |
     This document specifies a **Configurations Management RESTfulAPI** for WSO2 **Identity Server** .
     It is written with [swagger 2](http://swagger.io/).
@@ -177,12 +177,14 @@ paths:
       summary: |
         Get the resource type.
       parameters:
-      - name: type
-        in: body
+      - name: name
+        in: query
         description: This represents the resource type to be retrieved.
-        required: true
-        schema:
-          $ref: '#/definitions/ResourceTypeRequest'
+        type: string
+      - name: id
+        in: query
+        description: This represents the resource type to be retrieved.
+        type: string
       responses:
         200:
           description: Ok
@@ -215,12 +217,14 @@ paths:
       summary: |
         Revoke resource type.
       parameters:
-      - name: type
-        in: body
-        description: This represents the resource type to be deleted.
-        required: true
-        schema:
-          $ref: '#/definitions/ResourceTypeRequest'
+      - name: name
+        in: query
+        description: This represents the resource type to be retrieved.
+        type: string
+      - name: id
+        in: query
+        description: This represents the resource type to be retrieved.
+        type: string
       responses:
         200:
           description: Ok
@@ -253,30 +257,6 @@ paths:
       x-wso2-response:
       summary: |
         Retrieve resources based on the optional search parmeters.
-      parameters:
-      - name: name
-        in: path
-        description:  This represents the name of the resource to be retrieved.
-        required: true
-        type: 'string'
-      - name: resourceName
-        in: query
-        description: This represents an optional search filer for resource names.
-        type: array
-        items:
-          type: string
-      - name: tenant
-        in: query
-        description: This represents an optional search filer for resource names.
-        type: array
-        items:
-          type: string
-      - name: type
-        in: query
-        description: This represents an optional search filer for resource names.
-        type: array
-        items:
-          type: string
       responses:
         200:
           description: OK
@@ -434,18 +414,6 @@ paths:
         description:  This represents the name of the resource to be retrieved.
         required: true
         type: 'string'
-      - name: tenant
-        in: query
-        description: This represents an optional search filer for resource names.
-        type: array
-        items:
-          type: string
-      - name: type
-        in: query
-        description: This represents an optional search filer for resource names.
-        type: array
-        items:
-          type: string
       responses:
         200:
           description: OK
@@ -575,7 +543,7 @@ definitions:
         items:
           $ref: '#/definitions/Attribute'
       type:
-        $ref: '#/definitions/ResourceTypeRequest'
+        $ref: '#/definitions/ResourceType'
       file:
         type: object
         properties:

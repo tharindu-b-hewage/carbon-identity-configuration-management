@@ -1,10 +1,10 @@
 package org.wso2.carbon.identity.configuration.mgt.core.dao;
 
 import org.wso2.carbon.identity.configuration.mgt.core.exception.ConfigurationManagementException;
-import org.wso2.carbon.identity.configuration.mgt.core.model.Configuration;
+import org.wso2.carbon.identity.configuration.mgt.core.model.Resource;
 
 /**
- * Perform CRUD operations for {@link Configuration}.
+ * Perform CRUD operations for {@link Resource}.
  *
  * @since 1.0.0
  */
@@ -18,49 +18,49 @@ public interface ConfigurationDAO {
     int getPriority();
 
     /**
-     * Returns {@link Configuration} by name;
+     * Returns {@link Resource} by name;
      *
-     * @param name Name id of the {@link Configuration} to retrieve.
-     * @return {@link Configuration} for the given name.
+     * @param name Name id of the {@link Resource} to retrieve.
+     * @return {@link Resource} for the given name.
      */
-    Configuration getConfiguration(String name) throws ConfigurationManagementException;
+    Resource getConfiguration(String name) throws ConfigurationManagementException;
 
     /**
-     * Delete {@link Configuration} by the given name.
+     * Delete {@link Resource} by the given name.
      *
-     * @param name Name id of the {@link Configuration} to delete.
-     * @return Name id of the deleted {@link Configuration}.
-     * @throws ConfigurationManagementException Configuration management exception.
+     * @param name Name id of the {@link Resource} to delete.
+     * @return Name id of the deleted {@link Resource}.
+     * @throws ConfigurationManagementException Resource management exception.
      */
     String deleteConfiguration(String name) throws ConfigurationManagementException;
 
     /**
-     * Add given {@link Configuration}.
+     * Add given {@link Resource}.
      *
-     * @param name Name id of the {@link Configuration}
-     * @param configuration {@link Configuration} to be added.
-     * @return Name id of the added {@link Configuration}.
-     * @throws ConfigurationManagementException Configuration management exception.
+     * @param name Name id of the {@link Resource}
+     * @param resource {@link Resource} to be added.
+     * @return Name id of the added {@link Resource}.
+     * @throws ConfigurationManagementException Resource management exception.
      */
-    String addConfiguration(String name, Configuration configuration) throws ConfigurationManagementException;
+    String addConfiguration(String name, Resource resource) throws ConfigurationManagementException;
 
     /**
-     * Replace given {@link Configuration} or add if existing {@link Configuration} is not present.
+     * Replace given {@link Resource} or add if existing {@link Resource} is not present.
      *
-     * @param name Name id of the {@link Configuration}
-     * @param configuration New {@link Configuration} to replace the existing.
-     * @return Name id of the added {@link Configuration}.
-     * @throws ConfigurationManagementException Configuration management exception.
+     * @param name Name id of the {@link Resource}
+     * @param resource New {@link Resource} to replace the existing.
+     * @return Name id of the added {@link Resource}.
+     * @throws ConfigurationManagementException Resource management exception.
      */
-    String replaceConfiguration(String name, Configuration configuration) throws ConfigurationManagementException;
+    String replaceConfiguration(String name, Resource resource) throws ConfigurationManagementException;
 
     /**
-     * Update given {@link Configuration}.
+     * Update given {@link Resource}.
      *
-     * @param name Name id of the {@link Configuration}
-     * @param configuration New {@link Configuration} to update the existing.
-     * @return Name id of the added {@link Configuration}.
-     * @throws ConfigurationManagementException Configuration management exception.
+     * @param name Name id of the {@link Resource}
+     * @param resource New {@link Resource} to update the existing.
+     * @return Name id of the added {@link Resource}.
+     * @throws ConfigurationManagementException Resource management exception.
      */
-    String updateConfiguration(String name, Configuration configuration) throws ConfigurationManagementException;
+    String updateConfiguration(String name, Resource resource) throws ConfigurationManagementException;
 }

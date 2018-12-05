@@ -3,7 +3,8 @@ package org.wso2.carbon.identity.configuration.mgt.core.dao.impl;
 import org.wso2.carbon.identity.configuration.mgt.core.dao.ConfigurationDAO;
 import org.wso2.carbon.identity.configuration.mgt.core.exception.ConfigurationManagementException;
 import org.wso2.carbon.identity.configuration.mgt.core.model.Attribute;
-import org.wso2.carbon.identity.configuration.mgt.core.model.Configuration;
+import org.wso2.carbon.identity.configuration.mgt.core.model.Resource;
+import org.wso2.carbon.identity.configuration.mgt.core.model.ResourceType;
 import org.wso2.carbon.identity.core.util.IdentityDatabaseUtil;
 
 import java.sql.Connection;
@@ -27,19 +28,20 @@ public class ConfigurationDAOImpl implements ConfigurationDAO {
     /**
      * {@inheritDoc}
      */
-    public Configuration getConfiguration(String name) throws ConfigurationManagementException {
+    public Resource getConfiguration(String name) throws ConfigurationManagementException {
 
-        Connection connection = IdentityDatabaseUtil.getDBConnection();
-        try {
-            PreparedStatement statement = connection.prepareStatement("SELECT * FROM IDN_CONFIG_RESOURCE");
-            ResultSet resultSet = statement.executeQuery();
-        } catch (SQLException e) {
-
-        }
-        List<Attribute> attributes = new ArrayList<>(1);
-        Attribute tempAttribute = new Attribute("from", "abc@gmail.com");
-        attributes.add(tempAttribute);
-        return new Configuration("mail", attributes);
+//        Connection connection = IdentityDatabaseUtil.getDBConnection();
+//        try {
+//            PreparedStatement statement = connection.prepareStatement("SELECT * FROM IDN_CONFIG_RESOURCE");
+//            ResultSet resultSet = statement.executeQuery();
+//        } catch (SQLException e) {
+//
+//        }
+//        List<Attribute> attributes = new ArrayList<>(1);
+//        Attribute tempAttribute = new Attribute("from", "abc@gmail.com");
+//        attributes.add(tempAttribute);
+//        return new Resource("mail", attributes);
+        return new Resource("test", new ResourceType("testType"));
     }
 
     /**
@@ -47,30 +49,30 @@ public class ConfigurationDAOImpl implements ConfigurationDAO {
      */
     public String deleteConfiguration(String name) throws ConfigurationManagementException {
 
-        return new String("sample Deleted Configuration");
+        return new String("sample Deleted Resource");
     }
 
     /**
      * {@inheritDoc}
      */
-    public String addConfiguration(String name, Configuration configuration) throws ConfigurationManagementException {
+    public String addConfiguration(String name, Resource resource) throws ConfigurationManagementException {
 
-        return new String("sample added Configuration");
+        return new String("sample added Resource");
     }
 
     /**
      * {@inheritDoc}
      */
-    public String replaceConfiguration(String name, Configuration configuration) throws ConfigurationManagementException {
+    public String replaceConfiguration(String name, Resource resource) throws ConfigurationManagementException {
 
-        return new String("sample replaced Configuration");
+        return new String("sample replaced Resource");
     }
 
     /**
      * {@inheritDoc}
      */
-    public String updateConfiguration(String name, Configuration configuration) throws ConfigurationManagementException {
+    public String updateConfiguration(String name, Resource resource) throws ConfigurationManagementException {
 
-        return new String("sample updated configuration");
+        return new String("sample updated resource");
     }
 }

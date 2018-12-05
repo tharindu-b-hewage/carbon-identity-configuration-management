@@ -13,17 +13,21 @@ public class ConfigurationConstants {
     public static final String STATE_ADD_CONFIGURATION_CHANGE_RESPONSE = "add";
     public static final String STATE_UPDATE_CONFIGURATION_CHANGE_RESPONSE = "update";
     public static final String STATE_REPLACE_CONFIGURATION_CHANGE_RESPONSE = "replace";
-    public static final String BASE_PATH = "/api/identity/config-mgt/v1.0/configuration/";
+    public static final String BASE_PATH = "/api/identity/config-mgt/v1.0/resource/";
     public static final String CONFIG_MANAGEMENT_CONFIG_XML = "configuration-mgt-config.xml";
+    public static final String HTTP_SEARCH_FILTER_TENANT = "tenant";
+    public static final String HTTP_SEARCH_FILTER_TYPE = "type";
+    public static final String HTTP_SEARCH_FILTER_ATTRIBUTE = "attribute";
+    public static final String HTTP_SEARCH_FILTER_FILE = "file";
 
     public enum ErrorMessages {
         ERROR_CODE_SELECT_CONFIGURATION_BY_ID("CONFIGM_00001", "Error occurred while retrieving configuration " +
                 "from DB for the name: %s."),
-        ERROR_CODE_CONFIGURATION_ALREADY_EXIST("CONFIGM_00002", "Configuration with the name: %s already exists."),
+        ERROR_CODE_CONFIGURATION_ALREADY_EXIST("CONFIGM_00002", "Resource with the name: %s already exists."),
         ERROR_CODE_NO_USER_FOUND("CONFIGM_00003", "No authenticated user found to perform the operation: %s."),
         ERROR_CODE_UNEXPECTED("CONFIGM_00004", "Unexpected Error"),
-        ERROR_CODE_CONFIGURATION_NAME_REQUIRED("CONFIGM_00005", "Configuration name is required."),
-        ERROR_CODE_CONFIGURATION_NAME_INVALID("CONFIGM_00006", "Invalid Configuration Name: %s"),
+        ERROR_CODE_CONFIGURATION_NAME_REQUIRED("CONFIGM_00005", "Resource name is required."),
+        ERROR_CODE_CONFIGURATION_NAME_INVALID("CONFIGM_00006", "Invalid Resource Name: %s"),
         ERROR_CODE_GET_DAO("CONFIGM_00007", "No %s are registered."),
         ERROR_CODE_DATABASE_INITIALIZATION("CONFIGM_00008", "Error while initializing the configuration management " +
                 "data source."),
@@ -34,7 +38,7 @@ public class ConfigurationConstants {
                 "the database."),
         ERROR_CODE_GET_DB_TYPE("CONFIGM_00011", "Error while getting the database connection metadata."),
         ERROR_CODE_DATABASE_CONNECTION("CONFIGM_00012", "Error when getting a database connection object from the " +
-                "Configuration data source."),
+                "Resource data source."),
         ;
 
         private final String code;

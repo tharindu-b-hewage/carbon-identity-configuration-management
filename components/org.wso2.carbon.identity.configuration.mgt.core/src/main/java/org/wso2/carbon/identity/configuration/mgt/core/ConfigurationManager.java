@@ -17,11 +17,15 @@
 package org.wso2.carbon.identity.configuration.mgt.core;
 
 import org.wso2.carbon.identity.configuration.mgt.core.exception.ConfigurationManagementException;
-import org.wso2.carbon.identity.configuration.mgt.core.model.Configuration;
+import org.wso2.carbon.identity.configuration.mgt.core.model.Resource;
 import org.wso2.carbon.identity.configuration.mgt.core.model.ConfigurationChangeResponse;
+import org.wso2.carbon.identity.configuration.mgt.core.util.model.ConfigurationSearchFilter;
+
+import java.util.List;
+import java.util.Map;
 
 /**
- * Configuration manager service interface.
+ * Resource manager service interface.
  */
 public interface ConfigurationManager {
 
@@ -29,50 +33,52 @@ public interface ConfigurationManager {
      * This API is used to get the configuration by configuration name
      *
      * @param name Name id of the configuration.
+     * @param searchFilter Filter to search resources.
      * @return 200 OK with configuration element.
-     * @throws Configuration Management Exception.
+     * @throws Resource Management Exception.
      */
-    Configuration getConfiguration(String name) throws ConfigurationManagementException;
+    Resource getResource(String name, ConfigurationSearchFilter configurationSearchFilter)
+            throws ConfigurationManagementException;
 
     /**
      * This API is used to delete the configuration by configuration name
      *
      * @param name Name  id of the configuration.
-     * @throws ConfigurationManagementException Configuration management exception.
+     * @throws ConfigurationManagementException Resource management exception.
      */
-    void deleteConfiguration(String name) throws ConfigurationManagementException;
+    void deleteResource(String name) throws ConfigurationManagementException;
 
     /**
-     * This API is used to add the given configuration.
+     * This API is used to add the given resource.
      *
-     * @param name          Name id of the existing {@link Configuration}.
-     * @param configuration {@link Configuration} to be added.
-     * @return 201 created. Returns configuration change response with configuration name, tenant domain and change state.
-     * @throws ConfigurationManagementException Configuration management exception.
+     * @param name          Name id of the existing {@link Resource}.
+     * @param resource {@link Resource} to be added.
+     * @return 201 created. Returns resource change response with resource name, tenant domain and change state.
+     * @throws ConfigurationManagementException Resource management exception.
      */
-    ConfigurationChangeResponse addConfiguration(String name, Configuration configuration)
+    void addResource(String name, Resource resource)
             throws ConfigurationManagementException;
 
     /**
-     * This API is used to replace the existing configuration with the given configuration or add the given
-     * configuration if an existing configuration is not available.
+     * This API is used to replace the existing resource with the given resource or add the given
+     * resource if an existing resource is not available.
      *
-     * @param name          Name id of the existing {@link Configuration}.
-     * @param configuration New {@link Configuration} to replace the existing {@link Configuration}.
-     * @return 201 created. Returns configuration change response with configuration name, tenant domain and change state.
-     * @throws ConfigurationManagementException Configuration management exception.
+     * @param name          Name id of the existing {@link Resource}.
+     * @param resource New {@link Resource} to replace the existing {@link Resource}.
+     * @return 201 created. Returns resource change response with resource name, tenant domain and change state.
+     * @throws ConfigurationManagementException Resource management exception.
      */
-    ConfigurationChangeResponse replaceConfiguration(String name, Configuration configuration)
+    void replaceResource(String name, Resource resource)
             throws ConfigurationManagementException;
 
     /**
-     * This API is used to update the existing configuration with the given configuration.
+     * This API is used to update the existing resource with the given resource.
      *
-     * @param name          Name id of the existing {@link Configuration}.
-     * @param configuration New {@link Configuration} to update the existing {@link Configuration}.
-     * @return 201 created. Returns configuration change response with configuration name, tenant domain and change state.
-     * @throws ConfigurationManagementException Configuration management exception.
+     * @param name          Name id of the existing {@link Resource}.
+     * @param resource New {@link Resource} to update the existing {@link Resource}.
+     * @return 201 created. Returns resource change response with resource name, tenant domain and change state.
+     * @throws ConfigurationManagementException Resource management exception.
      */
-    ConfigurationChangeResponse updateConfiguration(String name, Configuration configuration)
+    void updateResource(String name, Resource resource)
             throws ConfigurationManagementException;
 }
