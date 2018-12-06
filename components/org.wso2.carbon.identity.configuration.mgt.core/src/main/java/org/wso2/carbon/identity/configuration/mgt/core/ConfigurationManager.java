@@ -17,6 +17,8 @@
 package org.wso2.carbon.identity.configuration.mgt.core;
 
 import org.wso2.carbon.identity.configuration.mgt.core.exception.ConfigurationManagementException;
+import org.wso2.carbon.identity.configuration.mgt.core.model.Attribute;
+import org.wso2.carbon.identity.configuration.mgt.core.model.AttributeValue;
 import org.wso2.carbon.identity.configuration.mgt.core.model.Resource;
 import org.wso2.carbon.identity.configuration.mgt.core.model.ResourceType;
 import org.wso2.carbon.identity.configuration.mgt.core.model.ResourceTypeCreate;
@@ -27,13 +29,20 @@ import org.wso2.carbon.identity.configuration.mgt.core.model.ResourceTypeCreate;
 public interface ConfigurationManager {
 
     /**
+     * Get resources based with a SearchContext object
+     * @return
+     * @throws ConfigurationManagementException
+     */
+    Resource getResource()
+            throws ConfigurationManagementException;
+    /**
      * This API is used to get the configuration by configuration name
      *
      * @param name Name id of the configuration.
      * @return 200 OK with configuration element.
      * @throws Resource Management Exception.
      */
-    Resource getResource(String name)
+    Resource getResource(String name, String resourceType)
             throws ConfigurationManagementException;
 
     /**
@@ -42,7 +51,7 @@ public interface ConfigurationManager {
      * @param name Name  id of the configuration.
      * @throws ConfigurationManagementException Resource management exception.
      */
-    void deleteResource(String name) throws ConfigurationManagementException;
+    void deleteResource(String name, String resourceType) throws ConfigurationManagementException;
 
     /**
      * This API is used to add the given resource.
@@ -52,7 +61,7 @@ public interface ConfigurationManager {
      * @return 201 created. Returns resource change response with resource name, tenant domain and change state.
      * @throws ConfigurationManagementException Resource management exception.
      */
-    void addResource(String name, Resource resource) throws ConfigurationManagementException;
+    void addResource(String name, String resourceType, Resource resource) throws ConfigurationManagementException;
 
     /**
      * This API is used to replace the existing resource with the given resource or add the given
@@ -63,7 +72,7 @@ public interface ConfigurationManager {
      * @return 201 created. Returns resource change response with resource name, tenant domain and change state.
      * @throws ConfigurationManagementException Resource management exception.
      */
-    void replaceResource(String name, Resource resource) throws ConfigurationManagementException;
+    void replaceResource(String name, String resourceType, Resource resource) throws ConfigurationManagementException;
 
     /**
      * This API is used to update the existing resource with the given resource.
@@ -73,7 +82,17 @@ public interface ConfigurationManager {
      * @return 201 created. Returns resource change response with resource name, tenant domain and change state.
      * @throws ConfigurationManagementException Resource management exception.
      */
-    void updateResource(String name, Resource resource) throws ConfigurationManagementException;
+    void updateResource(String name, String resourceType, Resource resource) throws ConfigurationManagementException;
+
+    AttributeValue getAttributeValue(String name, String resourceType, String attribute) throws ConfigurationManagementException;
+
+    void deleteAttribute(String name, String resourceType, String attribute) throws ConfigurationManagementException;
+
+    void updateAttribute(String name, String resourceType, Attribute attribute) throws ConfigurationManagementException;
+
+    void createAttribute(String name, String resourceType, Attribute attribute) throws ConfigurationManagementException;
+
+    void replaceAttribute(String name, String resourceType, Attribute attribute) throws ConfigurationManagementException;
 
     ResourceType getResourceType(String name, String id) throws ConfigurationManagementException;
 

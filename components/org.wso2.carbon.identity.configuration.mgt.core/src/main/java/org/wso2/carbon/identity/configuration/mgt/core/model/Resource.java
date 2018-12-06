@@ -24,45 +24,56 @@ import java.util.List;
 public class Resource {
 
     private String resourceName;
-    private ResourceType resourceType;
-    private ResourceFile resourceFile;
-    private List<Attribute> resourceAttribute;
+    private String resourceType;
+    private String lastModified;
+    private ResourceFile file;
+    private List<Attribute> attribute;
 
     /**
      * Initialize a Resource object.
      *
-     * @param resourceName         Name of the resource.
+     * @param resourceName Name of the resource.
      * @param resourceType Type of the resource.
      */
-    public Resource(String resourceName, ResourceType resourceType) {
+    public Resource(String resourceName, String resourceType) {
 
         this.resourceName = resourceName;
         this.resourceType = resourceType;
     }
 
-    public ResourceType getResourceType() {
+    public String getLastModified() {
+
+        return lastModified;
+    }
+
+    public void setLastModified(String lastModified) {
+
+        this.lastModified = lastModified;
+    }
+
+    public String getResourceType() {
 
         return resourceType;
     }
 
-    public void setResourceType(ResourceType resourceType) {
+    public void setResourceType(String resourceType) {
 
         this.resourceType = resourceType;
     }
 
-    public ResourceFile getResourceFile() {
+    public ResourceFile getFile() {
 
-        return resourceFile;
+        return file;
     }
 
-    public void setResourceFile(ResourceFile resourceFile) {
+    public void setFile(ResourceFile file) {
 
-        this.resourceFile = resourceFile;
+        this.file = file;
     }
 
-    public List<Attribute> getResourceAttribute() {
+    public List<Attribute> getAttribute() {
 
-        return resourceAttribute;
+        return attribute;
     }
 
     public String getResourceName() {
@@ -70,9 +81,9 @@ public class Resource {
         return resourceName;
     }
 
-    public void setResourceAttribute(List<Attribute> resourceAttribute) {
+    public void setAttribute(List<Attribute> attribute) {
 
-        this.resourceAttribute = resourceAttribute;
+        this.attribute = attribute;
     }
 
     public void setResourceName(String resourceName) {

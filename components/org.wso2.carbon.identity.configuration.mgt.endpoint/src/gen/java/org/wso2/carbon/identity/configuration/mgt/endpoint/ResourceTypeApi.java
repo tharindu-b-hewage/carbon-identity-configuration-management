@@ -1,6 +1,7 @@
 package org.wso2.carbon.identity.configuration.mgt.endpoint;
 
 import io.swagger.annotations.ApiParam;
+import org.apache.cxf.jaxrs.ext.search.SearchContext;
 import org.wso2.carbon.identity.configuration.mgt.endpoint.dto.ResourceTypeCreateDTO;
 import org.wso2.carbon.identity.configuration.mgt.endpoint.dto.ResourceTypeDTO;
 import org.wso2.carbon.identity.configuration.mgt.endpoint.factories.ResourceTypeApiServiceFactory;
@@ -14,6 +15,7 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 
 @Path("/resource-type")
@@ -63,9 +65,10 @@ public class ResourceTypeApi {
             @io.swagger.annotations.ApiResponse(code = 500, message = "Server Error")})
 
     public Response resourceTypeGet(@ApiParam(value = "This represents the resource type to be retrieved.") @QueryParam("name") String name,
-                                    @ApiParam(value = "This represents the resource type to be retrieved.") @QueryParam("id") String id) {
+                                    @ApiParam(value = "This represents the resource type to be retrieved.") @QueryParam("id") String id,
+                                    @ApiParam(value = "This represents the search query.") @Context SearchContext searchContext) {
 
-        return delegate.resourceTypeGet(name, id);
+        return delegate.resourceTypeGet(name, id, searchContext);
     }
 
     @PATCH

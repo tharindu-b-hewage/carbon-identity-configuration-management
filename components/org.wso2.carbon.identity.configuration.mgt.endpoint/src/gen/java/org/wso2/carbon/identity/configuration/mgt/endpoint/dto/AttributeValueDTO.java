@@ -4,14 +4,17 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-@ApiModel(description = "")
-public class ResourceFileDTO {
+import javax.validation.constraints.NotNull;
 
+@ApiModel(description = "")
+public class AttributeValueDTO {
+
+    @NotNull
     private String value = null;
 
     /**
      **/
-    @ApiModelProperty(value = "")
+    @ApiModelProperty(required = true, value = "")
     @JsonProperty("value")
     public String getValue() {
 
@@ -27,7 +30,7 @@ public class ResourceFileDTO {
     public String toString() {
 
         StringBuilder sb = new StringBuilder();
-        sb.append("class ResourceFileDTO {\n");
+        sb.append("class AttributeValueDTO {\n");
 
         sb.append("  value: ").append(value).append("\n");
         sb.append("}\n");

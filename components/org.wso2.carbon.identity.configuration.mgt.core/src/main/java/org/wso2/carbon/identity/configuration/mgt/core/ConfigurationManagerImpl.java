@@ -22,6 +22,8 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages;
 import org.wso2.carbon.identity.configuration.mgt.core.dao.ConfigurationDAO;
 import org.wso2.carbon.identity.configuration.mgt.core.exception.ConfigurationManagementException;
+import org.wso2.carbon.identity.configuration.mgt.core.model.Attribute;
+import org.wso2.carbon.identity.configuration.mgt.core.model.AttributeValue;
 import org.wso2.carbon.identity.configuration.mgt.core.model.ConfigurationManagerConfigurationHolder;
 import org.wso2.carbon.identity.configuration.mgt.core.model.Resource;
 import org.wso2.carbon.identity.configuration.mgt.core.model.ResourceType;
@@ -51,7 +53,15 @@ public class ConfigurationManagerImpl implements ConfigurationManager {
     /**
      * {@inheritDoc}
      */
-    public Resource getResource(String name)
+    public Resource getResource() throws ConfigurationManagementException {
+
+        return null;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public Resource getResource(String name, String resourceType)
             throws ConfigurationManagementException {
 
         Resource resource = this.getConfigurationDAO().getConfiguration(name);
@@ -67,7 +77,7 @@ public class ConfigurationManagerImpl implements ConfigurationManager {
     /**
      * {@inheritDoc}
      */
-    public void deleteResource(String name) throws ConfigurationManagementException {
+    public void deleteResource(String name, String resourceType) throws ConfigurationManagementException {
 
         // TODO: 10/29/18 DAO will handle the record not found error
         this.getConfigurationDAO().deleteConfiguration(name);
@@ -79,7 +89,7 @@ public class ConfigurationManagerImpl implements ConfigurationManager {
     /**
      * {@inheritDoc}
      */
-    public void addResource(String name, Resource resource) throws ConfigurationManagementException {
+    public void addResource(String name, String resourceType, Resource resource) throws ConfigurationManagementException {
 
         // TODO: 10/29/18 DAO will handle conflict error
         this.getConfigurationDAO().addConfiguration(name, resource);
@@ -91,7 +101,7 @@ public class ConfigurationManagerImpl implements ConfigurationManager {
     /**
      * {@inheritDoc}
      */
-    public void replaceResource(String name, Resource resource) throws ConfigurationManagementException {
+    public void replaceResource(String name, String resourceType, Resource resource) throws ConfigurationManagementException {
 
         this.getConfigurationDAO().replaceConfiguration(name, resource);
         if (log.isDebugEnabled()) {
@@ -102,7 +112,7 @@ public class ConfigurationManagerImpl implements ConfigurationManager {
     /**
      * {@inheritDoc}
      */
-    public void updateResource(String name, Resource resource) throws ConfigurationManagementException {
+    public void updateResource(String name, String resourceType, Resource resource) throws ConfigurationManagementException {
 
         // TODO: 10/29/18 DAO will handle the record not found error
         this.getConfigurationDAO().updateConfiguration(name, resource);
@@ -147,7 +157,26 @@ public class ConfigurationManagerImpl implements ConfigurationManager {
 
     }
 
-    ;
+    public AttributeValue getAttributeValue(String name, String resourceType, String attribute) throws ConfigurationManagementException {
+
+        return null;
+    }
+
+    public void deleteAttribute(String name, String resourceType, String attribute) throws ConfigurationManagementException {
+
+    }
+
+    public void updateAttribute(String name, String resourceType, Attribute attribute) throws ConfigurationManagementException {
+
+    }
+
+    public void createAttribute(String name, String resourceType, Attribute attribute) throws ConfigurationManagementException {
+
+    }
+
+    public void replaceAttribute(String name, String resourceType, Attribute attribute) throws ConfigurationManagementException {
+
+    }
 
     /**
      * Select highest priority Resource DAO from an already sorted list of Resource DAOs.

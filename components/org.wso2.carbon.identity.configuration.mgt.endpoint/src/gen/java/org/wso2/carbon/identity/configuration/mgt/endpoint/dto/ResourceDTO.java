@@ -14,10 +14,13 @@ public class ResourceDTO {
     @NotNull
     private String resourceName = null;
 
-    private List<AttributeDTO> attributes = new ArrayList<AttributeDTO>();
+    @NotNull
+    private String resourceType = null;
 
     @NotNull
-    private ResourceTypeDTO type = null;
+    private String lastModified = null;
+
+    private List<AttributeDTO> attributes = new ArrayList<AttributeDTO>();
 
     private ResourceFileDTO file = null;
 
@@ -37,6 +40,34 @@ public class ResourceDTO {
 
     /**
      **/
+    @ApiModelProperty(required = true, value = "")
+    @JsonProperty("resourceType")
+    public String getResourceType() {
+
+        return resourceType;
+    }
+
+    public void setResourceType(String resourceType) {
+
+        this.resourceType = resourceType;
+    }
+
+    /**
+     **/
+    @ApiModelProperty(required = true, value = "")
+    @JsonProperty("lastModified")
+    public String getLastModified() {
+
+        return lastModified;
+    }
+
+    public void setLastModified(String lastModified) {
+
+        this.lastModified = lastModified;
+    }
+
+    /**
+     **/
     @ApiModelProperty(value = "")
     @JsonProperty("attributes")
     public List<AttributeDTO> getAttributes() {
@@ -47,20 +78,6 @@ public class ResourceDTO {
     public void setAttributes(List<AttributeDTO> attributes) {
 
         this.attributes = attributes;
-    }
-
-    /**
-     **/
-    @ApiModelProperty(required = true, value = "")
-    @JsonProperty("type")
-    public ResourceTypeDTO getType() {
-
-        return type;
-    }
-
-    public void setType(ResourceTypeDTO type) {
-
-        this.type = type;
     }
 
     /**
@@ -84,8 +101,9 @@ public class ResourceDTO {
         sb.append("class ResourceDTO {\n");
 
         sb.append("  resourceName: ").append(resourceName).append("\n");
+        sb.append("  resourceType: ").append(resourceType).append("\n");
+        sb.append("  lastModified: ").append(lastModified).append("\n");
         sb.append("  attributes: ").append(attributes).append("\n");
-        sb.append("  type: ").append(type).append("\n");
         sb.append("  file: ").append(file).append("\n");
         sb.append("}\n");
         return sb.toString();

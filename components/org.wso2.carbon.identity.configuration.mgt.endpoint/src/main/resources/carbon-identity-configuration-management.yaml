@@ -275,9 +275,9 @@ paths:
           schema:
             $ref: '#/definitions/Error'
       tags:
-      - Resource
+      - Resources
 
-  "/resource/{name}":
+  "/resource/{resource-type}/{name}":
     post:
       description: |
         This API is used to store the resource given by the user.
@@ -291,6 +291,11 @@ paths:
       - name: name
         in: path
         description:  This represents the name of the resource to be added.
+        required: true
+        type: 'string'
+      - name: resource-type
+        in: path
+        description:  This represents the type of the resource to be added and can either be the name or id.
         required: true
         type: 'string'
       - name: resource
@@ -335,6 +340,11 @@ paths:
         description:  This represents the name of the resource to be added or replaced.
         required: true
         type: 'string'
+      - name: resource-type
+        in: path
+        description:  This represents the type of the resource to be added and can either be the name or id.
+        required: true
+        type: 'string'
       - name: resource
         in: body
         description:  This represents the resource that need to be added or replaced.
@@ -371,6 +381,11 @@ paths:
       - name: name
         in: path
         description:  This represents the name of the resource to be added or updated.
+        required: true
+        type: 'string'
+      - name: resource-type
+        in: path
+        description:  This represents the type of the resource to be added and can either be the name or id.
         required: true
         type: 'string'
       - name: resource
@@ -414,11 +429,16 @@ paths:
         description:  This represents the name of the resource to be retrieved.
         required: true
         type: 'string'
+      - name: resource-type
+        in: path
+        description:  This represents the type of the resource to be added and can either be the name or id.
+        required: true
+        type: 'string'
       responses:
         200:
           description: OK
           schema:
-            $ref: '#/definitions/ResourceSearchResponse'
+            $ref: '#/definitions/Resource'
         400:
           description: Bad Request
           schema:
@@ -447,6 +467,11 @@ paths:
         description:  This represents the name of the resource to be retrieved.
         required: true
         type: 'string'
+      - name: resource-type
+        in: path
+        description:  This represents the type of the resource to be added and can either be the name or id.
+        required: true
+        type: 'string'
       responses:
         200:
           description: OK
@@ -468,6 +493,248 @@ paths:
             $ref: '#/definitions/Error'
       tags:
       - Resource
+
+  "/resource/{resource-type}/{name}/{attribute}":
+    post:
+      description: |
+        This API is used to store the attribute given by the user.
+      x-wso2-request:
+      x-wso2-curl:
+      x-wso2-response:
+      summary: |
+        Create the attribute
+      # post parameters:
+      parameters:
+      - name: name
+        in: path
+        description:  This represents the name of the attribute to be added.
+        required: true
+        type: 'string'
+      - name: resource-type
+        in: path
+        description:  This represents the type of the attribute to be added and can either be the name or id.
+        required: true
+        type: 'string'
+      - name: attribute
+        in: path
+        description:  This represents an attribute key of the attribute to be added.
+        required: true
+        type: 'string'
+      - name: attributeValue
+        in: body
+        description:  This represents the corresponding attribute value that needs to be added.
+        required: true
+        schema:
+          $ref: '#/definitions/AttributeValue'
+      responses:
+        201:
+          description: Successful response
+        400:
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/Error'
+        401:
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/Error'
+        409:
+          description: Conflict
+          schema:
+            $ref: '#/definitions/Error'
+        500:
+          description: Server Error
+          schema:
+            $ref: '#/definitions/Error'
+      tags:
+      - Attribute
+    put:
+      description: |
+        This API is used to store or replace the attribute given by the user.
+      x-wso2-request:
+      x-wso2-curl:
+      x-wso2-response:
+      summary: |
+        Add or Replace the attribute
+      # put parameters:
+      parameters:
+      - name: name
+        in: path
+        description:  This represents the name of the attribute to be added or replaced.
+        required: true
+        type: 'string'
+      - name: resource-type
+        in: path
+        description:  This represents the type of the attribute to be added or replaced and can either be the name or id.
+        required: true
+        type: 'string'
+      - name: attribute
+        in: path
+        description:  This represents an attribute key of the attribute to be added or replaced.
+        required: true
+        type: 'string'
+      - name: attributeValue
+        in: body
+        description:  This represents the corresponding attribute value that needs to be added or replaced.
+        required: true
+        schema:
+          $ref: '#/definitions/AttributeValue'
+      responses:
+        201:
+          description: Successful response
+        400:
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/Error'
+        401:
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/Error'
+        500:
+          description: Server Error
+          schema:
+            $ref: '#/definitions/Error'
+      tags:
+      - Attribute
+    patch:
+      description: |
+        This API is used to update an existing attribute given by the user.
+      x-wso2-request:
+      x-wso2-curl:
+      x-wso2-response:
+      summary: |
+        Update existing attribute
+      # patch parameters:
+      parameters:
+      - name: name
+        in: path
+        description:  This represents the name of the attribute to be added or updated.
+        required: true
+        type: 'string'
+      - name: resource-type
+        in: path
+        description:  This represents the type of the attribute to be added or updated and can either be the name or id.
+        required: true
+        type: 'string'
+      - name: attribute
+        in: path
+        description:  This represents an attribute key of the attribute to be added or updated.
+        required: true
+        type: 'string'
+      - name: attributeValue
+        in: body
+        description:  This represents the corresponding attribute value that needs to be added or updated.
+        required: true
+        schema:
+          $ref: '#/definitions/AttributeValue'
+      responses:
+        201:
+          description: Successful response
+        400:
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/Error'
+        401:
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: Not Found
+          schema:
+            $ref: '#/definitions/Error'
+        500:
+          description: Server Error
+          schema:
+            $ref: '#/definitions/Error'
+      tags:
+      - Attribute
+    get:
+      description: |
+        This API is used to retrieve a attribute based on optional search filters.
+      x-wso2-request:
+      x-wso2-curl:
+      x-wso2-response:
+      summary: |
+        Retrieve the attribute based on optional search parameters.
+      parameters:
+      - name: name
+        in: path
+        description:  This represents the name of the attribute to be retrieved.
+        required: true
+        type: 'string'
+      - name: resource-type
+        in: path
+        description: This represents the type of the attribute to be retrieved and can either be the name or id.
+        required: true
+        type: 'string'
+      - name: attribute
+        in: path
+        description: This represents an attribute key of the attribute to be retrieved.
+        required: true
+        type: 'string'
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/Attribute'
+        400:
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/Error'
+        401:
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/Error'
+        500:
+          description: Server Error
+          schema:
+            $ref: '#/definitions/Error'
+      tags:
+      - Attribute
+    delete:
+      description: |
+        This API is used to revoke a attribute in the tenant domain given by the user.
+      x-wso2-request:
+      x-wso2-curl:
+      x-wso2-response:
+      summary: |
+        Revoke the attribute
+      parameters:
+      - name: name
+        in: path
+        description:  This represents the name of the attribute to be retrieved.
+        required: true
+        type: 'string'
+      - name: resource-type
+        in: path
+        description:  This represents the type of the attribute to be deleted and can either be the name or id.
+        required: true
+        type: 'string'
+      - name: attribute
+        in: path
+        description:  This represents an attribute key of the attribute to be deleted.
+        required: true
+        type: 'string'
+      responses:
+        200:
+          description: OK
+        404:
+          description: Not Found
+          schema:
+            $ref: '#/definitions/Error'
+        400:
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/Error'
+        401:
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/Error'
+        500:
+          description: Server Error
+          schema:
+            $ref: '#/definitions/Error'
+      tags:
+      - Attribute
 
 definitions:
   #-----------------------------------------------------
@@ -496,6 +763,16 @@ definitions:
       value:
         type: string
   #-----------------------------------------------------
+  # Resource Attribute Value Object
+  #-----------------------------------------------------
+  AttributeValue:
+    type: object
+    required:
+    - value
+    properties:
+      value:
+        type: string
+  #-----------------------------------------------------
   # Type Create object
   #-----------------------------------------------------
   ResourceTypeCreate:
@@ -504,16 +781,6 @@ definitions:
       name:
         type: string
       description:
-        type: string
-  #-----------------------------------------------------
-  # Type Request object
-  #-----------------------------------------------------
-  ResourceTypeRequest:
-    type: object
-    properties:
-      name:
-        type: string
-      id:
         type: string
   #-----------------------------------------------------
   # Type object
@@ -534,16 +801,19 @@ definitions:
     type: object
     required:
     - resourceName
-    - type
+    - resourceType
+    - lastModified
     properties:
       resourceName:
+        type: string
+      resourceType:
+        type: string
+      lastModified:
         type: string
       attributes:
         type: array
         items:
           $ref: '#/definitions/Attribute'
-      type:
-        $ref: '#/definitions/ResourceType'
       file:
         type: object
         properties:

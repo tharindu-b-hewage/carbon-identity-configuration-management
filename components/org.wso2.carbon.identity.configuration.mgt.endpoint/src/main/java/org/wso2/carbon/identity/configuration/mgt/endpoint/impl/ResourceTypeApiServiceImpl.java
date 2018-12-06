@@ -2,6 +2,7 @@ package org.wso2.carbon.identity.configuration.mgt.endpoint.impl;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.cxf.jaxrs.ext.search.SearchContext;
 import org.wso2.carbon.identity.configuration.mgt.core.exception.ConfigurationManagementClientException;
 import org.wso2.carbon.identity.configuration.mgt.core.exception.ConfigurationManagementException;
 import org.wso2.carbon.identity.configuration.mgt.core.model.ResourceType;
@@ -25,7 +26,7 @@ public class ResourceTypeApiServiceImpl extends ResourceTypeApiService {
     private static final Log LOG = LogFactory.getLog(ResourceTypeApiServiceImpl.class);
 
     @Override
-    public Response resourceTypeDelete(String name, String id) {
+    public Response resourceTypeDelete(java.lang.String name, java.lang.String id) {
 
         try {
             getConfigurationManager().deleteResourceType(name, id);
@@ -40,7 +41,7 @@ public class ResourceTypeApiServiceImpl extends ResourceTypeApiService {
     }
 
     @Override
-    public Response resourceTypeGet(String name, String id) {
+    public Response resourceTypeGet(java.lang.String name, java.lang.String id, SearchContext searchContext) {
 
         try {
             ResourceType resourceType = getConfigurationManager().getResourceType(name, id);

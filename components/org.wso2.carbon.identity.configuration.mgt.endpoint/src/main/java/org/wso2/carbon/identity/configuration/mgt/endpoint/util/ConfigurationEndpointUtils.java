@@ -23,11 +23,13 @@ import org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationCon
 import org.wso2.carbon.identity.configuration.mgt.core.exception.ConfigurationManagementClientException;
 import org.wso2.carbon.identity.configuration.mgt.core.exception.ConfigurationManagementException;
 import org.wso2.carbon.identity.configuration.mgt.core.model.Attribute;
+import org.wso2.carbon.identity.configuration.mgt.core.model.AttributeValue;
 import org.wso2.carbon.identity.configuration.mgt.core.model.Resource;
 import org.wso2.carbon.identity.configuration.mgt.core.model.ResourceFile;
 import org.wso2.carbon.identity.configuration.mgt.core.model.ResourceType;
 import org.wso2.carbon.identity.configuration.mgt.core.model.ResourceTypeCreate;
 import org.wso2.carbon.identity.configuration.mgt.endpoint.dto.AttributeDTO;
+import org.wso2.carbon.identity.configuration.mgt.endpoint.dto.AttributeValueDTO;
 import org.wso2.carbon.identity.configuration.mgt.endpoint.dto.ErrorDTO;
 import org.wso2.carbon.identity.configuration.mgt.endpoint.dto.ResourceDTO;
 import org.wso2.carbon.identity.configuration.mgt.endpoint.dto.ResourceFileDTO;
@@ -64,12 +66,12 @@ public class ConfigurationEndpointUtils {
         ResourceDTO resourceDTO = new ResourceDTO();
         resourceDTO.setResourceName(resource.getResourceName());
         resourceDTO.setAttributes(
-                resource.getResourceAttribute().stream().map(
+                resource.getAttribute().stream().map(
                         ConfigurationEndpointUtils::getAttributeDTO
                 ).collect(Collectors.toList())
         );
-        resourceDTO.setFile(getResourceFileDTO(resource.getResourceFile()));
-        resourceDTO.setType(getResourceTypeDTO(resource.getResourceType()));
+        resourceDTO.setFile(getResourceFileDTO(resource.getFile()));
+        resourceDTO.setResourceType(resource.getResourceType());
         return resourceDTO;
     }
 
@@ -89,14 +91,20 @@ public class ConfigurationEndpointUtils {
         return resourceFileDTO;
     }
 
+    public static AttributeValueDTO getAttributeValueDTO(AttributeValue attributeValue) {
+
+        AttributeValueDTO attributeValueDTO = new AttributeValueDTO();
+        attributeValueDTO.setValue(attributeValue.getValue());
+        return attributeValueDTO;
+    }
+
     public static Resource getResourceFromDTO(ResourceDTO resourceDTO) {
 
         Resource resource = new Resource(
-                resourceDTO.getResourceName(),
-                getResourceTypeFromDTO(resourceDTO.getType())
+                resourceDTO.getResourceName(), resourceDTO.getResourceType()
         );
-        resource.setResourceFile(getResourceFileFromDTO(resourceDTO.getFile()));
-        resource.setResourceAttribute(
+        resource.setFile(getResourceFileFromDTO(resourceDTO.getFile()));
+        resource.setAttribute(
                 resourceDTO.getAttributes().stream().map(
                         ConfigurationEndpointUtils::getAttributeFromDTO
                 ).collect(Collectors.toList())
@@ -148,7 +156,7 @@ public class ConfigurationEndpointUtils {
         return attributeDTO;
     }
 
-    private static ErrorDTO getErrorDTO(String message, String description, String code) {
+    private static ErrorDTO getErrorDTO(java.lang.String message, java.lang.String description, java.lang.String code) {
 
         ErrorDTO errorDTO = new ErrorDTO();
         errorDTO.setCode(code);
@@ -198,7 +206,7 @@ public class ConfigurationEndpointUtils {
         return ConfigurationConstants.ErrorMessages.ERROR_CODE_NO_USER_FOUND.getCode().equals(e.getErrorCode());
     }
 
-    public static NotFoundException buildNotFoundRequestException(String description, String code,
+    public static NotFoundException buildNotFoundRequestException(java.lang.String description, java.lang.String code,
                                                                   Log log, Throwable e) {
 
         ErrorDTO errorDTO = getErrorDTO(ConfigurationConstants.STATUS_BAD_REQUEST_MESSAGE_DEFAULT, description, code);
@@ -213,7 +221,7 @@ public class ConfigurationEndpointUtils {
      * @param code        Error Code.
      * @return BadRequestException with the given errorCode and description.
      */
-    public static BadRequestException buildBadRequestException(String description, String code,
+    public static BadRequestException buildBadRequestException(java.lang.String description, java.lang.String code,
                                                                Log log, Throwable e) {
 
         ErrorDTO errorDTO = getErrorDTO(ConfigurationConstants.STATUS_BAD_REQUEST_MESSAGE_DEFAULT, description, code);
@@ -228,7 +236,7 @@ public class ConfigurationEndpointUtils {
      * @param code        Error Code.
      * @return ConflictRequestException with the given errorCode and description.
      */
-    public static ConflictRequestException buildConflictRequestException(String description, String code,
+    public static ConflictRequestException buildConflictRequestException(java.lang.String description, java.lang.String code,
                                                                          Log log, Throwable e) {
 
         ErrorDTO errorDTO = getErrorDTO(ConfigurationConstants.STATUS_BAD_REQUEST_MESSAGE_DEFAULT, description, code);
@@ -243,7 +251,7 @@ public class ConfigurationEndpointUtils {
      * @param code        Error Code.
      * @return ForbiddenException with the given errorCode and description.
      */
-    public static ForbiddenException buildForbiddenException(String description, String code,
+    public static ForbiddenException buildForbiddenException(java.lang.String description, java.lang.String code,
                                                              Log log, Throwable e) {
 
         ErrorDTO errorDTO = getErrorDTO(ConfigurationConstants.STATUS_BAD_REQUEST_MESSAGE_DEFAULT, description, code);
@@ -257,7 +265,7 @@ public class ConfigurationEndpointUtils {
      * @param code Error Code.
      * @return a new InternalServerErrorException with default details.
      */
-    public static InternalServerErrorException buildInternalServerErrorException(String code,
+    public static InternalServerErrorException buildInternalServerErrorException(java.lang.String code,
                                                                                  Log log, Throwable e) {
 
         ErrorDTO errorDTO = getErrorDTO(ConfigurationConstants.STATUS_INTERNAL_SERVER_ERROR_MESSAGE_DEFAULT,
