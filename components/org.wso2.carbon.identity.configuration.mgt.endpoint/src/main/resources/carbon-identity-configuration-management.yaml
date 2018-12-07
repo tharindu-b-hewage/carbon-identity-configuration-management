@@ -52,6 +52,86 @@ consumes:
 produces:
 - application/json
 paths:
+  # Endpoint used to perform tenant based search
+  "/search/tenant":
+    get:
+      description: |
+        This API is used to search for tenants with search filters.
+      x-wso2-request:
+      x-wso2-curl:
+      x-wso2-response:
+      summary: |
+        Retrieve tenants based on search parameters.
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/TenantResponse'
+        400:
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/Error'
+        401:
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/Error'
+        500:
+          description: Server Error
+          schema:
+            $ref: '#/definitions/Error'
+      tags:
+      - Search
+  "/search/{tenant-domain}/{resource-type}/{name}/{attribute}":
+    get:
+      description: |
+        This API is used to retrieve an attribute from the given tenant.
+      x-wso2-request:
+      x-wso2-curl:
+      x-wso2-response:
+      summary: |
+        Retrieve the tenant attribute.
+      parameters:
+      - name: tenant-domain
+        in: path
+        description:  This represents the tenant domain name of the attribute to be retrieved.
+        required: true
+        type: 'string'
+      - name: name
+        in: path
+        description:  This represents the name of the attribute to be retrieved.
+        required: true
+        type: 'string'
+      - name: resource-type
+        in: path
+        description: This represents the type of the attribute to be retrieved and can either be the name or id.
+        required: true
+        type: 'string'
+      - name: attribute
+        in: path
+        description: This represents an attribute key of the attribute to be retrieved.
+        required: true
+        type: 'string'
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/Attribute'
+        400:
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/Error'
+        401:
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/Error'
+        500:
+          description: Server Error
+          schema:
+            $ref: '#/definitions/Error'
+      tags:
+      - Search
+
+
   # Endpoint used to create resource types
   "/resource-type":
     post:
@@ -68,7 +148,7 @@ paths:
         description: This represents the resource type to be added.
         required: true
         schema:
-          $ref: '#/definitions/ResourceTypeCreate'
+          $ref: '#/definitions/ResourceTypeAdd'
       responses:
         201:
           description: Successful response
@@ -106,10 +186,10 @@ paths:
         description: This represents the resource type to be added.
         required: true
         schema:
-          $ref: '#/definitions/ResourceTypeCreate'
+          $ref: '#/definitions/ResourceTypeAdd'
       responses:
-        201:
-          description: Successful response
+        200:
+          description: Ok
           schema:
             $ref: '#/definitions/ResourceType'
         400:
@@ -144,10 +224,10 @@ paths:
         description: This represents the resource type to update the existing.
         required: true
         schema:
-          $ref: '#/definitions/ResourceTypeCreate'
+          $ref: '#/definitions/ResourceTypeAdd'
       responses:
-        201:
-          description: Successful response
+        200:
+          description: Ok
           schema:
             $ref: '#/definitions/ResourceType'
         400:
@@ -259,9 +339,9 @@ paths:
         Retrieve resources based on the optional search parmeters.
       responses:
         200:
-          description: OK
+          description: Ok
           schema:
-            $ref: '#/definitions/ResourceSearchResponse'
+            $ref: '#/definitions/Resources'
         400:
           description: Bad Request
           schema:
@@ -303,10 +383,12 @@ paths:
         description:  This represents the resource that needs to be added.
         required: true
         schema:
-          $ref: '#/definitions/Resource'
+          $ref: '#/definitions/ResourceAdd'
       responses:
         201:
           description: Successful response
+          schema:
+            $ref: '#/definitions/Resource'
         400:
           description: Bad Request
           schema:
@@ -350,10 +432,12 @@ paths:
         description:  This represents the resource that need to be added or replaced.
         required: true
         schema:
-          $ref: '#/definitions/Resource'
+          $ref: '#/definitions/ResourceAdd'
       responses:
-        201:
-          description: Successful response
+        200:
+          description: Ok
+          schema:
+            $ref: '#/definitions/Resource'
         400:
           description: Bad Request
           schema:
@@ -393,10 +477,12 @@ paths:
         description:  This represents the resource that needs to be updated.
         required: true
         schema:
-          $ref: '#/definitions/Resource'
+          $ref: '#/definitions/ResourceAdd'
       responses:
-        201:
-          description: Successful response
+        200:
+          description: Ok
+          schema:
+            $ref: '#/definitions/Resource'
         400:
           description: Bad Request
           schema:
@@ -529,6 +615,8 @@ paths:
       responses:
         201:
           description: Successful response
+          schema:
+            $ref: '#/definitions/Attribute'
         400:
           description: Bad Request
           schema:
@@ -579,8 +667,10 @@ paths:
         schema:
           $ref: '#/definitions/AttributeValue'
       responses:
-        201:
-          description: Successful response
+        200:
+          description: Ok
+          schema:
+            $ref: '#/definitions/Attribute'
         400:
           description: Bad Request
           schema:
@@ -627,8 +717,10 @@ paths:
         schema:
           $ref: '#/definitions/AttributeValue'
       responses:
-        201:
-          description: Successful response
+        200:
+          description: Ok
+          schema:
+            $ref: '#/definitions/Attribute'
         400:
           description: Bad Request
           schema:
@@ -716,7 +808,7 @@ paths:
         type: 'string'
       responses:
         200:
-          description: OK
+          description: Ok
         404:
           description: Not Found
           schema:
@@ -775,7 +867,7 @@ definitions:
   #-----------------------------------------------------
   # Type Create object
   #-----------------------------------------------------
-  ResourceTypeCreate:
+  ResourceTypeAdd:
     type: object
     properties:
       name:
@@ -820,22 +912,24 @@ definitions:
           value:
             type: string
   #-----------------------------------------------------
-  # Resource Search Response Element object
+  # Resource Add object
   #-----------------------------------------------------
-  ResourceSearchResponseElement:
+  ResourceAdd:
     type: object
-    required:
-    - resource
-    - tenantId
     properties:
-      resource:
-        $ref: '#/definitions/Resource'
-      tenantId:
-        type: string
+      attributes:
+        type: array
+        items:
+          $ref: '#/definitions/Attribute'
+      file:
+        type: object
+        properties:
+          value:
+            type: string
   #-----------------------------------------------------
   # Resource Search Response object
   #-----------------------------------------------------
-  ResourceSearchResponse:
+  Resources:
     type: object
     required:
     - resources
@@ -843,4 +937,26 @@ definitions:
       resources:
         type: array
         items:
-          $ref: '#/definitions/ResourceSearchResponseElement'
+          $ref: '#/definitions/Resource'
+  #-----------------------------------------------------
+  # Tenant object
+  #-----------------------------------------------------
+  Tenant:
+    type: object
+    required:
+      - tenantdomain
+    properties:
+      tenantDomain:
+        type: string
+  #-----------------------------------------------------
+  # Tenants object
+  #-----------------------------------------------------
+  TenantResponse:
+    type: object
+    required:
+    - tenants
+    properties:
+      tenants:
+        type: array
+        items:
+          $ref: '#/definitions/Tenant'
