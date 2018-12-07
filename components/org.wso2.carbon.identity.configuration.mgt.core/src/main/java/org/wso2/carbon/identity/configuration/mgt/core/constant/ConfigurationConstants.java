@@ -24,6 +24,13 @@ public class ConfigurationConstants {
         ERROR_CODE_CONFIGURATION_NAME_REQUIRED("CONFIGM_00005", "Resource name is required."),
         ERROR_CODE_CONFIGURATION_NAME_INVALID("CONFIGM_00006", "Invalid Resource Name: %s"),
         ERROR_CODE_GET_DAO("CONFIGM_00007", "No %s are registered."),
+        ERROR_CODE_RESOURCE_NAME_MISSING("CONFIGM_00008", "Missing mandatory resource type name."),
+        ERROR_CODE_DATABASE_CONNECTION("CONFIGM_00009", "Error when creating the database connection."),
+        ERROR_CODE_ADD_RESOURCE_TYPE("CONFIGM_00010", "Error while adding the resource type: %s."),
+        ERROR_CODE_RESOURCE_TYPE_ALREADY_EXISTS("CONFIGM_00011", "Resource type with the name: %s already exists."),
+        ERROR_CODE_INVALID_RESOURCE_TYPE_IDENTIFIER("CONFIGM_00012", "Invalid resource type identifiers: %s. " +
+                "Either name or id should exists."),
+        ERROR_CODE_RETRIEVE_RESOURCE_TYPE("CONFIGM_00013", "Error while getting the resource type: %s."),
         ;
 
         private final String code;

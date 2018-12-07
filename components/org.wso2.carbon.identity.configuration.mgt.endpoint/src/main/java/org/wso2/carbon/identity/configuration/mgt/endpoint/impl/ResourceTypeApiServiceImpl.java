@@ -2,10 +2,10 @@ package org.wso2.carbon.identity.configuration.mgt.endpoint.impl;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.cxf.jaxrs.ext.search.SearchContext;
 import org.wso2.carbon.identity.configuration.mgt.core.exception.ConfigurationManagementClientException;
 import org.wso2.carbon.identity.configuration.mgt.core.exception.ConfigurationManagementException;
 import org.wso2.carbon.identity.configuration.mgt.core.model.ResourceType;
+import org.wso2.carbon.identity.configuration.mgt.core.model.ResourceTypeAddResponse;
 import org.wso2.carbon.identity.configuration.mgt.endpoint.ResourceTypeApiService;
 import org.wso2.carbon.identity.configuration.mgt.endpoint.dto.ResourceTypeCreateDTO;
 import org.wso2.carbon.identity.configuration.mgt.endpoint.dto.ResourceTypeDTO;
@@ -15,6 +15,7 @@ import javax.ws.rs.core.Response;
 
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.BASE_PATH;
 import static org.wso2.carbon.identity.configuration.mgt.endpoint.util.ConfigurationEndpointUtils.getConfigurationManager;
+import static org.wso2.carbon.identity.configuration.mgt.endpoint.util.ConfigurationEndpointUtils.getResourceTypeAddResponseDTO;
 import static org.wso2.carbon.identity.configuration.mgt.endpoint.util.ConfigurationEndpointUtils.getResourceTypeCreateFromDTO;
 import static org.wso2.carbon.identity.configuration.mgt.endpoint.util.ConfigurationEndpointUtils.getResourceTypeDTO;
 import static org.wso2.carbon.identity.configuration.mgt.endpoint.util.ConfigurationEndpointUtils.handleBadRequestResponse;
@@ -26,7 +27,7 @@ public class ResourceTypeApiServiceImpl extends ResourceTypeApiService {
     private static final Log LOG = LogFactory.getLog(ResourceTypeApiServiceImpl.class);
 
     @Override
-    public Response resourceTypeDelete(java.lang.String name, java.lang.String id) {
+    public Response resourceTypeDelete(String name, String id) {
 
         try {
             getConfigurationManager().deleteResourceType(name, id);
@@ -41,7 +42,7 @@ public class ResourceTypeApiServiceImpl extends ResourceTypeApiService {
     }
 
     @Override
-    public Response resourceTypeGet(java.lang.String name, java.lang.String id, SearchContext searchContext) {
+    public Response resourceTypeGet(String name, String id) {
 
         try {
             ResourceType resourceType = getConfigurationManager().getResourceType(name, id);
@@ -75,8 +76,10 @@ public class ResourceTypeApiServiceImpl extends ResourceTypeApiService {
     public Response resourceTypePost(ResourceTypeCreateDTO resourceTypeCreate) {
 
         try {
-            getConfigurationManager().addResourceType(getResourceTypeCreateFromDTO(resourceTypeCreate));
-            return Response.created(new URI(BASE_PATH + "type")).build();
+            ResourceTypeAddResponse resourceTypeAddResponse = getConfigurationManager()
+                    .addResourceType(getResourceTypeCreateFromDTO(resourceTypeCreate));
+            return Response.created(new URI(BASE_PATH + "type"))
+                    .entity(getResourceTypeAddResponseDTO(resourceTypeAddResponse)).build(); // TODO: 12/6/18 Reactor created path in everywhere
         } catch (ConfigurationManagementClientException e) {
             return handleBadRequestResponse(e, LOG);
         } catch (ConfigurationManagementException e) {

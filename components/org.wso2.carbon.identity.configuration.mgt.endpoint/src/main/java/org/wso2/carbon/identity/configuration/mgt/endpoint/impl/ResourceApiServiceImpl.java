@@ -32,7 +32,7 @@ public class ResourceApiServiceImpl extends ResourceApiService {
     private static final Log LOG = LogFactory.getLog(ResourceApiServiceImpl.class);
 
     @Override
-    public Response resourceGet(SearchContext searchContext) {
+    public Response resourceGet() {
 
         try {
             Resource resource = getConfigurationManager().getResource();
@@ -64,24 +64,25 @@ public class ResourceApiServiceImpl extends ResourceApiService {
     }
 
     @Override
-    public Response resourceResourceTypeNameAttributeGet(String name, String resourceType, String attribute, SearchContext searchContext) {
+    public Response resourceResourceTypeNameAttributeGet(String name, String resourceType, String attribute) {
 
-        try {
-            SearchCondition<SearchBean> condition = searchContext.getCondition(SearchBean.class);
-            SQLPrinterVisitor<SearchBean> visitor = new SQLPrinterVisitor<>("MY_TABLE");
-            condition.accept(visitor);
-            String query = visitor.getQuery();
-            AttributeValue attributeValue = getConfigurationManager().getAttributeValue(name, resourceType, attribute);
-            AttributeValueDTO attributeValueDTO = getAttributeValueDTO(attributeValue);
-            // TODO: 12/5/18 Response is wrong. GET can result in a ResourceSearchResponseElement
-            return Response.ok().entity(attributeValueDTO).build();
-        } catch (ConfigurationManagementClientException e) {
-            return handleBadRequestResponse(e, LOG);
-        } catch (ConfigurationManagementException e) {
-            return handleServerErrorResponse(e, LOG);
-        } catch (Throwable throwable) {
-            return handleUnexpectedServerError(throwable, LOG);
-        }
+//        try {
+//            SearchCondition<SearchBean> condition = searchContext.getCondition(SearchBean.class);
+//            SQLPrinterVisitor<SearchBean> visitor = new SQLPrinterVisitor<>("MY_TABLE");
+//            condition.accept(visitor);
+//            String query = visitor.getQuery();
+//            AttributeValue attributeValue = getConfigurationManager().getAttributeValue(name, resourceType, attribute);
+//            AttributeValueDTO attributeValueDTO = getAttributeValueDTO(attributeValue);
+//            // TODO: 12/5/18 Response is wrong. GET can result in a ResourceSearchResponseElement
+//            return Response.ok().entity(attributeValueDTO).build();
+//        } catch (ConfigurationManagementClientException e) {
+//            return handleBadRequestResponse(e, LOG);
+//        } catch (ConfigurationManagementException e) {
+//            return handleServerErrorResponse(e, LOG);
+//        } catch (Throwable throwable) {
+//            return handleUnexpectedServerError(throwable, LOG);
+//        }
+        return null;
     }
 
     @Override
@@ -145,24 +146,25 @@ public class ResourceApiServiceImpl extends ResourceApiService {
     }
 
     @Override
-    public Response resourceResourceTypeNameGet(String name, String resourceType, SearchContext searchContext) {
-
-        try {
-            SearchCondition<SearchBean> condition = searchContext.getCondition(SearchBean.class);
-            SQLPrinterVisitor<SearchBean> visitor = new SQLPrinterVisitor<>("MY_TABLE");
-            condition.accept(visitor);
-            String query = visitor.getQuery();
-            Resource resource = getConfigurationManager().getResource(name, resourceType);
-            ResourceDTO resourceDTO = getResourceDTO(resource);
-            // TODO: 12/5/18 Response is wrong. GET can result in a ResourceSearchResponseElement
-            return Response.ok().entity(resourceDTO).build();
-        } catch (ConfigurationManagementClientException e) {
-            return handleBadRequestResponse(e, LOG);
-        } catch (ConfigurationManagementException e) {
-            return handleServerErrorResponse(e, LOG);
-        } catch (Throwable throwable) {
-            return handleUnexpectedServerError(throwable, LOG);
-        }
+    public Response resourceResourceTypeNameGet(String name, String resourceType) {
+//
+//        try {
+//            SearchCondition<SearchBean> condition = searchContext.getCondition(SearchBean.class);
+//            SQLPrinterVisitor<SearchBean> visitor = new SQLPrinterVisitor<>("MY_TABLE");
+//            condition.accept(visitor);
+//            String query = visitor.getQuery();
+//            Resource resource = getConfigurationManager().getResource(name, resourceType);
+//            ResourceDTO resourceDTO = getResourceDTO(resource);
+//            // TODO: 12/5/18 Response is wrong. GET can result in a ResourceSearchResponseElement
+//            return Response.ok().entity(resourceDTO).build();
+//        } catch (ConfigurationManagementClientException e) {
+//            return handleBadRequestResponse(e, LOG);
+//        } catch (ConfigurationManagementException e) {
+//            return handleServerErrorResponse(e, LOG);
+//        } catch (Throwable throwable) {
+//            return handleUnexpectedServerError(throwable, LOG);
+//        }
+        return null;
     }
 
     @Override

@@ -21,6 +21,7 @@ import org.wso2.carbon.identity.configuration.mgt.core.model.Attribute;
 import org.wso2.carbon.identity.configuration.mgt.core.model.AttributeValue;
 import org.wso2.carbon.identity.configuration.mgt.core.model.Resource;
 import org.wso2.carbon.identity.configuration.mgt.core.model.ResourceType;
+import org.wso2.carbon.identity.configuration.mgt.core.model.ResourceTypeAddResponse;
 import org.wso2.carbon.identity.configuration.mgt.core.model.ResourceTypeCreate;
 
 /**
@@ -98,7 +99,7 @@ public interface ConfigurationManager {
 
     void deleteResourceType(String name, String id) throws ConfigurationManagementException;
 
-    void addResourceType(ResourceTypeCreate resourceTypeCreate) throws ConfigurationManagementException;
+    ResourceTypeAddResponse addResourceType(ResourceTypeCreate resourceTypeCreate) throws ConfigurationManagementException;
 
     void replaceResourceType(ResourceTypeCreate resourceTypeCreate) throws ConfigurationManagementException;
 

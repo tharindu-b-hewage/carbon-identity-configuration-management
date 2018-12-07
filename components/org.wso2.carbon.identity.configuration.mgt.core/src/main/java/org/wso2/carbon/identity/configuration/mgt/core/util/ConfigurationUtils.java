@@ -1,10 +1,13 @@
 package org.wso2.carbon.identity.configuration.mgt.core.util;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
 import org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants;
 import org.wso2.carbon.identity.configuration.mgt.core.exception.ConfigurationManagementClientException;
 import org.wso2.carbon.identity.configuration.mgt.core.exception.ConfigurationManagementRuntimeException;
 import org.wso2.carbon.identity.configuration.mgt.core.exception.ConfigurationManagementServerException;
+
+import java.util.UUID;
 
 public class ConfigurationUtils {
 
@@ -17,7 +20,7 @@ public class ConfigurationUtils {
      * @return ConfigurationManagementClientException.
      */
     public static ConfigurationManagementClientException handleClientException(ConfigurationConstants.ErrorMessages error,
-                                                                               String data) {
+                                                                                    String data) {
 
         String message;
         if (StringUtils.isNotBlank(data)) {
@@ -27,6 +30,19 @@ public class ConfigurationUtils {
         }
 
         return new ConfigurationManagementClientException(message, error.getCode());
+    }
+
+    public static ConfigurationManagementClientException handleClientException(ConfigurationConstants.ErrorMessages error,
+                                                                               String data, Throwable e) {
+
+        String message;
+        if (StringUtils.isNotBlank(data)) {
+            message = String.format(error.getMessage(), data);
+        } else {
+            message = error.getMessage();
+        }
+
+        return new ConfigurationManagementClientException(message, error.getCode(), e);
     }
 
     /**
@@ -47,6 +63,18 @@ public class ConfigurationUtils {
             message = error.getMessage();
         }
         return new ConfigurationManagementServerException(message, error.getCode());
+    }
+
+    public static ConfigurationManagementServerException handleServerException(ConfigurationConstants.ErrorMessages error,
+                                                                               String data, Throwable e) {
+
+        String message;
+        if (StringUtils.isNotBlank(data)) {
+            message = String.format(error.getMessage(), data);
+        } else {
+            message = error.getMessage();
+        }
+        return new ConfigurationManagementServerException(message, error.getCode(), e);
     }
 
     /**
@@ -88,5 +116,10 @@ public class ConfigurationUtils {
             message = error.getMessage();
         }
         return new ConfigurationManagementRuntimeException(message, error.getCode());
+    }
+
+    public static String generateUniqueID() {
+
+        return UUID.randomUUID().toString();
     }
 }

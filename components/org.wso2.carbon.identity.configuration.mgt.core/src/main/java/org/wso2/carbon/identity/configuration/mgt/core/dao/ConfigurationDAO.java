@@ -2,6 +2,7 @@ package org.wso2.carbon.identity.configuration.mgt.core.dao;
 
 import org.wso2.carbon.identity.configuration.mgt.core.exception.ConfigurationManagementException;
 import org.wso2.carbon.identity.configuration.mgt.core.model.Resource;
+import org.wso2.carbon.identity.configuration.mgt.core.model.ResourceType;
 
 /**
  * Perform CRUD operations for {@link Resource}.
@@ -63,4 +64,10 @@ public interface ConfigurationDAO {
      * @throws ConfigurationManagementException Resource management exception.
      */
     String updateConfiguration(String name, Resource resource) throws ConfigurationManagementException;
+
+    void addResourceType(ResourceType resourceType) throws ConfigurationManagementException;
+
+    ResourceType getResourceTypeByName(String name) throws ConfigurationManagementException;
+
+    ResourceType getResourceTypeById(String id) throws ConfigurationManagementException;
 }
