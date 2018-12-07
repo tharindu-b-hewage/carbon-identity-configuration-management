@@ -4,35 +4,37 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
+import java.util.ArrayList;
+import java.util.List;
 import javax.validation.constraints.NotNull;
 
 @ApiModel(description = "")
-public class AttributeValueDTO {
+public class ResourcesDTO {
 
     @NotNull
-    private String value = null;
+    private List<ResourceDTO> resources = new ArrayList<ResourceDTO>();
 
     /**
      **/
     @ApiModelProperty(required = true, value = "")
-    @JsonProperty("value")
-    public String getValue() {
+    @JsonProperty("resources")
+    public List<ResourceDTO> getResources() {
 
-        return value;
+        return resources;
     }
 
-    public void setValue(String value) {
+    public void setResources(List<ResourceDTO> resources) {
 
-        this.value = value;
+        this.resources = resources;
     }
 
     @Override
     public String toString() {
 
         StringBuilder sb = new StringBuilder();
-        sb.append("class AttributeValueDTO {\n");
+        sb.append("class ResourcesDTO {\n");
 
-        sb.append("  value: ").append(value).append("\n");
+        sb.append("  resources: ").append(resources).append("\n");
         sb.append("}\n");
         return sb.toString();
     }

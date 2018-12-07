@@ -2,24 +2,22 @@ package org.wso2.carbon.identity.configuration.mgt.endpoint.impl;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.cxf.jaxrs.ext.search.SearchBean;
-import org.apache.cxf.jaxrs.ext.search.SearchCondition;
 import org.apache.cxf.jaxrs.ext.search.SearchContext;
-import org.apache.cxf.jaxrs.ext.search.sql.SQLPrinterVisitor;
 import org.wso2.carbon.identity.configuration.mgt.core.exception.ConfigurationManagementClientException;
 import org.wso2.carbon.identity.configuration.mgt.core.exception.ConfigurationManagementException;
 import org.wso2.carbon.identity.configuration.mgt.core.model.Attribute;
-import org.wso2.carbon.identity.configuration.mgt.core.model.AttributeValue;
+import org.wso2.carbon.identity.configuration.mgt.core.model.AttributePathParameter;
 import org.wso2.carbon.identity.configuration.mgt.core.model.Resource;
+import org.wso2.carbon.identity.configuration.mgt.endpoint.ApiResponseMessage;
 import org.wso2.carbon.identity.configuration.mgt.endpoint.ResourceApiService;
 import org.wso2.carbon.identity.configuration.mgt.endpoint.dto.AttributeValueDTO;
+import org.wso2.carbon.identity.configuration.mgt.endpoint.dto.ResourceAddDTO;
 import org.wso2.carbon.identity.configuration.mgt.endpoint.dto.ResourceDTO;
 
 import java.net.URI;
 import javax.ws.rs.core.Response;
 
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.BASE_PATH;
-import static org.wso2.carbon.identity.configuration.mgt.endpoint.util.ConfigurationEndpointUtils.getAttributeValueDTO;
 import static org.wso2.carbon.identity.configuration.mgt.endpoint.util.ConfigurationEndpointUtils.getConfigurationManager;
 import static org.wso2.carbon.identity.configuration.mgt.endpoint.util.ConfigurationEndpointUtils.getResourceDTO;
 import static org.wso2.carbon.identity.configuration.mgt.endpoint.util.ConfigurationEndpointUtils.getResourceFromDTO;
@@ -32,10 +30,10 @@ public class ResourceApiServiceImpl extends ResourceApiService {
     private static final Log LOG = LogFactory.getLog(ResourceApiServiceImpl.class);
 
     @Override
-    public Response resourceGet() {
+    public Response resourceGet(SearchContext searchContext) {
 
         try {
-            Resource resource = getConfigurationManager().getResource();
+            Resource resource = getConfigurationManager().getResource(searchContext);
             ResourceDTO resourceDTO = getResourceDTO(resource);
             // TODO: 12/5/18 Response is wrong. GET can result in a ResourceSearchResponseElement
             return Response.ok().entity(resourceDTO).build();
@@ -64,25 +62,19 @@ public class ResourceApiServiceImpl extends ResourceApiService {
     }
 
     @Override
-    public Response resourceResourceTypeNameAttributeGet(String name, String resourceType, String attribute) {
+    public Response resourceResourceTypeNameAttributeGet(String name, String resourceType, String attribute, SearchContext searchContext) {
 
-//        try {
-//            SearchCondition<SearchBean> condition = searchContext.getCondition(SearchBean.class);
-//            SQLPrinterVisitor<SearchBean> visitor = new SQLPrinterVisitor<>("MY_TABLE");
-//            condition.accept(visitor);
-//            String query = visitor.getQuery();
-//            AttributeValue attributeValue = getConfigurationManager().getAttributeValue(name, resourceType, attribute);
-//            AttributeValueDTO attributeValueDTO = getAttributeValueDTO(attributeValue);
-//            // TODO: 12/5/18 Response is wrong. GET can result in a ResourceSearchResponseElement
-//            return Response.ok().entity(attributeValueDTO).build();
-//        } catch (ConfigurationManagementClientException e) {
-//            return handleBadRequestResponse(e, LOG);
-//        } catch (ConfigurationManagementException e) {
-//            return handleServerErrorResponse(e, LOG);
-//        } catch (Throwable throwable) {
-//            return handleUnexpectedServerError(throwable, LOG);
-//        }
-        return null;
+        try{
+            AttributePathParameter attributePathParameter = new AttributePathParameter();
+            attributePathParameter.setAttributeKey(attribute);
+            attributePathParameter.setResourceName(name);
+            attributePathParameter.setResourceType(resourceType);
+
+            getConfigurationManager().getAttributeValue(attributePathParameter, searchContext);
+        } catch (ConfigurationManagementException e) {
+            // Do something
+        }
+        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
 
     @Override
@@ -104,7 +96,7 @@ public class ResourceApiServiceImpl extends ResourceApiService {
     public Response resourceResourceTypeNameAttributePost(String name, String resourceType, String attribute, AttributeValueDTO attributeValue) {
 
         try {
-            getConfigurationManager().createAttribute(name, resourceType, new Attribute(name, attributeValue.getValue()));
+            getConfigurationManager().addAttribute(name, resourceType, new Attribute(name, attributeValue.getValue()));
             return Response.created(new URI(BASE_PATH + name)).build();
         } catch (ConfigurationManagementClientException e) {
             return handleBadRequestResponse(e, LOG);
@@ -146,29 +138,17 @@ public class ResourceApiServiceImpl extends ResourceApiService {
     }
 
     @Override
-    public Response resourceResourceTypeNameGet(String name, String resourceType) {
-//
-//        try {
-//            SearchCondition<SearchBean> condition = searchContext.getCondition(SearchBean.class);
-//            SQLPrinterVisitor<SearchBean> visitor = new SQLPrinterVisitor<>("MY_TABLE");
-//            condition.accept(visitor);
-//            String query = visitor.getQuery();
-//            Resource resource = getConfigurationManager().getResource(name, resourceType);
-//            ResourceDTO resourceDTO = getResourceDTO(resource);
-//            // TODO: 12/5/18 Response is wrong. GET can result in a ResourceSearchResponseElement
-//            return Response.ok().entity(resourceDTO).build();
-//        } catch (ConfigurationManagementClientException e) {
-//            return handleBadRequestResponse(e, LOG);
-//        } catch (ConfigurationManagementException e) {
-//            return handleServerErrorResponse(e, LOG);
-//        } catch (Throwable throwable) {
-//            return handleUnexpectedServerError(throwable, LOG);
-//        }
-        return null;
+    public Response resourceResourceTypeNameGet(String name, String resourceType, SearchContext searchContext) {
+        try {
+            getConfigurationManager().getResource(name, resourceType, searchContext);
+        } catch (ConfigurationManagementException e) {
+
+        }
+        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
 
     @Override
-    public Response resourceResourceTypeNamePatch(String name, String resourceType, ResourceDTO resourceDTO) {
+    public Response resourceResourceTypeNamePatch(String name, String resourceType, ResourceAddDTO resource) {
 
         try {
             getConfigurationManager().updateResource(name, resourceType, getResourceFromDTO(resourceDTO));
@@ -183,7 +163,7 @@ public class ResourceApiServiceImpl extends ResourceApiService {
     }
 
     @Override
-    public Response resourceResourceTypeNamePost(String name, String resourceType, ResourceDTO resourceDTO) {
+    public Response resourceResourceTypeNamePost(String name, String resourceType, ResourceAddDTO resource) {
 
         try {
             getConfigurationManager().addResource(name, resourceType, getResourceFromDTO(resourceDTO));
@@ -198,7 +178,7 @@ public class ResourceApiServiceImpl extends ResourceApiService {
     }
 
     @Override
-    public Response resourceResourceTypeNamePut(String name, String resourceType, ResourceDTO resourceDTO) {
+    public Response resourceResourceTypeNamePut(String name, String resourceType, ResourceAddDTO resource) {
 
         try {
             getConfigurationManager().replaceResource(name, resourceType, getResourceFromDTO(resourceDTO));

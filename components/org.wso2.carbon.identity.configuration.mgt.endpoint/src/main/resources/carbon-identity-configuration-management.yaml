@@ -944,7 +944,7 @@ definitions:
   Tenant:
     type: object
     required:
-      - tenantdomain
+    - tenantdomain
     properties:
       tenantDomain:
         type: string

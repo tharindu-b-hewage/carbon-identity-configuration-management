@@ -5,31 +5,31 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel(description = "")
-public class ResourceFileDTO {
+public class TenantDTO {
 
-    private String value = null;
+    private String tenantDomain = null;
 
     /**
      **/
     @ApiModelProperty(value = "")
-    @JsonProperty("value")
-    public String getValue() {
+    @JsonProperty("tenantDomain")
+    public String getTenantDomain() {
 
-        return value;
+        return tenantDomain;
     }
 
-    public void setValue(String value) {
+    public void setTenantDomain(String tenantDomain) {
 
-        this.value = value;
+        this.tenantDomain = tenantDomain;
     }
 
     @Override
     public String toString() {
 
         StringBuilder sb = new StringBuilder();
-        sb.append("class ResourceFileDTO {\n");
+        sb.append("class TenantDTO {\n");
 
-        sb.append("  value: ").append(value).append("\n");
+        sb.append("  tenantDomain: ").append(tenantDomain).append("\n");
         sb.append("}\n");
         return sb.toString();
     }

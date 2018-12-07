@@ -28,7 +28,7 @@ import org.wso2.carbon.identity.configuration.mgt.core.model.ConfigurationManage
 import org.wso2.carbon.identity.configuration.mgt.core.model.Resource;
 import org.wso2.carbon.identity.configuration.mgt.core.model.ResourceType;
 import org.wso2.carbon.identity.configuration.mgt.core.model.ResourceTypeAddResponse;
-import org.wso2.carbon.identity.configuration.mgt.core.model.ResourceTypeCreate;
+import org.wso2.carbon.identity.configuration.mgt.core.model.ResourceTypeAdd;
 import org.wso2.carbon.identity.configuration.mgt.core.util.ConfigurationUtils;
 
 import java.util.List;
@@ -177,7 +177,7 @@ public class ConfigurationManagerImpl implements ConfigurationManager {
     /**
      * {@inheritDoc}
      */
-    public ResourceTypeAddResponse addResourceType(ResourceTypeCreate resourceTypeCreate) throws ConfigurationManagementException {
+    public ResourceType addResourceType(ResourceTypeAdd resourceTypeCreate) throws ConfigurationManagementException {
 
         validateResourceTypeCreateRequest(resourceTypeCreate);
         String resourceTypeID = generateUniqueID();
@@ -194,7 +194,7 @@ public class ConfigurationManagerImpl implements ConfigurationManager {
         return new ResourceTypeAddResponse(resourceType.getId(), resourceType.getName());
     }
 
-    private void validateResourceTypeCreateRequest(ResourceTypeCreate resourceTypeCreate) throws ConfigurationManagementException {
+    private void validateResourceTypeCreateRequest(ResourceTypeAdd resourceTypeCreate) throws ConfigurationManagementException {
 
         if (StringUtils.isEmpty(resourceTypeCreate.getName())) {
             throw handleClientException(ERROR_CODE_RESOURCE_NAME_MISSING, null);
@@ -213,7 +213,7 @@ public class ConfigurationManagerImpl implements ConfigurationManager {
         return !StringUtils.isEmpty(getResourceType(resourceTypeName, null).getId());
     }
 
-    private ResourceType generateResourceTypeFromRequest(ResourceTypeCreate resourceTypeCreate, String resourceTypeID) {
+    private ResourceType generateResourceTypeFromRequest(ResourceTypeAdd resourceTypeCreate, String resourceTypeID) {
 
         ResourceType resourceType = new ResourceType();
         resourceType.setName(resourceTypeCreate.getName());
@@ -226,14 +226,14 @@ public class ConfigurationManagerImpl implements ConfigurationManager {
     /**
      * {@inheritDoc}
      */
-    public void replaceResourceType(ResourceTypeCreate resourceTypeCreate) throws ConfigurationManagementException {
+    public void replaceResourceType(ResourceTypeAdd resourceTypeCreate) throws ConfigurationManagementException {
 
     }
 
     /**
      * {@inheritDoc}
      */
-    public void updateResourceType(ResourceTypeCreate resourceTypeCreate) throws ConfigurationManagementException {
+    public void updateResourceType(ResourceTypeAdd resourceTypeCreate) throws ConfigurationManagementException {
 
     }
 
@@ -250,7 +250,7 @@ public class ConfigurationManagerImpl implements ConfigurationManager {
 
     }
 
-    public void createAttribute(String name, String resourceType, Attribute attribute) throws ConfigurationManagementException {
+    public void addAttribute(String name, String resourceType, Attribute attribute) throws ConfigurationManagementException {
 
     }
 

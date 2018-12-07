@@ -28,7 +28,7 @@ import org.wso2.carbon.identity.configuration.mgt.core.model.Resource;
 import org.wso2.carbon.identity.configuration.mgt.core.model.ResourceFile;
 import org.wso2.carbon.identity.configuration.mgt.core.model.ResourceType;
 import org.wso2.carbon.identity.configuration.mgt.core.model.ResourceTypeAddResponse;
-import org.wso2.carbon.identity.configuration.mgt.core.model.ResourceTypeCreate;
+import org.wso2.carbon.identity.configuration.mgt.core.model.ResourceTypeAdd;
 import org.wso2.carbon.identity.configuration.mgt.endpoint.dto.AttributeDTO;
 import org.wso2.carbon.identity.configuration.mgt.endpoint.dto.AttributeValueDTO;
 import org.wso2.carbon.identity.configuration.mgt.endpoint.dto.ErrorDTO;
@@ -137,9 +137,9 @@ public class ConfigurationEndpointUtils {
         return resourceType;
     }
 
-    public static ResourceTypeCreate getResourceTypeCreateFromDTO(ResourceTypeCreateDTO resourceTypeCreateDTO) {
+    public static ResourceTypeAdd getResourceTypeCreateFromDTO(ResourceTypeCreateDTO resourceTypeCreateDTO) {
 
-        ResourceTypeCreate resourceTypeCreate = new ResourceTypeCreate();
+        ResourceTypeAdd resourceTypeCreate = new ResourceTypeAdd();
         resourceTypeCreate.setName(resourceTypeCreateDTO.getName());
         resourceTypeCreate.setDescription(resourceTypeCreateDTO.getDescription());
         return resourceTypeCreate;

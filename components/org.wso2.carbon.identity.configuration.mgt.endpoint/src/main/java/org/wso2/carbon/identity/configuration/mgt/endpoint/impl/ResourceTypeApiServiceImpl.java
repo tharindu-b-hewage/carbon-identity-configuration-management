@@ -2,12 +2,14 @@ package org.wso2.carbon.identity.configuration.mgt.endpoint.impl;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.cxf.jaxrs.ext.search.SearchBean;
+import org.apache.cxf.jaxrs.ext.search.SearchCondition;
+import org.apache.cxf.jaxrs.ext.search.SearchContext;
 import org.wso2.carbon.identity.configuration.mgt.core.exception.ConfigurationManagementClientException;
 import org.wso2.carbon.identity.configuration.mgt.core.exception.ConfigurationManagementException;
 import org.wso2.carbon.identity.configuration.mgt.core.model.ResourceType;
-import org.wso2.carbon.identity.configuration.mgt.core.model.ResourceTypeAddResponse;
 import org.wso2.carbon.identity.configuration.mgt.endpoint.ResourceTypeApiService;
-import org.wso2.carbon.identity.configuration.mgt.endpoint.dto.ResourceTypeCreateDTO;
+import org.wso2.carbon.identity.configuration.mgt.endpoint.dto.ResourceTypeAddDTO;
 import org.wso2.carbon.identity.configuration.mgt.endpoint.dto.ResourceTypeDTO;
 
 import java.net.URI;
@@ -15,8 +17,6 @@ import javax.ws.rs.core.Response;
 
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.BASE_PATH;
 import static org.wso2.carbon.identity.configuration.mgt.endpoint.util.ConfigurationEndpointUtils.getConfigurationManager;
-import static org.wso2.carbon.identity.configuration.mgt.endpoint.util.ConfigurationEndpointUtils.getResourceTypeAddResponseDTO;
-import static org.wso2.carbon.identity.configuration.mgt.endpoint.util.ConfigurationEndpointUtils.getResourceTypeCreateFromDTO;
 import static org.wso2.carbon.identity.configuration.mgt.endpoint.util.ConfigurationEndpointUtils.getResourceTypeDTO;
 import static org.wso2.carbon.identity.configuration.mgt.endpoint.util.ConfigurationEndpointUtils.handleBadRequestResponse;
 import static org.wso2.carbon.identity.configuration.mgt.endpoint.util.ConfigurationEndpointUtils.handleServerErrorResponse;
@@ -42,10 +42,10 @@ public class ResourceTypeApiServiceImpl extends ResourceTypeApiService {
     }
 
     @Override
-    public Response resourceTypeGet(String name, String id) {
+    public Response resourceTypeGet(String name, String id, SearchContext searchContext) {
 
         try {
-            ResourceType resourceType = getConfigurationManager().getResourceType(name, id);
+            ResourceType resourceType = getConfigurationManager().getResourceType(name, id, searchContext);
             ResourceTypeDTO resourceTypeDTO = getResourceTypeDTO(resourceType);
             return Response.ok().entity(resourceTypeDTO).build();
         } catch (ConfigurationManagementClientException e) {
@@ -58,10 +58,10 @@ public class ResourceTypeApiServiceImpl extends ResourceTypeApiService {
     }
 
     @Override
-    public Response resourceTypePatch(ResourceTypeCreateDTO resourceTypeCreate) {
+    public Response resourceTypePatch(ResourceTypeAddDTO type) {
 
         try {
-            getConfigurationManager().updateResourceType(getResourceTypeCreateFromDTO(resourceTypeCreate));
+            getConfigurationManager().updateResourceType(getResourceTypeAddFromDTO(type));
             return Response.created(new URI(BASE_PATH + "type")).build();
         } catch (ConfigurationManagementClientException e) {
             return handleBadRequestResponse(e, LOG);
@@ -73,13 +73,13 @@ public class ResourceTypeApiServiceImpl extends ResourceTypeApiService {
     }
 
     @Override
-    public Response resourceTypePost(ResourceTypeCreateDTO resourceTypeCreate) {
+    public Response resourceTypePost(ResourceTypeAddDTO type) {
 
         try {
-            ResourceTypeAddResponse resourceTypeAddResponse = getConfigurationManager()
-                    .addResourceType(getResourceTypeCreateFromDTO(resourceTypeCreate));
+            ResourceType resourceTypeAddResponse = getConfigurationManager()
+                    .addResourceType(getResourceTypeAddFromDTO(type));
             return Response.created(new URI(BASE_PATH + "type"))
-                    .entity(getResourceTypeAddResponseDTO(resourceTypeAddResponse)).build(); // TODO: 12/6/18 Reactor created path in everywhere
+                    .entity(getResourceTypeDTO(ResourceType)).build(); // TODO: 12/6/18 Reactor created path in everywhere
         } catch (ConfigurationManagementClientException e) {
             return handleBadRequestResponse(e, LOG);
         } catch (ConfigurationManagementException e) {
@@ -90,10 +90,10 @@ public class ResourceTypeApiServiceImpl extends ResourceTypeApiService {
     }
 
     @Override
-    public Response resourceTypePut(ResourceTypeCreateDTO resourceTypeCreate) {
+    public Response resourceTypePut(ResourceTypeAddDTO type) {
 
         try {
-            getConfigurationManager().replaceResourceType(getResourceTypeCreateFromDTO(resourceTypeCreate));
+            getConfigurationManager().replaceResourceType(getResourceTypeAddFromDTO(type));
             return Response.created(new URI(BASE_PATH + "type")).build();
         } catch (ConfigurationManagementClientException e) {
             return handleBadRequestResponse(e, LOG);

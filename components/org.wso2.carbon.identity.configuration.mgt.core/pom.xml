@@ -57,6 +57,7 @@
                             org.wso2.securevault.*,
                             org.wso2.carbon.context.*; version="${carbon.core.version.range}",
                             org.wso2.carbon.identity.core.*; version="${carbon.identity.framework.imp.pkg.version.range}",
+                            org.apache.cxf.jaxrs.ext.search.*; version="${org.apache.cxf.version}",
                         </Import-Package>
                         <Export-Package>
                             !org.wso2.carbon.identity.configuration.mgt.core.internal,
@@ -69,6 +70,11 @@
     </build>
 
     <dependencies>
+        <dependency>
+            <groupId>org.apache.cxf</groupId>
+            <artifactId>cxf-rt-rs-extension-search</artifactId>
+            <version>${org.apache.cxf.version}</version>
+        </dependency>
         <dependency>
             <groupId>commons-lang.wso2</groupId>
             <artifactId>commons-lang</artifactId>
