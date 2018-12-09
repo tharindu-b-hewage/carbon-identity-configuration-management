@@ -3,7 +3,6 @@ package org.wso2.carbon.identity.configuration.mgt.endpoint;
 import io.swagger.annotations.ApiParam;
 import org.apache.cxf.jaxrs.ext.search.SearchContext;
 import org.wso2.carbon.identity.configuration.mgt.endpoint.dto.AttributeDTO;
-import org.wso2.carbon.identity.configuration.mgt.endpoint.dto.AttributeValueDTO;
 import org.wso2.carbon.identity.configuration.mgt.endpoint.dto.ResourceAddDTO;
 import org.wso2.carbon.identity.configuration.mgt.endpoint.dto.ResourceDTO;
 import org.wso2.carbon.identity.configuration.mgt.endpoint.dto.ResourcesDTO;
@@ -33,7 +32,7 @@ public class ResourceApi {
 
     @Consumes({"application/json"})
     @Produces({"application/json"})
-    @io.swagger.annotations.ApiOperation(value = "Retrieve resources based on the optional search parmeters.\n", notes = "This API is used to retrieve resources for the tenant domain based on the optional search parameters.\n", response = ResourcesDTO.class)
+    @io.swagger.annotations.ApiOperation(value = "Retrieve resources.\n", notes = "This API is used to retrieve resources.\n", response = ResourcesDTO.class)
     @io.swagger.annotations.ApiResponses(value = {
             @io.swagger.annotations.ApiResponse(code = 200, message = "Ok"),
 
@@ -43,171 +42,13 @@ public class ResourceApi {
 
             @io.swagger.annotations.ApiResponse(code = 500, message = "Server Error")})
 
-    public Response resourceGet(@ApiParam(value = "This represents the search query.") @Context SearchContext searchContext) {
+    public Response resourceGet(@ApiParam(value = "This represents the search parameters for the request.") @Context SearchContext searchContext) {
 
         return delegate.resourceGet(searchContext);
     }
 
-    @DELETE
-    @Path("/{resource-type}/{name}/{attribute}")
-    @Consumes({"application/json"})
-    @Produces({"application/json"})
-    @io.swagger.annotations.ApiOperation(value = "Revoke the attribute\n", notes = "This API is used to revoke a attribute in the tenant domain given by the user.\n", response = void.class)
-    @io.swagger.annotations.ApiResponses(value = {
-            @io.swagger.annotations.ApiResponse(code = 200, message = "Ok"),
-
-            @io.swagger.annotations.ApiResponse(code = 400, message = "Bad Request"),
-
-            @io.swagger.annotations.ApiResponse(code = 401, message = "Unauthorized"),
-
-            @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found"),
-
-            @io.swagger.annotations.ApiResponse(code = 500, message = "Server Error")})
-
-    public Response resourceResourceTypeNameAttributeDelete(@ApiParam(value = "This represents the name of the attribute to be retrieved.", required = true) @PathParam("name") String name,
-                                                            @ApiParam(value = "This represents the type of the attribute to be deleted and can either be the name or id.", required = true) @PathParam("resource-type") String resourceType,
-                                                            @ApiParam(value = "This represents an attribute key of the attribute to be deleted.", required = true) @PathParam("attribute") String attribute) {
-
-        return delegate.resourceResourceTypeNameAttributeDelete(name, resourceType, attribute);
-    }
-
-    @GET
-    @Path("/{resource-type}/{name}/{attribute}")
-    @Consumes({"application/json"})
-    @Produces({"application/json"})
-    @io.swagger.annotations.ApiOperation(value = "Retrieve the attribute based on optional search parameters.\n", notes = "This API is used to retrieve a attribute based on optional search filters.\n", response = AttributeDTO.class)
-    @io.swagger.annotations.ApiResponses(value = {
-            @io.swagger.annotations.ApiResponse(code = 200, message = "OK"),
-
-            @io.swagger.annotations.ApiResponse(code = 400, message = "Bad Request"),
-
-            @io.swagger.annotations.ApiResponse(code = 401, message = "Unauthorized"),
-
-            @io.swagger.annotations.ApiResponse(code = 500, message = "Server Error")})
-
-    public Response resourceResourceTypeNameAttributeGet(@ApiParam(value = "This represents the name of the attribute to be retrieved.", required = true) @PathParam("name") String name,
-                                                         @ApiParam(value = "This represents the type of the attribute to be retrieved and can either be the name or id.", required = true) @PathParam("resource-type") String resourceType,
-                                                         @ApiParam(value = "This represents an attribute key of the attribute to be retrieved.", required = true) @PathParam("attribute") String attribute,
-                                                         @ApiParam(value = "This represents the search query.") @Context SearchContext searchContext) {
-
-        return delegate.resourceResourceTypeNameAttributeGet(name, resourceType, attribute, searchContext);
-    }
-
     @PATCH
-    @Path("/{resource-type}/{name}/{attribute}")
-    @Consumes({"application/json"})
-    @Produces({"application/json"})
-    @io.swagger.annotations.ApiOperation(value = "Update existing attribute\n", notes = "This API is used to update an existing attribute given by the user.\n", response = AttributeDTO.class)
-    @io.swagger.annotations.ApiResponses(value = {
-            @io.swagger.annotations.ApiResponse(code = 200, message = "Ok"),
-
-            @io.swagger.annotations.ApiResponse(code = 400, message = "Bad Request"),
-
-            @io.swagger.annotations.ApiResponse(code = 401, message = "Unauthorized"),
-
-            @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found"),
-
-            @io.swagger.annotations.ApiResponse(code = 500, message = "Server Error")})
-
-    public Response resourceResourceTypeNameAttributePatch(@ApiParam(value = "This represents the name of the attribute to be added or updated.", required = true) @PathParam("name") String name,
-                                                           @ApiParam(value = "This represents the type of the attribute to be added or updated and can either be the name or id.", required = true) @PathParam("resource-type") String resourceType,
-                                                           @ApiParam(value = "This represents an attribute key of the attribute to be added or updated.", required = true) @PathParam("attribute") String attribute,
-                                                           @ApiParam(value = "This represents the corresponding attribute value that needs to be added or updated.", required = true) AttributeValueDTO attributeValue) {
-
-        return delegate.resourceResourceTypeNameAttributePatch(name, resourceType, attribute, attributeValue);
-    }
-
-    @POST
-    @Path("/{resource-type}/{name}/{attribute}")
-    @Consumes({"application/json"})
-    @Produces({"application/json"})
-    @io.swagger.annotations.ApiOperation(value = "Create the attribute\n", notes = "This API is used to store the attribute given by the user.\n", response = AttributeDTO.class)
-    @io.swagger.annotations.ApiResponses(value = {
-            @io.swagger.annotations.ApiResponse(code = 201, message = "Successful response"),
-
-            @io.swagger.annotations.ApiResponse(code = 400, message = "Bad Request"),
-
-            @io.swagger.annotations.ApiResponse(code = 401, message = "Unauthorized"),
-
-            @io.swagger.annotations.ApiResponse(code = 409, message = "Conflict"),
-
-            @io.swagger.annotations.ApiResponse(code = 500, message = "Server Error")})
-
-    public Response resourceResourceTypeNameAttributePost(@ApiParam(value = "This represents the name of the attribute to be added.", required = true) @PathParam("name") String name,
-                                                          @ApiParam(value = "This represents the type of the attribute to be added and can either be the name or id.", required = true) @PathParam("resource-type") String resourceType,
-                                                          @ApiParam(value = "This represents an attribute key of the attribute to be added.", required = true) @PathParam("attribute") String attribute,
-                                                          @ApiParam(value = "This represents the corresponding attribute value that needs to be added.", required = true) AttributeValueDTO attributeValue) {
-
-        return delegate.resourceResourceTypeNameAttributePost(name, resourceType, attribute, attributeValue);
-    }
-
-    @PUT
-    @Path("/{resource-type}/{name}/{attribute}")
-    @Consumes({"application/json"})
-    @Produces({"application/json"})
-    @io.swagger.annotations.ApiOperation(value = "Add or Replace the attribute\n", notes = "This API is used to store or replace the attribute given by the user.\n", response = AttributeDTO.class)
-    @io.swagger.annotations.ApiResponses(value = {
-            @io.swagger.annotations.ApiResponse(code = 200, message = "Ok"),
-
-            @io.swagger.annotations.ApiResponse(code = 400, message = "Bad Request"),
-
-            @io.swagger.annotations.ApiResponse(code = 401, message = "Unauthorized"),
-
-            @io.swagger.annotations.ApiResponse(code = 500, message = "Server Error")})
-
-    public Response resourceResourceTypeNameAttributePut(@ApiParam(value = "This represents the name of the attribute to be added or replaced.", required = true) @PathParam("name") String name,
-                                                         @ApiParam(value = "This represents the type of the attribute to be added or replaced and can either be the name or id.", required = true) @PathParam("resource-type") String resourceType,
-                                                         @ApiParam(value = "This represents an attribute key of the attribute to be added or replaced.", required = true) @PathParam("attribute") String attribute,
-                                                         @ApiParam(value = "This represents the corresponding attribute value that needs to be added or replaced.", required = true) AttributeValueDTO attributeValue) {
-
-        return delegate.resourceResourceTypeNameAttributePut(name, resourceType, attribute, attributeValue);
-    }
-
-    @DELETE
-    @Path("/{resource-type}/{name}")
-    @Consumes({"application/json"})
-    @Produces({"application/json"})
-    @io.swagger.annotations.ApiOperation(value = "Revoke the resource\n", notes = "This API is used to revoke a resource in the tenant domain given by the user.\n", response = void.class)
-    @io.swagger.annotations.ApiResponses(value = {
-            @io.swagger.annotations.ApiResponse(code = 200, message = "OK"),
-
-            @io.swagger.annotations.ApiResponse(code = 400, message = "Bad Request"),
-
-            @io.swagger.annotations.ApiResponse(code = 401, message = "Unauthorized"),
-
-            @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found"),
-
-            @io.swagger.annotations.ApiResponse(code = 500, message = "Server Error")})
-
-    public Response resourceResourceTypeNameDelete(@ApiParam(value = "This represents the name of the resource to be retrieved.", required = true) @PathParam("name") String name,
-                                                   @ApiParam(value = "This represents the type of the resource to be added and can either be the name or id.", required = true) @PathParam("resource-type") String resourceType) {
-
-        return delegate.resourceResourceTypeNameDelete(name, resourceType);
-    }
-
-    @GET
-    @Path("/{resource-type}/{name}")
-    @Consumes({"application/json"})
-    @Produces({"application/json"})
-    @io.swagger.annotations.ApiOperation(value = "Retrieve the resource based on optional search parameters.\n", notes = "This API is used to retrieve a resource based on optional search filters.\n", response = ResourceDTO.class)
-    @io.swagger.annotations.ApiResponses(value = {
-            @io.swagger.annotations.ApiResponse(code = 200, message = "OK"),
-
-            @io.swagger.annotations.ApiResponse(code = 400, message = "Bad Request"),
-
-            @io.swagger.annotations.ApiResponse(code = 401, message = "Unauthorized"),
-
-            @io.swagger.annotations.ApiResponse(code = 500, message = "Server Error")})
-
-    public Response resourceResourceTypeNameGet(@ApiParam(value = "This represents the name of the resource to be retrieved.", required = true) @PathParam("name") String name,
-                                                @ApiParam(value = "This represents the type of the resource to be added and can either be the name or id.", required = true) @PathParam("resource-type") String resourceType,
-                                                @ApiParam(value = "This represents the search query.") @Context SearchContext searchContext) {
-
-        return delegate.resourceResourceTypeNameGet(name, resourceType, searchContext);
-    }
-
-    @PATCH
-    @Path("/{resource-type}/{name}")
+    @Path("/{resource-type}")
     @Consumes({"application/json"})
     @Produces({"application/json"})
     @io.swagger.annotations.ApiOperation(value = "Update existing resource\n", notes = "This API is used to update an existing resource given by the user.\n", response = ResourceDTO.class)
@@ -222,15 +63,14 @@ public class ResourceApi {
 
             @io.swagger.annotations.ApiResponse(code = 500, message = "Server Error")})
 
-    public Response resourceResourceTypeNamePatch(@ApiParam(value = "This represents the name of the resource to be added or updated.", required = true) @PathParam("name") String name,
-                                                  @ApiParam(value = "This represents the type of the resource to be added and can either be the name or id.", required = true) @PathParam("resource-type") String resourceType,
-                                                  @ApiParam(value = "This represents the resource that needs to be updated.", required = true) ResourceAddDTO resource) {
+    public Response resourceResourceTypePatch(@ApiParam(value = "This represents the type of the resource to be added and can either be the name or id.", required = true) @PathParam("resource-type") String resourceType,
+                                              @ApiParam(value = "This represents the resource that needs to be updated.", required = true) ResourceAddDTO resource) {
 
-        return delegate.resourceResourceTypeNamePatch(name, resourceType, resource);
+        return delegate.resourceResourceTypePatch(resourceType, resource);
     }
 
     @POST
-    @Path("/{resource-type}/{name}")
+    @Path("/{resource-type}")
     @Consumes({"application/json"})
     @Produces({"application/json"})
     @io.swagger.annotations.ApiOperation(value = "Create the resource\n", notes = "This API is used to store the resource given by the user.\n", response = ResourceDTO.class)
@@ -245,15 +85,14 @@ public class ResourceApi {
 
             @io.swagger.annotations.ApiResponse(code = 500, message = "Server Error")})
 
-    public Response resourceResourceTypeNamePost(@ApiParam(value = "This represents the name of the resource to be added.", required = true) @PathParam("name") String name,
-                                                 @ApiParam(value = "This represents the type of the resource to be added and can either be the name or id.", required = true) @PathParam("resource-type") String resourceType,
-                                                 @ApiParam(value = "This represents the resource that needs to be added.", required = true) ResourceAddDTO resource) {
+    public Response resourceResourceTypePost(@ApiParam(value = "This represents the type of the resource to be added.", required = true) @PathParam("resource-type") String resourceType,
+                                             @ApiParam(value = "This represents the resource that needs to be added.", required = true) ResourceAddDTO resource) {
 
-        return delegate.resourceResourceTypeNamePost(name, resourceType, resource);
+        return delegate.resourceResourceTypePost(resourceType, resource);
     }
 
     @PUT
-    @Path("/{resource-type}/{name}")
+    @Path("/{resource-type}")
     @Consumes({"application/json"})
     @Produces({"application/json"})
     @io.swagger.annotations.ApiOperation(value = "Add or Replace the resource\n", notes = "This API is used to store or replace the resource given by the user.\n", response = ResourceDTO.class)
@@ -266,11 +105,185 @@ public class ResourceApi {
 
             @io.swagger.annotations.ApiResponse(code = 500, message = "Server Error")})
 
-    public Response resourceResourceTypeNamePut(@ApiParam(value = "This represents the name of the resource to be added or replaced.", required = true) @PathParam("name") String name,
-                                                @ApiParam(value = "This represents the type of the resource to be added and can either be the name or id.", required = true) @PathParam("resource-type") String resourceType,
-                                                @ApiParam(value = "This represents the resource that need to be added or replaced.", required = true) ResourceAddDTO resource) {
+    public Response resourceResourceTypePut(@ApiParam(value = "This represents the type of the resource to be added and can either be the name or id.", required = true) @PathParam("resource-type") String resourceType,
+                                            @ApiParam(value = "This represents the resource that need to be added or replaced.", required = true) ResourceAddDTO resource) {
 
-        return delegate.resourceResourceTypeNamePut(name, resourceType, resource);
+        return delegate.resourceResourceTypePut(resourceType, resource);
+    }
+
+    @DELETE
+    @Path("/{resource-type}/{resource-name}/{attribute-key}")
+    @Consumes({"application/json"})
+    @Produces({"application/json"})
+    @io.swagger.annotations.ApiOperation(value = "Revoke the attribute\n", notes = "This API is used to revoke a attribute in the tenant domain given by the user.\n", response = void.class)
+    @io.swagger.annotations.ApiResponses(value = {
+            @io.swagger.annotations.ApiResponse(code = 200, message = "Ok"),
+
+            @io.swagger.annotations.ApiResponse(code = 400, message = "Bad Request"),
+
+            @io.swagger.annotations.ApiResponse(code = 401, message = "Unauthorized"),
+
+            @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found"),
+
+            @io.swagger.annotations.ApiResponse(code = 500, message = "Server Error")})
+
+    public Response resourceResourceTypeResourceNameAttributeKeyDelete(@ApiParam(value = "This represents the name of the attribute to be retrieved.", required = true) @PathParam("resource-name") String resourceName,
+                                                                       @ApiParam(value = "This represents the type of the attribute to be deleted and can either be the name or id.", required = true) @PathParam("resource-type") String resourceType,
+                                                                       @ApiParam(value = "This represents an attribute key of the attribute to be deleted.", required = true) @PathParam("attribute-key") String attributeKey) {
+
+        return delegate.resourceResourceTypeResourceNameAttributeKeyDelete(resourceName, resourceType, attributeKey);
+    }
+
+    @GET
+    @Path("/{resource-type}/{resource-name}/{attribute-key}")
+    @Consumes({"application/json"})
+    @Produces({"application/json"})
+    @io.swagger.annotations.ApiOperation(value = "Retrieve the attribute.\n", notes = "This API is used to retrieve a attribute.\n", response = AttributeDTO.class)
+    @io.swagger.annotations.ApiResponses(value = {
+            @io.swagger.annotations.ApiResponse(code = 200, message = "Ok"),
+
+            @io.swagger.annotations.ApiResponse(code = 400, message = "Bad Request"),
+
+            @io.swagger.annotations.ApiResponse(code = 401, message = "Unauthorized"),
+
+            @io.swagger.annotations.ApiResponse(code = 500, message = "Server Error")})
+
+    public Response resourceResourceTypeResourceNameAttributeKeyGet(@ApiParam(value = "This represents the name of the attribute to be retrieved.", required = true) @PathParam("resource-name") String resourceName,
+                                                                    @ApiParam(value = "This represents the type of the attribute to be retrieved and can either be the name or id.", required = true) @PathParam("resource-type") String resourceType,
+                                                                    @ApiParam(value = "This represents an attribute key of the attribute to be retrieved.", required = true) @PathParam("attribute-key") String attributeKey,
+                                                                    @ApiParam(value = "This represents the search parameters for the request.") @Context SearchContext searchContext) {
+
+        return delegate.resourceResourceTypeResourceNameAttributeKeyGet(resourceName, resourceType, attributeKey, searchContext);
+    }
+
+    @DELETE
+    @Path("/{resource-type}/{resource-name}")
+    @Consumes({"application/json"})
+    @Produces({"application/json"})
+    @io.swagger.annotations.ApiOperation(value = "Revoke the resource\n", notes = "This API is used to revoke a resource in the tenant domain given by the user.\n", response = void.class)
+    @io.swagger.annotations.ApiResponses(value = {
+            @io.swagger.annotations.ApiResponse(code = 200, message = "Ok"),
+
+            @io.swagger.annotations.ApiResponse(code = 400, message = "Bad Request"),
+
+            @io.swagger.annotations.ApiResponse(code = 401, message = "Unauthorized"),
+
+            @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found"),
+
+            @io.swagger.annotations.ApiResponse(code = 500, message = "Server Error")})
+
+    public Response resourceResourceTypeResourceNameDelete(@ApiParam(value = "This represents the name of the resource to be revoked.", required = true) @PathParam("resource-name") String resourceName,
+                                                           @ApiParam(value = "This represents the type of the resource to be added and can either be the name or id.", required = true) @PathParam("resource-type") String resourceType) {
+
+        return delegate.resourceResourceTypeResourceNameDelete(resourceName, resourceType);
+    }
+
+    @GET
+    @Path("/{resource-type}/{resource-name}")
+    @Consumes({"application/json"})
+    @Produces({"application/json"})
+    @io.swagger.annotations.ApiOperation(value = "Retrieve the resource.\n", notes = "This API is used to retrieve a resource.\n", response = ResourceDTO.class)
+    @io.swagger.annotations.ApiResponses(value = {
+            @io.swagger.annotations.ApiResponse(code = 200, message = "Ok"),
+
+            @io.swagger.annotations.ApiResponse(code = 400, message = "Bad Request"),
+
+            @io.swagger.annotations.ApiResponse(code = 401, message = "Unauthorized"),
+
+            @io.swagger.annotations.ApiResponse(code = 500, message = "Server Error")})
+
+    public Response resourceResourceTypeResourceNameGet(@ApiParam(value = "This represents the name of the resource to be retrieved.", required = true) @PathParam("resource-name") String resourceName,
+                                                        @ApiParam(value = "This represents the type of the resource to be added and can either be the name or id.", required = true) @PathParam("resource-type") String resourceType,
+                                                        @ApiParam(value = "This represents the search parameters for the request.") @Context SearchContext searchContext) {
+
+        return delegate.resourceResourceTypeResourceNameGet(resourceName, resourceType, searchContext);
+    }
+
+    @PATCH
+    @Path("/{resource-type}/{resource-name}")
+    @Consumes({"application/json"})
+    @Produces({"application/json"})
+    @io.swagger.annotations.ApiOperation(value = "Update existing attribute\n", notes = "This API is used to update an existing attribute given by the user.\n", response = AttributeDTO.class)
+    @io.swagger.annotations.ApiResponses(value = {
+            @io.swagger.annotations.ApiResponse(code = 200, message = "Ok"),
+
+            @io.swagger.annotations.ApiResponse(code = 400, message = "Bad Request"),
+
+            @io.swagger.annotations.ApiResponse(code = 401, message = "Unauthorized"),
+
+            @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found"),
+
+            @io.swagger.annotations.ApiResponse(code = 500, message = "Server Error")})
+
+    public Response resourceResourceTypeResourceNamePatch(@ApiParam(value = "This represents the name of the attribute to be added or updated.", required = true) @PathParam("resource-name") String resourceName,
+                                                          @ApiParam(value = "This represents the type of the attribute to be added or updated and can either be the name or id.", required = true) @PathParam("resource-type") String resourceType,
+                                                          @ApiParam(value = "This represents the corresponding attribute value that needs to be added or updated.", required = true) AttributeDTO attribute) {
+
+        return delegate.resourceResourceTypeResourceNamePatch(resourceName, resourceType, attribute);
+    }
+
+    @POST
+    @Path("/{resource-type}/{resource-name}")
+    @Consumes({"application/json"})
+    @Produces({"application/json"})
+    @io.swagger.annotations.ApiOperation(value = "Create the attribute\n", notes = "This API is used to store the attribute given by the user.\n", response = AttributeDTO.class)
+    @io.swagger.annotations.ApiResponses(value = {
+            @io.swagger.annotations.ApiResponse(code = 201, message = "Successful response"),
+
+            @io.swagger.annotations.ApiResponse(code = 400, message = "Bad Request"),
+
+            @io.swagger.annotations.ApiResponse(code = 401, message = "Unauthorized"),
+
+            @io.swagger.annotations.ApiResponse(code = 409, message = "Conflict"),
+
+            @io.swagger.annotations.ApiResponse(code = 500, message = "Server Error")})
+
+    public Response resourceResourceTypeResourceNamePost(@ApiParam(value = "This represents the name of the attribute to be added.", required = true) @PathParam("resource-name") String resourceName,
+                                                         @ApiParam(value = "This represents the type of the attribute to be added and can either be the name or id.", required = true) @PathParam("resource-type") String resourceType,
+                                                         @ApiParam(value = "This represents the corresponding attribute value that needs to be added.", required = true) AttributeDTO attribute) {
+
+        return delegate.resourceResourceTypeResourceNamePost(resourceName, resourceType, attribute);
+    }
+
+    @PUT
+    @Path("/{resource-type}/{resource-name}")
+    @Consumes({"application/json"})
+    @Produces({"application/json"})
+    @io.swagger.annotations.ApiOperation(value = "Add or Replace the attribute\n", notes = "This API is used to store or replace the attribute given by the user.\n", response = AttributeDTO.class)
+    @io.swagger.annotations.ApiResponses(value = {
+            @io.swagger.annotations.ApiResponse(code = 200, message = "Ok"),
+
+            @io.swagger.annotations.ApiResponse(code = 400, message = "Bad Request"),
+
+            @io.swagger.annotations.ApiResponse(code = 401, message = "Unauthorized"),
+
+            @io.swagger.annotations.ApiResponse(code = 500, message = "Server Error")})
+
+    public Response resourceResourceTypeResourceNamePut(@ApiParam(value = "This represents the name of the attribute to be added or replaced.", required = true) @PathParam("resource-name") String resourceName,
+                                                        @ApiParam(value = "This represents the type of the attribute to be added or replaced and can either be the name or id.", required = true) @PathParam("resource-type") String resourceType,
+                                                        @ApiParam(value = "This represents the corresponding attribute value that needs to be added or replaced.", required = true) AttributeDTO attribute) {
+
+        return delegate.resourceResourceTypeResourceNamePut(resourceName, resourceType, attribute);
+    }
+
+    @GET
+    @Path("/resource-type/{resource-type-name}")
+    @Consumes({"application/json"})
+    @Produces({"application/json"})
+    @io.swagger.annotations.ApiOperation(value = "Retrieve all the resources for the given resource type.\n", notes = "This API is used to retrieve all the resources for a given resource type.\n", response = ResourcesDTO.class)
+    @io.swagger.annotations.ApiResponses(value = {
+            @io.swagger.annotations.ApiResponse(code = 200, message = "Ok"),
+
+            @io.swagger.annotations.ApiResponse(code = 400, message = "Bad Request"),
+
+            @io.swagger.annotations.ApiResponse(code = 401, message = "Unauthorized"),
+
+            @io.swagger.annotations.ApiResponse(code = 500, message = "Server Error")})
+
+    public Response resourceResourceTypeResourceTypeNameGet(@ApiParam(value = "This represents the name of the resource type to be retrieved.", required = true) @PathParam("resource-type-name") String resourceTypeName,
+                                                            @ApiParam(value = "This represents the search parameters for the request.") @Context SearchContext searchContext) {
+
+        return delegate.resourceResourceTypeResourceTypeNameGet(resourceTypeName, searchContext);
     }
 }
 

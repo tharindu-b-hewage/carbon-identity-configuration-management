@@ -10,9 +10,25 @@ import java.util.List;
 @ApiModel(description = "")
 public class ResourceAddDTO {
 
+    private String name = null;
+
     private List<AttributeDTO> attributes = new ArrayList<AttributeDTO>();
 
     private ResourceFileDTO file = null;
+
+    /**
+     **/
+    @ApiModelProperty(value = "")
+    @JsonProperty("name")
+    public String getName() {
+
+        return name;
+    }
+
+    public void setName(String name) {
+
+        this.name = name;
+    }
 
     /**
      **/
@@ -48,6 +64,7 @@ public class ResourceAddDTO {
         StringBuilder sb = new StringBuilder();
         sb.append("class ResourceAddDTO {\n");
 
+        sb.append("  name: ").append(name).append("\n");
         sb.append("  attributes: ").append(attributes).append("\n");
         sb.append("  file: ").append(file).append("\n");
         sb.append("}\n");

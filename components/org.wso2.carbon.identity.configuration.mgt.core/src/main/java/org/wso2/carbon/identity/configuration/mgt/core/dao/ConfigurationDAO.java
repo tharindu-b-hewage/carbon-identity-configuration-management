@@ -2,6 +2,7 @@ package org.wso2.carbon.identity.configuration.mgt.core.dao;
 
 import org.wso2.carbon.identity.configuration.mgt.core.exception.ConfigurationManagementException;
 import org.wso2.carbon.identity.configuration.mgt.core.model.Resource;
+import org.wso2.carbon.identity.configuration.mgt.core.model.ResourceAdd;
 import org.wso2.carbon.identity.configuration.mgt.core.model.ResourceType;
 
 /**
@@ -24,7 +25,7 @@ public interface ConfigurationDAO {
      * @param name Name id of the {@link Resource} to retrieve.
      * @return {@link Resource} for the given name.
      */
-    Resource getConfiguration(String name) throws ConfigurationManagementException;
+    Resource getResource(String name) throws ConfigurationManagementException;
 
     /**
      * Delete {@link Resource} by the given name.
@@ -33,17 +34,17 @@ public interface ConfigurationDAO {
      * @return Name id of the deleted {@link Resource}.
      * @throws ConfigurationManagementException Resource management exception.
      */
-    String deleteConfiguration(String name) throws ConfigurationManagementException;
+    void deleteResource(String name) throws ConfigurationManagementException;
 
     /**
      * Add given {@link Resource}.
      *
-     * @param name Name id of the {@link Resource}
+     * @param resourceType Name id of the {@link Resource}
      * @param resource {@link Resource} to be added.
      * @return Name id of the added {@link Resource}.
      * @throws ConfigurationManagementException Resource management exception.
      */
-    String addConfiguration(String name, Resource resource) throws ConfigurationManagementException;
+    Resource addResource(String resourceType, ResourceAdd resource) throws ConfigurationManagementException;
 
     /**
      * Replace given {@link Resource} or add if existing {@link Resource} is not present.
@@ -53,7 +54,7 @@ public interface ConfigurationDAO {
      * @return Name id of the added {@link Resource}.
      * @throws ConfigurationManagementException Resource management exception.
      */
-    String replaceConfiguration(String name, Resource resource) throws ConfigurationManagementException;
+    Resource replaceResource(String name, Resource resource) throws ConfigurationManagementException;
 
     /**
      * Update given {@link Resource}.
@@ -63,7 +64,7 @@ public interface ConfigurationDAO {
      * @return Name id of the added {@link Resource}.
      * @throws ConfigurationManagementException Resource management exception.
      */
-    String updateConfiguration(String name, Resource resource) throws ConfigurationManagementException;
+    Resource updateConfiguration(String name, Resource resource) throws ConfigurationManagementException;
 
     void addResourceType(ResourceType resourceType) throws ConfigurationManagementException;
 

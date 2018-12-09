@@ -11,9 +11,11 @@ public class ResourceType {
 
     private String description;
 
-    public ResourceType(String name) {
+    public ResourceType(String name, String id, String description) {
 
         this.name = name;
+        this.id = id;
+        this.description = description;
     }
 
     public ResourceType() {

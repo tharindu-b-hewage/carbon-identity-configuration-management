@@ -23,6 +23,7 @@ import java.util.List;
  */
 public class Resource {
 
+    private String tenantDomain;
     private String resourceName;
     private String resourceType;
     private String lastModified;
@@ -39,6 +40,16 @@ public class Resource {
 
         this.resourceName = resourceName;
         this.resourceType = resourceType;
+    }
+
+    public String getTenantDomain() {
+
+        return tenantDomain;
+    }
+
+    public void setTenantDomain(String tenantDomain) {
+
+        this.tenantDomain = tenantDomain;
     }
 
     public String getLastModified() {

@@ -13,8 +13,8 @@ import javax.ws.rs.PATCH;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 
@@ -25,51 +25,6 @@ import javax.ws.rs.core.Response;
 public class ResourceTypeApi {
 
     private final ResourceTypeApiService delegate = ResourceTypeApiServiceFactory.getResourceTypeApi();
-
-    @DELETE
-
-    @Consumes({"application/json"})
-    @Produces({"application/json"})
-    @io.swagger.annotations.ApiOperation(value = "Revoke resource type.\n", notes = "This API is used to delete an existing resource type.\n", response = void.class)
-    @io.swagger.annotations.ApiResponses(value = {
-            @io.swagger.annotations.ApiResponse(code = 200, message = "Ok"),
-
-            @io.swagger.annotations.ApiResponse(code = 400, message = "Bad Request"),
-
-            @io.swagger.annotations.ApiResponse(code = 401, message = "Unauthorized"),
-
-            @io.swagger.annotations.ApiResponse(code = 409, message = "Conflict"),
-
-            @io.swagger.annotations.ApiResponse(code = 500, message = "Server Error")})
-
-    public Response resourceTypeDelete(@ApiParam(value = "This represents the resource type to be retrieved.") @QueryParam("name") String name,
-                                       @ApiParam(value = "This represents the resource type to be retrieved.") @QueryParam("id") String id) {
-
-        return delegate.resourceTypeDelete(name, id);
-    }
-
-    @GET
-
-    @Consumes({"application/json"})
-    @Produces({"application/json"})
-    @io.swagger.annotations.ApiOperation(value = "Get the resource type.\n", notes = "This API is used to get an existing resource type.\n", response = ResourceTypeDTO.class)
-    @io.swagger.annotations.ApiResponses(value = {
-            @io.swagger.annotations.ApiResponse(code = 200, message = "Ok"),
-
-            @io.swagger.annotations.ApiResponse(code = 400, message = "Bad Request"),
-
-            @io.swagger.annotations.ApiResponse(code = 401, message = "Unauthorized"),
-
-            @io.swagger.annotations.ApiResponse(code = 409, message = "Conflict"),
-
-            @io.swagger.annotations.ApiResponse(code = 500, message = "Server Error")})
-
-    public Response resourceTypeGet(@ApiParam(value = "This represents the resource type to be retrieved.") @QueryParam("name") String name,
-                                    @ApiParam(value = "This represents the resource type to be retrieved.") @QueryParam("id") String id,
-                                    @ApiParam(value = "This represents the search query.") @Context SearchContext searchContext) {
-
-        return delegate.resourceTypeGet(name, id, searchContext);
-    }
 
     @PATCH
 
@@ -132,6 +87,49 @@ public class ResourceTypeApi {
     public Response resourceTypePut(@ApiParam(value = "This represents the resource type to be added.", required = true) ResourceTypeAddDTO type) {
 
         return delegate.resourceTypePut(type);
+    }
+
+    @DELETE
+    @Path("/{resource-type-name}")
+    @Consumes({"application/json"})
+    @Produces({"application/json"})
+    @io.swagger.annotations.ApiOperation(value = "Revoke resource type.\n", notes = "This API is used to delete an existing resource type.\n", response = void.class)
+    @io.swagger.annotations.ApiResponses(value = {
+            @io.swagger.annotations.ApiResponse(code = 200, message = "Ok"),
+
+            @io.swagger.annotations.ApiResponse(code = 400, message = "Bad Request"),
+
+            @io.swagger.annotations.ApiResponse(code = 401, message = "Unauthorized"),
+
+            @io.swagger.annotations.ApiResponse(code = 409, message = "Conflict"),
+
+            @io.swagger.annotations.ApiResponse(code = 500, message = "Server Error")})
+
+    public Response resourceTypeResourceTypeNameDelete(@ApiParam(value = "This represents the resource type to be revoked.", required = true) @PathParam("resource-type-name") String resourceTypeName) {
+
+        return delegate.resourceTypeResourceTypeNameDelete(resourceTypeName);
+    }
+
+    @GET
+    @Path("/{resource-type-name}")
+    @Consumes({"application/json"})
+    @Produces({"application/json"})
+    @io.swagger.annotations.ApiOperation(value = "Get the resource type.\n", notes = "This API is used to get an existing resource type.\n", response = ResourceTypeDTO.class)
+    @io.swagger.annotations.ApiResponses(value = {
+            @io.swagger.annotations.ApiResponse(code = 200, message = "Ok"),
+
+            @io.swagger.annotations.ApiResponse(code = 400, message = "Bad Request"),
+
+            @io.swagger.annotations.ApiResponse(code = 401, message = "Unauthorized"),
+
+            @io.swagger.annotations.ApiResponse(code = 409, message = "Conflict"),
+
+            @io.swagger.annotations.ApiResponse(code = 500, message = "Server Error")})
+
+    public Response resourceTypeResourceTypeNameGet(@ApiParam(value = "This represents the resource type to be retrieved.", required = true) @PathParam("resource-type-name") String resourceTypeName,
+                                                    @ApiParam(value = "This represents the search parameters for the request.") @Context SearchContext searchContext) {
+
+        return delegate.resourceTypeResourceTypeNameGet(resourceTypeName, searchContext);
     }
 }
 

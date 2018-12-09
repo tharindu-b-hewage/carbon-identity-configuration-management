@@ -20,12 +20,11 @@ import org.apache.cxf.jaxrs.ext.search.SearchContext;
 import org.wso2.carbon.identity.configuration.mgt.core.exception.ConfigurationManagementException;
 import org.wso2.carbon.identity.configuration.mgt.core.model.Attribute;
 import org.wso2.carbon.identity.configuration.mgt.core.model.AttributePathParameter;
-import org.wso2.carbon.identity.configuration.mgt.core.model.AttributeValue;
 import org.wso2.carbon.identity.configuration.mgt.core.model.Resource;
+import org.wso2.carbon.identity.configuration.mgt.core.model.ResourceAdd;
 import org.wso2.carbon.identity.configuration.mgt.core.model.ResourceType;
 import org.wso2.carbon.identity.configuration.mgt.core.model.ResourceTypeAdd;
-import org.wso2.carbon.identity.configuration.mgt.core.model.TenantAttributePathParameter;
-import org.wso2.carbon.identity.configuration.mgt.core.model.TenantResponse;
+import org.wso2.carbon.identity.configuration.mgt.core.model.Resources;
 
 /**
  * Resource manager service interface.
@@ -33,63 +32,67 @@ import org.wso2.carbon.identity.configuration.mgt.core.model.TenantResponse;
 public interface ConfigurationManager {
 
     // --------------------------------Search---------------------------------------------------------------------
-    TenantResponse getTenants(SearchContext searchContext) throws ConfigurationManagementException;
 
-    Attribute getTenantAttribute(TenantAttributePathParameter tenantAttributePathParameter, SearchContext searchContext)
-            throws ConfigurationManagementException;
+    /**
+     * Get resources from all the tenants with optional search parameters;
+     *
+     * @param searchContext
+     * @return
+     * @throws ConfigurationManagementException
+     */
+    Resources getTenantResources(SearchContext searchContext) throws ConfigurationManagementException;
 
-    // Type
+    // --------------------------------Resource Type--------------------------------------------------------------
     ResourceType addResourceType(ResourceTypeAdd resourceTypeAdd) throws ConfigurationManagementException;
 
-    void replaceResourceType(ResourceTypeAdd resourceTypeAdd) throws ConfigurationManagementException;
+    ResourceType replaceResourceType(ResourceTypeAdd resourceTypeAdd) throws ConfigurationManagementException;
 
-    void updateResourceType(ResourceTypeAdd resourceTypeAdd) throws ConfigurationManagementException;
+    ResourceType updateResourceType(ResourceTypeAdd resourceTypeAdd) throws ConfigurationManagementException;
 
-    ResourceType getResourceType(String name, String id, SearchContext searchContext)
+    ResourceType getResourceType(String name, SearchContext searchContext)
             throws ConfigurationManagementException;
 
-    void deleteResourceType(String name, String id) throws ConfigurationManagementException;
+    void deleteResourceType(String name) throws ConfigurationManagementException;
 
-    // --------------------------------Resources---------------------------------------------------------------------
+    // --------------------------------Resources-------------------------------------------------------------------
+
     /**
-     * Get resources based with a SearchContext object
+     * Get all the resources of the current tenant based with a SearchContext object
      *
      * @return
      * @throws ConfigurationManagementException
      */
-    Resource getResource(SearchContext searchContext) throws ConfigurationManagementException;
+    Resources getResources(SearchContext searchContext) throws ConfigurationManagementException;
+
+    Resources getResourcesByType(String resourceType, SearchContext searchContext)
+            throws ConfigurationManagementException;
 
     // --------------------------------Resource---------------------------------------------------------------------
+
     /**
      * This API is used to add the given resource.
      *
-     * @param name     Name id of the existing {@link Resource}.
-     * @param resource {@link Resource} to be added.
      * @return 201 created. Returns resource change response with resource name, tenant domain and change state.
      * @throws ConfigurationManagementException Resource management exception.
      */
-    void addResource(String name, String resourceType, Resource resource) throws ConfigurationManagementException;
+    Resource addResource(String resourceType, ResourceAdd resourceAdd) throws ConfigurationManagementException;
 
     /**
      * This API is used to replace the existing resource with the given resource or add the given
      * resource if an existing resource is not available.
      *
-     * @param name     Name id of the existing {@link Resource}.
-     * @param resource New {@link Resource} to replace the existing {@link Resource}.
      * @return 201 created. Returns resource change response with resource name, tenant domain and change state.
      * @throws ConfigurationManagementException Resource management exception.
      */
-    void replaceResource(String name, String resourceType, Resource resource) throws ConfigurationManagementException;
+    Resource replaceResource(String resourceType, ResourceAdd resourceAdd) throws ConfigurationManagementException;
 
     /**
      * This API is used to update the existing resource with the given resource.
      *
-     * @param name     Name id of the existing {@link Resource}.
-     * @param resource New {@link Resource} to update the existing {@link Resource}.
      * @return 201 created. Returns resource change response with resource name, tenant domain and change state.
      * @throws ConfigurationManagementException Resource management exception.
      */
-    void updateResource(String name, String resourceType, Resource resource) throws ConfigurationManagementException;
+    Resource updateResource(String resourceType, ResourceAdd resourceAdd) throws ConfigurationManagementException;
 
     /**
      * This API is used to get the configuration by configuration name
@@ -109,14 +112,14 @@ public interface ConfigurationManager {
      */
     void deleteResource(String name, String resourceType) throws ConfigurationManagementException;
 
-    // -------------------------------- Attribute---------------------------------------------------------------------
-    void addAttribute(String name, String resourceType, Attribute attribute) throws ConfigurationManagementException;
+    // -------------------------------- Attribute-------------------------------------------------------------------
+    Attribute addAttribute(String name, String resourceType, Attribute attribute) throws ConfigurationManagementException;
 
-    void replaceAttribute(String name, String resourceType, Attribute attribute) throws ConfigurationManagementException;
+    Attribute replaceAttribute(String name, String resourceType, Attribute attribute) throws ConfigurationManagementException;
 
-    void updateAttribute(String name, String resourceType, Attribute attribute) throws ConfigurationManagementException;
+    Attribute updateAttribute(String name, String resourceType, Attribute attribute) throws ConfigurationManagementException;
 
-    AttributeValue getAttributeValue(AttributePathParameter attributePathParameter, SearchContext searchContext)
+    Attribute getAttribute(AttributePathParameter attributePathParameter, SearchContext searchContext)
             throws ConfigurationManagementException;
 
     void deleteAttribute(String name, String resourceType, String attribute) throws ConfigurationManagementException;

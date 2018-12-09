@@ -4,20 +4,16 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-import javax.validation.constraints.NotNull;
-
 @ApiModel(description = "")
 public class AttributeDTO {
 
-    @NotNull
     private String key = null;
 
-    @NotNull
     private String value = null;
 
     /**
      **/
-    @ApiModelProperty(required = true, value = "")
+    @ApiModelProperty(value = "")
     @JsonProperty("key")
     public String getKey() {
 
@@ -31,7 +27,7 @@ public class AttributeDTO {
 
     /**
      **/
-    @ApiModelProperty(required = true, value = "")
+    @ApiModelProperty(value = "")
     @JsonProperty("value")
     public String getValue() {
 

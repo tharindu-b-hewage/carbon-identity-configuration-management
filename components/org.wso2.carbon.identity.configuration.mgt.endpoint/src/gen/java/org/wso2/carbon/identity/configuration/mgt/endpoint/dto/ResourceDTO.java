@@ -11,6 +11,8 @@ import javax.validation.constraints.NotNull;
 @ApiModel(description = "")
 public class ResourceDTO {
 
+    private String tenantDomain = null;
+
     @NotNull
     private String resourceName = null;
 
@@ -23,6 +25,20 @@ public class ResourceDTO {
     private List<AttributeDTO> attributes = new ArrayList<AttributeDTO>();
 
     private ResourceFileDTO file = null;
+
+    /**
+     **/
+    @ApiModelProperty(value = "")
+    @JsonProperty("tenantDomain")
+    public String getTenantDomain() {
+
+        return tenantDomain;
+    }
+
+    public void setTenantDomain(String tenantDomain) {
+
+        this.tenantDomain = tenantDomain;
+    }
 
     /**
      **/
@@ -100,6 +116,7 @@ public class ResourceDTO {
         StringBuilder sb = new StringBuilder();
         sb.append("class ResourceDTO {\n");
 
+        sb.append("  tenantDomain: ").append(tenantDomain).append("\n");
         sb.append("  resourceName: ").append(resourceName).append("\n");
         sb.append("  resourceType: ").append(resourceType).append("\n");
         sb.append("  lastModified: ").append(lastModified).append("\n");

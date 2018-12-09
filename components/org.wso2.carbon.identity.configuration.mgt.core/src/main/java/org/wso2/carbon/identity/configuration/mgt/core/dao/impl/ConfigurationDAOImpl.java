@@ -6,6 +6,7 @@ import org.wso2.carbon.identity.configuration.mgt.core.constant.SQLConstants;
 import org.wso2.carbon.identity.configuration.mgt.core.dao.ConfigurationDAO;
 import org.wso2.carbon.identity.configuration.mgt.core.exception.ConfigurationManagementException;
 import org.wso2.carbon.identity.configuration.mgt.core.model.Resource;
+import org.wso2.carbon.identity.configuration.mgt.core.model.ResourceAdd;
 import org.wso2.carbon.identity.configuration.mgt.core.model.ResourceType;
 import org.wso2.carbon.identity.configuration.mgt.core.util.ConfigurationUtils;
 import org.wso2.carbon.identity.core.util.IdentityDatabaseUtil;
@@ -32,7 +33,7 @@ public class ConfigurationDAOImpl implements ConfigurationDAO {
     /**
      * {@inheritDoc}
      */
-    public Resource getConfiguration(String name) throws ConfigurationManagementException {
+    public Resource getResource(String name) throws ConfigurationManagementException {
 
 //        Connection connection = IdentityDatabaseUtil.getDBConnection();
 //        try {
@@ -51,33 +52,32 @@ public class ConfigurationDAOImpl implements ConfigurationDAO {
     /**
      * {@inheritDoc}
      */
-    public String deleteConfiguration(String name) throws ConfigurationManagementException {
+    public void deleteResource(String name) throws ConfigurationManagementException {
 
-        return new String("sample Deleted Resource");
     }
 
     /**
      * {@inheritDoc}
      */
-    public String addConfiguration(String name, Resource resource) throws ConfigurationManagementException {
+    public Resource addResource(String name, ResourceAdd resourceAdd) throws ConfigurationManagementException {
 
-        return new String("sample added Resource");
+        return new Resource("test", "test");
     }
 
     /**
      * {@inheritDoc}
      */
-    public String replaceConfiguration(String name, Resource resource) throws ConfigurationManagementException {
+    public Resource replaceResource(String name, Resource resource) throws ConfigurationManagementException {
 
-        return new String("sample replaced Resource");
+        return new Resource("test", "test");
     }
 
     /**
      * {@inheritDoc}
      */
-    public String updateConfiguration(String name, Resource resource) throws ConfigurationManagementException {
+    public Resource updateConfiguration(String name, Resource resource) throws ConfigurationManagementException {
 
-        return new String("sample updated resource");
+        return new Resource("test", "test");
     }
 
     /**
@@ -143,11 +143,15 @@ public class ConfigurationDAOImpl implements ConfigurationDAO {
             getResourceTypePreparedStatement = connection.prepareStatement(
                     selectGetResourceTypeQuery(name, id)
             );
-            getResourceTypePreparedStatement.setString(1, name);
+            getResourceTypePreparedStatement.setString(
+                    1,
+                    StringUtils.isEmpty(name) ? id : name
+            );
             ResultSet resultSet = getResourceTypePreparedStatement.executeQuery();
 
-            ResourceType resourceType = new ResourceType();
+            ResourceType resourceType = null;
             if (resultSet.next()) {
+                resourceType = new ResourceType();
                 resourceType.setId(resultSet.getString("ID"));
                 resourceType.setName(resultSet.getString("NAME"));
                 resourceType.setDescription(resultSet.getString("DESCRIPTION"));

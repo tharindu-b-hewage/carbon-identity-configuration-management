@@ -12,10 +12,10 @@
             <bean class="org.wso2.carbon.identity.configuration.mgt.endpoint.ResourceApi"/>
             <bean class="org.wso2.carbon.identity.configuration.mgt.endpoint.ResourceTypeApi"/>
             <bean class="org.wso2.carbon.identity.configuration.mgt.endpoint.SearchApi"/>
-
         </jaxrs:serviceBeans>
         <jaxrs:providers>
             <bean class="com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider"/>
+            <bean class="org.apache.cxf.jaxrs.ext.search.SearchContextProvider"/>
         </jaxrs:providers>
     </jaxrs:server>
 </beans>

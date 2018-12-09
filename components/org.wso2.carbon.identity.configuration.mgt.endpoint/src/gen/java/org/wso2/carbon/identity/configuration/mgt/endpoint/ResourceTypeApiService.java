@@ -7,14 +7,14 @@ import javax.ws.rs.core.Response;
 
 public abstract class ResourceTypeApiService {
 
-    public abstract Response resourceTypeDelete(String name, String id);
-
-    public abstract Response resourceTypeGet(String name, String id, SearchContext searchContext);
-
     public abstract Response resourceTypePatch(ResourceTypeAddDTO type);
 
     public abstract Response resourceTypePost(ResourceTypeAddDTO type);
 
     public abstract Response resourceTypePut(ResourceTypeAddDTO type);
+
+    public abstract Response resourceTypeResourceTypeNameDelete(String resourceTypeName);
+
+    public abstract Response resourceTypeResourceTypeNameGet(String resourceTypeName, SearchContext searchContext);
 }
 
