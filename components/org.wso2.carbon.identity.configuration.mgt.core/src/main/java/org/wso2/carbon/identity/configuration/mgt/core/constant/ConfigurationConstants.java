@@ -14,6 +14,13 @@ public class ConfigurationConstants {
     public static final String STATE_UPDATE_CONFIGURATION_CHANGE_RESPONSE = "update";
     public static final String STATE_REPLACE_CONFIGURATION_CHANGE_RESPONSE = "replace";
     public static final String BASE_PATH = "/api/identity/config-mgt/v1.0/resource/";
+    public static final String MY_SQL = "MySQL";
+    public static final String POSTGRE_SQL = "PostgreSQL";
+    public static final String DB2 = "DB2";
+    public static final String MICROSOFT = "Microsoft";
+    public static final String S_MICROSOFT = "microsoft";
+    public static final String INFORMIX = "Informix";
+    public static final String H2 = "H2";
 
     public enum ErrorMessages {
         ERROR_CODE_SELECT_CONFIGURATION_BY_ID("CONFIGM_00001", "Error occurred while retrieving configuration " +

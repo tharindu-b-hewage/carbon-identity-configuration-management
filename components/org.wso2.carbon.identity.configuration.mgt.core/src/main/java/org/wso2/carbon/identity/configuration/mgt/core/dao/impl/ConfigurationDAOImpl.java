@@ -1,6 +1,8 @@
 package org.wso2.carbon.identity.configuration.mgt.core.dao.impl;
 
 import org.apache.commons.lang.StringUtils;
+import org.wso2.carbon.database.utils.jdbc.JdbcTemplate;
+import org.wso2.carbon.database.utils.jdbc.exceptions.DataAccessException;
 import org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages;
 import org.wso2.carbon.identity.configuration.mgt.core.constant.SQLConstants;
 import org.wso2.carbon.identity.configuration.mgt.core.dao.ConfigurationDAO;
@@ -9,12 +11,14 @@ import org.wso2.carbon.identity.configuration.mgt.core.model.Resource;
 import org.wso2.carbon.identity.configuration.mgt.core.model.ResourceAdd;
 import org.wso2.carbon.identity.configuration.mgt.core.model.ResourceType;
 import org.wso2.carbon.identity.configuration.mgt.core.util.ConfigurationUtils;
+import org.wso2.carbon.identity.configuration.mgt.core.util.JdbcUtils;
 import org.wso2.carbon.identity.core.util.IdentityDatabaseUtil;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
+
+import javax.xml.crypto.Data;
 
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_ADD_RESOURCE_TYPE;
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_DELETE_RESOURCE_TYPE;
@@ -82,8 +86,6 @@ public class ConfigurationDAOImpl implements ConfigurationDAO {
         return new Resource("test", "test");
     }
 
-
-
     /**
      * {@inheritDoc}
      *
@@ -102,19 +104,15 @@ public class ConfigurationDAOImpl implements ConfigurationDAO {
 
     private void addResourceType(ResourceType resourceType, Connection connection) throws ConfigurationManagementException {
 
-        PreparedStatement addResourceTypePreparedStatement = null;
+        JdbcTemplate jdbcTemplate = JdbcUtils.getNewTemplate();
         try {
-            addResourceTypePreparedStatement = connection.prepareStatement(
-                    SQLConstants.INSERT_RESOURCE_TYPE_SQL);
-            addResourceTypePreparedStatement.setString(1, resourceType.getId());
-            addResourceTypePreparedStatement.setString(2, resourceType.getName());
-            addResourceTypePreparedStatement.setString(3, resourceType.getDescription());
-            addResourceTypePreparedStatement.execute();
-        } catch (SQLException e) {
-            IdentityDatabaseUtil.rollBack(connection);
+            jdbcTemplate.executeInsert(SQLConstants.INSERT_RESOURCE_TYPE_SQL, preparedStatement -> {
+                preparedStatement.setString(1, resourceType.getId());
+                preparedStatement.setString(2, resourceType.getName());
+                preparedStatement.setString(3, resourceType.getDescription());
+            }, resourceType, false);
+        } catch (DataAccessException e) {
             throw ConfigurationUtils.handleServerException(ERROR_CODE_ADD_RESOURCE_TYPE, resourceType.getName(), e);
-        } finally {
-            IdentityDatabaseUtil.closeStatement(addResourceTypePreparedStatement);
         }
     }
 
@@ -126,12 +124,14 @@ public class ConfigurationDAOImpl implements ConfigurationDAO {
      */
     public void replaceResourceType(ResourceType resourceType) throws ConfigurationManagementException {
 
-        try (Connection connection = getConnection()) {
-            replaceResourceType(resourceType, connection);
-        } catch (SQLException e) {
-            throw ConfigurationUtils.handleRuntimeException(
-                    ErrorMessages.ERROR_CODE_DATABASE_CONNECTION, null);
-        }
+//        JdbcTemplate jdbcTemplate = JdbcUtils.getNewTemplate();
+//        try {
+//            jdbcTemplate.executeInsert(SQLConstants.REPLACE_RESOURCE_TYPE_SQL, preparedStatement -> {
+//
+//            })
+//        } catch (DataAccessException e) {
+//
+//        }
     }
 
     private void replaceResourceType(ResourceType resourceType, Connection connection) throws ConfigurationManagementException {
@@ -160,51 +160,34 @@ public class ConfigurationDAOImpl implements ConfigurationDAO {
     @Override
     public ResourceType getResourceTypeByName(String name) throws ConfigurationManagementException {
 
-        try (Connection connection = getConnection()) {
-            return getResourceTypeByIdentifier(name, null, connection);
-        } catch (SQLException e) {
-            throw ConfigurationUtils.handleRuntimeException(
-                    ErrorMessages.ERROR_CODE_DATABASE_CONNECTION, null);
-        }
+        return getResourceTypeByIdentifier(name, null);
     }
 
     @Override
     public ResourceType getResourceTypeById(String id) throws ConfigurationManagementException {
 
-        try (Connection connection = getConnection()) {
-            return getResourceTypeByIdentifier(null, id, connection);
-        } catch (SQLException e) {
-            throw ConfigurationUtils.handleRuntimeException(
-                    ErrorMessages.ERROR_CODE_DATABASE_CONNECTION, null);
-        }
+        return getResourceTypeByIdentifier(null, id);
     }
 
-    private ResourceType getResourceTypeByIdentifier(String name, String id, Connection connection) throws ConfigurationManagementException {
+    private ResourceType getResourceTypeByIdentifier(String name, String id) throws ConfigurationManagementException {
 
-        PreparedStatement getResourceTypePreparedStatement = null;
+        JdbcTemplate jdbcTemplate = JdbcUtils.getNewTemplate();
+        ResourceType resourceTypeResponse;
         try {
-            getResourceTypePreparedStatement = connection.prepareStatement(
-                    selectGetResourceTypeQuery(id)
+            resourceTypeResponse = jdbcTemplate.fetchSingleRecord(
+                    selectGetResourceTypeQuery(id),
+                    (resultSet, rowNumber) -> {
+                        ResourceType resourceType = new ResourceType();
+                        resourceType.setId(resultSet.getString("ID"));
+                        resourceType.setName(resultSet.getString("NAME"));
+                        resourceType.setDescription(resultSet.getString("DESCRIPTION"));
+                        return resourceType;
+                    }, preparedStatement ->
+                            preparedStatement.setString(1, StringUtils.isEmpty(name) ? id : name)
             );
-            getResourceTypePreparedStatement.setString(
-                    1,
-                    StringUtils.isEmpty(name) ? id : name
-            );
-            ResultSet resultSet = getResourceTypePreparedStatement.executeQuery();
-
-            ResourceType resourceType = null;
-            if (resultSet.next()) {
-                resourceType = new ResourceType();
-                resourceType.setId(resultSet.getString("ID"));
-                resourceType.setName(resultSet.getString("NAME"));
-                resourceType.setDescription(resultSet.getString("DESCRIPTION"));
-            }
-            return resourceType;
-        } catch (SQLException e) {
-            IdentityDatabaseUtil.rollBack(connection);
+            return resourceTypeResponse;
+        } catch (DataAccessException e) {
             throw ConfigurationUtils.handleServerException(ERROR_CODE_RETRIEVE_RESOURCE_TYPE, name, e);
-        } finally {
-            IdentityDatabaseUtil.closeStatement(getResourceTypePreparedStatement);
         }
     }
 
@@ -216,31 +199,14 @@ public class ConfigurationDAOImpl implements ConfigurationDAO {
 
     public void deleteResourceTypeByName(String name) throws ConfigurationManagementException {
 
-        try (Connection connection = getConnection()) {
-            deleteResourceTypeByIdentifier(name, null, connection);
-        } catch (SQLException e) {
-            throw ConfigurationUtils.handleRuntimeException(
-                    ErrorMessages.ERROR_CODE_DATABASE_CONNECTION, null);
-        }
-    }
-
-    private void deleteResourceTypeByIdentifier(String name, String id, Connection connection) throws ConfigurationManagementException {
-
-        PreparedStatement deleteResourceTypePreparedStatement = null;
+        JdbcTemplate jdbcTemplate = JdbcUtils.getNewTemplate();
         try {
-            deleteResourceTypePreparedStatement = connection.prepareStatement(
-                    selectDeleteResourceTypeQuery(id)
-            );
-            deleteResourceTypePreparedStatement.setString(
-                    1,
-                    StringUtils.isEmpty(name) ? id : name
-            );
-            deleteResourceTypePreparedStatement.executeUpdate();
-        } catch (SQLException e) {
-            IdentityDatabaseUtil.rollBack(connection);
+            jdbcTemplate.executeUpdate(selectDeleteResourceTypeQuery(null), (preparedStatement -> {
+                preparedStatement.setString(1, name);
+            }
+            ));
+        } catch (DataAccessException e) {
             throw ConfigurationUtils.handleServerException(ERROR_CODE_DELETE_RESOURCE_TYPE, name, e);
-        } finally {
-            IdentityDatabaseUtil.closeStatement(deleteResourceTypePreparedStatement);
         }
     }
 

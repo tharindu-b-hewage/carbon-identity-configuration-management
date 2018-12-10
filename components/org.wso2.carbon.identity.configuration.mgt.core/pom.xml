@@ -57,6 +57,7 @@
                             org.wso2.securevault.*,
                             org.wso2.carbon.context.*; version="${carbon.core.version.range}",
                             org.wso2.carbon.identity.core.*; version="${carbon.identity.framework.imp.pkg.version.range}",
+                            org.wso2.carbon.database.utils.*;version="${org.wso2.carbon.database.utils.version.range}",
                         </Import-Package>
                         <Export-Package>
                             !org.wso2.carbon.identity.configuration.mgt.core.internal,
@@ -69,6 +70,10 @@
     </build>
 
     <dependencies>
+        <dependency>
+            <groupId>org.wso2.carbon.utils</groupId>
+            <artifactId>org.wso2.carbon.database.utils</artifactId>
+        </dependency>
         <dependency>
             <groupId>commons-lang.wso2</groupId>
             <artifactId>commons-lang</artifactId>
