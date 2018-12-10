@@ -24,6 +24,7 @@ import static org.wso2.carbon.identity.configuration.mgt.endpoint.util.Configura
 import static org.wso2.carbon.identity.configuration.mgt.endpoint.util.ConfigurationEndpointUtils.getResourceAddFromDTO;
 import static org.wso2.carbon.identity.configuration.mgt.endpoint.util.ConfigurationEndpointUtils.getResourceDTO;
 import static org.wso2.carbon.identity.configuration.mgt.endpoint.util.ConfigurationEndpointUtils.getResourcesDTO;
+import static org.wso2.carbon.identity.configuration.mgt.endpoint.util.ConfigurationEndpointUtils.getSearchCondition;
 import static org.wso2.carbon.identity.configuration.mgt.endpoint.util.ConfigurationEndpointUtils.handleBadRequestResponse;
 import static org.wso2.carbon.identity.configuration.mgt.endpoint.util.ConfigurationEndpointUtils.handleServerErrorResponse;
 import static org.wso2.carbon.identity.configuration.mgt.endpoint.util.ConfigurationEndpointUtils.handleUnexpectedServerError;
@@ -36,7 +37,7 @@ public class ResourceApiServiceImpl extends ResourceApiService {
     public Response resourceGet(SearchContext searchContext) {
 
         try {
-            Resources resources = getConfigurationManager().getResources(searchContext);
+            Resources resources = getConfigurationManager().getResources(getSearchCondition(searchContext));
             ResourcesDTO resourcesDTO = getResourcesDTO(resources);
             return Response.ok().entity(resourcesDTO).build();
         } catch (ConfigurationManagementClientException e) {
@@ -52,7 +53,7 @@ public class ResourceApiServiceImpl extends ResourceApiService {
     public Response resourceResourceTypeResourceTypeNameGet(String resourceTypeName, SearchContext searchContext) {
 
         try {
-            Resources resources = getConfigurationManager().getResourcesByType(resourceTypeName, searchContext);
+            Resources resources = getConfigurationManager().getResourcesByType(resourceTypeName, getSearchCondition(searchContext));
             return Response.ok().entity(getResourcesDTO(resources)).build();
         } catch (ConfigurationManagementClientException e) {
             return handleBadRequestResponse(e, LOG);
@@ -133,7 +134,7 @@ public class ResourceApiServiceImpl extends ResourceApiService {
             attributePathParameter.setResourceName(resourceName);
             attributePathParameter.setResourceType(resourceType);
 
-            Attribute attribute = getConfigurationManager().getAttribute(attributePathParameter, searchContext);
+            Attribute attribute = getConfigurationManager().getAttribute(attributePathParameter, getSearchCondition(searchContext));
             return Response.ok().entity(getAttributeDTO(attribute)).build();
         } catch (ConfigurationManagementClientException e) {
             return handleBadRequestResponse(e, LOG);
@@ -163,7 +164,7 @@ public class ResourceApiServiceImpl extends ResourceApiService {
     public Response resourceResourceTypeResourceNameGet(String resourceName, String resourceType, SearchContext searchContext) {
 
         try {
-            Resource resource = getConfigurationManager().getResource(resourceName, resourceType, searchContext);
+            Resource resource = getConfigurationManager().getResource(resourceName, resourceType, getSearchCondition(searchContext));
             return Response.ok().entity(getResourceDTO(resource)).build();
         } catch (ConfigurationManagementClientException e) {
             return handleBadRequestResponse(e, LOG);

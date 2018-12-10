@@ -16,7 +16,6 @@
 
 package org.wso2.carbon.identity.configuration.mgt.core;
 
-import org.apache.cxf.jaxrs.ext.search.SearchContext;
 import org.wso2.carbon.identity.configuration.mgt.core.exception.ConfigurationManagementException;
 import org.wso2.carbon.identity.configuration.mgt.core.model.Attribute;
 import org.wso2.carbon.identity.configuration.mgt.core.model.AttributePathParameter;
@@ -25,6 +24,7 @@ import org.wso2.carbon.identity.configuration.mgt.core.model.ResourceAdd;
 import org.wso2.carbon.identity.configuration.mgt.core.model.ResourceType;
 import org.wso2.carbon.identity.configuration.mgt.core.model.ResourceTypeAdd;
 import org.wso2.carbon.identity.configuration.mgt.core.model.Resources;
+import org.wso2.carbon.identity.configuration.mgt.core.model.search.SearchCondition;
 
 /**
  * Resource manager service interface.
@@ -36,11 +36,10 @@ public interface ConfigurationManager {
     /**
      * Get resources from all the tenants with optional search parameters;
      *
-     * @param searchContext
      * @return
      * @throws ConfigurationManagementException
      */
-    Resources getTenantResources(SearchContext searchContext) throws ConfigurationManagementException;
+    Resources getTenantResources(SearchCondition searchCondition) throws ConfigurationManagementException;
 
     // --------------------------------Resource Type--------------------------------------------------------------
     ResourceType addResourceType(ResourceTypeAdd resourceTypeAdd) throws ConfigurationManagementException;
@@ -49,7 +48,7 @@ public interface ConfigurationManager {
 
     ResourceType updateResourceType(ResourceTypeAdd resourceTypeAdd) throws ConfigurationManagementException;
 
-    ResourceType getResourceType(String name, SearchContext searchContext)
+    ResourceType getResourceType(String name, SearchCondition searchCondition)
             throws ConfigurationManagementException;
 
     void deleteResourceType(String name) throws ConfigurationManagementException;
@@ -62,9 +61,9 @@ public interface ConfigurationManager {
      * @return
      * @throws ConfigurationManagementException
      */
-    Resources getResources(SearchContext searchContext) throws ConfigurationManagementException;
+    Resources getResources(SearchCondition searchCondition) throws ConfigurationManagementException;
 
-    Resources getResourcesByType(String resourceType, SearchContext searchContext)
+    Resources getResourcesByType(String resourceType, SearchCondition searchCondition)
             throws ConfigurationManagementException;
 
     // --------------------------------Resource---------------------------------------------------------------------
@@ -101,7 +100,7 @@ public interface ConfigurationManager {
      * @return 200 OK with configuration element.
      * @throws Resource Management Exception.
      */
-    Resource getResource(String name, String resourceType, SearchContext searchContext)
+    Resource getResource(String name, String resourceType, SearchCondition searchCondition)
             throws ConfigurationManagementException;
 
     /**
@@ -119,7 +118,7 @@ public interface ConfigurationManager {
 
     Attribute updateAttribute(String name, String resourceType, Attribute attribute) throws ConfigurationManagementException;
 
-    Attribute getAttribute(AttributePathParameter attributePathParameter, SearchContext searchContext)
+    Attribute getAttribute(AttributePathParameter attributePathParameter, SearchCondition searchCondition)
             throws ConfigurationManagementException;
 
     void deleteAttribute(String name, String resourceType, String attribute) throws ConfigurationManagementException;

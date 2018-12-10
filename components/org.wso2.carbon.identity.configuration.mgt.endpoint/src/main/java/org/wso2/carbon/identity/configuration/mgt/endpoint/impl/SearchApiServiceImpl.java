@@ -12,10 +12,10 @@ import org.wso2.carbon.identity.configuration.mgt.endpoint.util.ConfigurationEnd
 import javax.ws.rs.core.Response;
 
 import static org.wso2.carbon.identity.configuration.mgt.endpoint.util.ConfigurationEndpointUtils.getResourcesDTO;
+import static org.wso2.carbon.identity.configuration.mgt.endpoint.util.ConfigurationEndpointUtils.getSearchCondition;
 import static org.wso2.carbon.identity.configuration.mgt.endpoint.util.ConfigurationEndpointUtils.handleBadRequestResponse;
 import static org.wso2.carbon.identity.configuration.mgt.endpoint.util.ConfigurationEndpointUtils.handleServerErrorResponse;
 import static org.wso2.carbon.identity.configuration.mgt.endpoint.util.ConfigurationEndpointUtils.handleUnexpectedServerError;
-
 public class SearchApiServiceImpl extends SearchApiService {
 
     private static final Log LOG = LogFactory.getLog(ResourceTypeApiServiceImpl.class);
@@ -24,7 +24,7 @@ public class SearchApiServiceImpl extends SearchApiService {
     public Response searchGet(SearchContext searchContext) {
 
         try {
-            Resources resources = ConfigurationEndpointUtils.getConfigurationManager().getTenantResources(searchContext);
+            Resources resources = ConfigurationEndpointUtils.getConfigurationManager().getTenantResources(getSearchCondition(searchContext));
             return Response.ok().entity(getResourcesDTO(resources)).build();
         } catch (ConfigurationManagementClientException e) {
             return handleBadRequestResponse(e, LOG);

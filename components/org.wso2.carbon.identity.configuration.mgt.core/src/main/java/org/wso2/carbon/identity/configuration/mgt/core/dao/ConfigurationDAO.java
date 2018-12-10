@@ -68,7 +68,11 @@ public interface ConfigurationDAO {
 
     void addResourceType(ResourceType resourceType) throws ConfigurationManagementException;
 
+    void replaceResourceType(ResourceType resourceType) throws ConfigurationManagementException;
+
     ResourceType getResourceTypeByName(String name) throws ConfigurationManagementException;
 
     ResourceType getResourceTypeById(String id) throws ConfigurationManagementException;
+
+    void deleteResourceTypeByName(String name) throws ConfigurationManagementException;
 }

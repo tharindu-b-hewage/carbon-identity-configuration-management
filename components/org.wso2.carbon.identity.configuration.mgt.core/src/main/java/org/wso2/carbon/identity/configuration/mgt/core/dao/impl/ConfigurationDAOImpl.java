@@ -17,6 +17,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_ADD_RESOURCE_TYPE;
+import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_DELETE_RESOURCE_TYPE;
+import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_REPLACE_RESOURCE_TYPE;
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_RETRIEVE_RESOURCE_TYPE;
 
 public class ConfigurationDAOImpl implements ConfigurationDAO {
@@ -80,6 +82,8 @@ public class ConfigurationDAOImpl implements ConfigurationDAO {
         return new Resource("test", "test");
     }
 
+
+
     /**
      * {@inheritDoc}
      *
@@ -114,6 +118,45 @@ public class ConfigurationDAOImpl implements ConfigurationDAO {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @param resourceType
+     * @throws ConfigurationManagementException
+     */
+    public void replaceResourceType(ResourceType resourceType) throws ConfigurationManagementException {
+
+        try (Connection connection = getConnection()) {
+            replaceResourceType(resourceType, connection);
+        } catch (SQLException e) {
+            throw ConfigurationUtils.handleRuntimeException(
+                    ErrorMessages.ERROR_CODE_DATABASE_CONNECTION, null);
+        }
+    }
+
+    private void replaceResourceType(ResourceType resourceType, Connection connection) throws ConfigurationManagementException {
+
+        PreparedStatement replaceResourceTypePreparedStatement = null;
+        try {
+            replaceResourceTypePreparedStatement = connection.prepareStatement(
+                    SQLConstants.REPLACE_RESOURCE_TYPE_SQL);
+            replaceResourceTypePreparedStatement.setString(1, resourceType.getId());
+            replaceResourceTypePreparedStatement.setString(2, resourceType.getName());
+            replaceResourceTypePreparedStatement.setString(3, resourceType.getDescription());
+
+            // Name is not update since it's the only possible duplicate key here. However a new UUID is generated
+            // since PUT replaces the existing value.
+            replaceResourceTypePreparedStatement.setString(4, resourceType.getId());
+            replaceResourceTypePreparedStatement.setString(5, resourceType.getDescription());
+            replaceResourceTypePreparedStatement.execute();
+        } catch (SQLException e) {
+            IdentityDatabaseUtil.rollBack(connection);
+            throw ConfigurationUtils.handleServerException(ERROR_CODE_REPLACE_RESOURCE_TYPE, resourceType.getName(), e);
+        } finally {
+            IdentityDatabaseUtil.closeStatement(replaceResourceTypePreparedStatement);
+        }
+    }
+
     @Override
     public ResourceType getResourceTypeByName(String name) throws ConfigurationManagementException {
 
@@ -141,7 +184,7 @@ public class ConfigurationDAOImpl implements ConfigurationDAO {
         PreparedStatement getResourceTypePreparedStatement = null;
         try {
             getResourceTypePreparedStatement = connection.prepareStatement(
-                    selectGetResourceTypeQuery(name, id)
+                    selectGetResourceTypeQuery(id)
             );
             getResourceTypePreparedStatement.setString(
                     1,
@@ -165,10 +208,46 @@ public class ConfigurationDAOImpl implements ConfigurationDAO {
         }
     }
 
-    private String selectGetResourceTypeQuery(String name, String id) {
+    private String selectGetResourceTypeQuery(String id) {
 
         return StringUtils.isEmpty(id) ? SQLConstants.GET_RESOURCE_TYPE_BY_NAME_SQL :
                 SQLConstants.GET_RESOURCE_TYPE_BY_ID_SQL;
+    }
+
+    public void deleteResourceTypeByName(String name) throws ConfigurationManagementException {
+
+        try (Connection connection = getConnection()) {
+            deleteResourceTypeByIdentifier(name, null, connection);
+        } catch (SQLException e) {
+            throw ConfigurationUtils.handleRuntimeException(
+                    ErrorMessages.ERROR_CODE_DATABASE_CONNECTION, null);
+        }
+    }
+
+    private void deleteResourceTypeByIdentifier(String name, String id, Connection connection) throws ConfigurationManagementException {
+
+        PreparedStatement deleteResourceTypePreparedStatement = null;
+        try {
+            deleteResourceTypePreparedStatement = connection.prepareStatement(
+                    selectDeleteResourceTypeQuery(id)
+            );
+            deleteResourceTypePreparedStatement.setString(
+                    1,
+                    StringUtils.isEmpty(name) ? id : name
+            );
+            deleteResourceTypePreparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            IdentityDatabaseUtil.rollBack(connection);
+            throw ConfigurationUtils.handleServerException(ERROR_CODE_DELETE_RESOURCE_TYPE, name, e);
+        } finally {
+            IdentityDatabaseUtil.closeStatement(deleteResourceTypePreparedStatement);
+        }
+    }
+
+    private String selectDeleteResourceTypeQuery(String id) {
+
+        return StringUtils.isEmpty(id) ? SQLConstants.DELETE_RESOURCE_TYPE_BY_NAME_SQL :
+                SQLConstants.DELETE_RESOURCE_TYPE_BY_ID_SQL;
     }
 
     protected Connection getConnection() {

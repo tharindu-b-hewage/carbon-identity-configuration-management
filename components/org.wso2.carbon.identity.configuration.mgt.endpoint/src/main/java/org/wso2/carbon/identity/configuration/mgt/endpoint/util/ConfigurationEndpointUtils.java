@@ -17,6 +17,7 @@
 package org.wso2.carbon.identity.configuration.mgt.endpoint.util;
 
 import org.apache.commons.logging.Log;
+import org.apache.cxf.jaxrs.ext.search.SearchContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.identity.configuration.mgt.core.ConfigurationManager;
 import org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants;
@@ -29,6 +30,7 @@ import org.wso2.carbon.identity.configuration.mgt.core.model.ResourceFile;
 import org.wso2.carbon.identity.configuration.mgt.core.model.ResourceType;
 import org.wso2.carbon.identity.configuration.mgt.core.model.ResourceTypeAdd;
 import org.wso2.carbon.identity.configuration.mgt.core.model.Resources;
+import org.wso2.carbon.identity.configuration.mgt.core.model.search.SearchCondition;
 import org.wso2.carbon.identity.configuration.mgt.endpoint.dto.AttributeDTO;
 import org.wso2.carbon.identity.configuration.mgt.endpoint.dto.ErrorDTO;
 import org.wso2.carbon.identity.configuration.mgt.endpoint.dto.ResourceAddDTO;
@@ -258,6 +260,11 @@ public class ConfigurationEndpointUtils {
                 ConfigurationConstants.STATUS_INTERNAL_SERVER_ERROR_MESSAGE_DEFAULT, code);
         logError(log, e);
         return new InternalServerErrorException(errorDTO);
+    }
+
+    public static SearchCondition getSearchCondition(SearchContext searchContext) {
+        // TODO: 12/10/18 Implementation
+        return new SearchCondition(null);
     }
 
     private static void logDebug(Log log, Throwable throwable) {

@@ -32,6 +32,9 @@ public class ConfigurationConstants {
                 "Either name or id should exists."),
         ERROR_CODE_RETRIEVE_RESOURCE_TYPE("CONFIGM_00013", "Error while getting the resource type: %s."),
         ERROR_CODE_RESOURCE_TYPE_NAME_INVALID("CONFIGM_00014", "Invalid resource type name: %s."),
+        ERROR_CODE_RESOURCE_TYPE_DOES_NOT_EXISTS("CONFIGM_00015", "Resource type with the name: %s does not exists."),
+        ERROR_CODE_DELETE_RESOURCE_TYPE("CONFIGM_00016", "Error while deleting the resource type: %s."),
+        ERROR_CODE_REPLACE_RESOURCE_TYPE("CONFIGM_00010", "Error while replacing the resource type: %s."),
         ;
 
         private final String code;
@@ -58,5 +61,16 @@ public class ConfigurationConstants {
 
             return code + ":" + message;
         }
+    }
+
+    public enum SearchConditionType {
+        AND,
+        EQUALS,
+        GREATER_OR_EQUALS,
+        GREATER_THAN,
+        LESS_OR_EQUAL,
+        LESS_THAN,
+        NOT_EQUALS,
+        OR
     }
 }

@@ -17,6 +17,7 @@ import static org.wso2.carbon.identity.configuration.mgt.core.constant.Configura
 import static org.wso2.carbon.identity.configuration.mgt.endpoint.util.ConfigurationEndpointUtils.getConfigurationManager;
 import static org.wso2.carbon.identity.configuration.mgt.endpoint.util.ConfigurationEndpointUtils.getResourceTypeAddFromDTO;
 import static org.wso2.carbon.identity.configuration.mgt.endpoint.util.ConfigurationEndpointUtils.getResourceTypeDTO;
+import static org.wso2.carbon.identity.configuration.mgt.endpoint.util.ConfigurationEndpointUtils.getSearchCondition;
 import static org.wso2.carbon.identity.configuration.mgt.endpoint.util.ConfigurationEndpointUtils.handleBadRequestResponse;
 import static org.wso2.carbon.identity.configuration.mgt.endpoint.util.ConfigurationEndpointUtils.handleServerErrorResponse;
 import static org.wso2.carbon.identity.configuration.mgt.endpoint.util.ConfigurationEndpointUtils.handleUnexpectedServerError;
@@ -89,7 +90,7 @@ public class ResourceTypeApiServiceImpl extends ResourceTypeApiService {
     public Response resourceTypeResourceTypeNameGet(String resourceTypeName, SearchContext searchContext) {
 
         try {
-            ResourceType resourceType = getConfigurationManager().getResourceType(resourceTypeName, searchContext);
+            ResourceType resourceType = getConfigurationManager().getResourceType(resourceTypeName, getSearchCondition(searchContext));
             return Response.ok().entity(getResourceTypeDTO(resourceType)).build();
         } catch (ConfigurationManagementClientException e) {
             return handleBadRequestResponse(e, LOG);
