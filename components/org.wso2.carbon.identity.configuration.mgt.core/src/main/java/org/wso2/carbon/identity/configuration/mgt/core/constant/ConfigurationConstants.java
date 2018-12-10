@@ -42,6 +42,9 @@ public class ConfigurationConstants {
         ERROR_CODE_RESOURCE_TYPE_DOES_NOT_EXISTS("CONFIGM_00015", "Resource type with the name: %s does not exists."),
         ERROR_CODE_DELETE_RESOURCE_TYPE("CONFIGM_00016", "Error while deleting the resource type: %s."),
         ERROR_CODE_REPLACE_RESOURCE_TYPE("CONFIGM_00010", "Error while replacing the resource type: %s."),
+        ERROR_CODE_RESOURCE_ADD_REQUEST_INVALID("CONFIGM_00011", "Resource add request validation failed. " +
+                "Invalid resource add request."),
+        ERROR_CODE_RESOURCE_GET_REQUEST_INVALID("CONFIGM_00012", "Resource get request validation failed"),
         ;
 
         private final String code;

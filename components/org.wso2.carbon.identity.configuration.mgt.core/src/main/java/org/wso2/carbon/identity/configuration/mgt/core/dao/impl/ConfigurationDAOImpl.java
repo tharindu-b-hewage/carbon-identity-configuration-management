@@ -3,7 +3,6 @@ package org.wso2.carbon.identity.configuration.mgt.core.dao.impl;
 import org.apache.commons.lang.StringUtils;
 import org.wso2.carbon.database.utils.jdbc.JdbcTemplate;
 import org.wso2.carbon.database.utils.jdbc.exceptions.DataAccessException;
-import org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages;
 import org.wso2.carbon.identity.configuration.mgt.core.constant.SQLConstants;
 import org.wso2.carbon.identity.configuration.mgt.core.dao.ConfigurationDAO;
 import org.wso2.carbon.identity.configuration.mgt.core.exception.ConfigurationManagementException;
@@ -17,8 +16,6 @@ import org.wso2.carbon.identity.core.util.IdentityDatabaseUtil;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-
-import javax.xml.crypto.Data;
 
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_ADD_RESOURCE_TYPE;
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_DELETE_RESOURCE_TYPE;
@@ -39,7 +36,7 @@ public class ConfigurationDAOImpl implements ConfigurationDAO {
     /**
      * {@inheritDoc}
      */
-    public Resource getResource(String name) throws ConfigurationManagementException {
+    public Resource getResource(String name, String resourceTypeId, int tenantId) throws ConfigurationManagementException {
 
 //        Connection connection = IdentityDatabaseUtil.getDBConnection();
 //        try {
@@ -52,7 +49,16 @@ public class ConfigurationDAOImpl implements ConfigurationDAO {
 //        Attribute tempAttribute = new Attribute("from", "abc@gmail.com");
 //        attributes.add(tempAttribute);
 //        return new Resource("mail", attributes);
+        JdbcTemplate jdbcTemplate = JdbcUtils.getNewTemplate();
+        Resource resource;
+        try {
+            resource = jdbcTemplate.executeQuery();
+        }
         return new Resource("test", "test");
+    }
+
+    private String getResourceId(String resourceName, String resourceTypeId, int tenantId) {
+
     }
 
     /**
@@ -93,16 +99,6 @@ public class ConfigurationDAOImpl implements ConfigurationDAO {
      * @throws ConfigurationManagementException
      */
     public void addResourceType(ResourceType resourceType) throws ConfigurationManagementException {
-
-        try (Connection connection = getConnection()) {
-            addResourceType(resourceType, connection);
-        } catch (SQLException e) {
-            throw ConfigurationUtils.handleRuntimeException(
-                    ErrorMessages.ERROR_CODE_DATABASE_CONNECTION, null);
-        }
-    }
-
-    private void addResourceType(ResourceType resourceType, Connection connection) throws ConfigurationManagementException {
 
         JdbcTemplate jdbcTemplate = JdbcUtils.getNewTemplate();
         try {
@@ -214,10 +210,5 @@ public class ConfigurationDAOImpl implements ConfigurationDAO {
 
         return StringUtils.isEmpty(id) ? SQLConstants.DELETE_RESOURCE_TYPE_BY_NAME_SQL :
                 SQLConstants.DELETE_RESOURCE_TYPE_BY_ID_SQL;
-    }
-
-    protected Connection getConnection() {
-
-        return IdentityDatabaseUtil.getDBConnection();
     }
 }

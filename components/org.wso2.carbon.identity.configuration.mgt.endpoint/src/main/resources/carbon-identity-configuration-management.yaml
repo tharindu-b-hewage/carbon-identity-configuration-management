@@ -52,6 +52,22 @@ consumes:
 produces:
 - application/json
 paths:
+  "/upload":
+    post:
+      summary: Uploads a file
+      consumes:
+      - multipart/form-data
+      parameters:
+      - in: formData
+        name: upfile
+        type: file
+        description: The file to be uploaded
+      responses:
+        201:
+          description: Successful response
+      tags:
+      - File Upload
+
   # Endpoint used to perform tenant based search
   "/search":
     get:

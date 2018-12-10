@@ -19,6 +19,7 @@ package org.wso2.carbon.identity.configuration.mgt.core;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages;
 import org.wso2.carbon.identity.configuration.mgt.core.dao.ConfigurationDAO;
 import org.wso2.carbon.identity.configuration.mgt.core.exception.ConfigurationManagementClientException;
@@ -37,6 +38,8 @@ import org.wso2.carbon.identity.configuration.mgt.core.util.ConfigurationUtils;
 import java.util.List;
 
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_GET_DAO;
+import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_RESOURCE_ADD_REQUEST_INVALID;
+import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_RESOURCE_GET_REQUEST_INVALID;
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_RESOURCE_TYPE_ALREADY_EXISTS;
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_RESOURCE_TYPE_DOES_NOT_EXISTS;
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_RESOURCE_TYPE_NAME_INVALID;
@@ -80,10 +83,12 @@ public class ConfigurationManagerImpl implements ConfigurationManager {
     /**
      * {@inheritDoc}
      */
-    public Resource getResource(String name, String resourceType, SearchCondition searchCondition)
+    public Resource getResource(String name, String resourceTypeName, SearchCondition searchCondition)
             throws ConfigurationManagementException {
 
-        Resource resource = this.getConfigurationDAO().getResource(name);
+        validateResourceRetrieveRequest(name, resourceTypeName);
+        ResourceType resourceType = getResourceType(resourceTypeName, null);
+        Resource resource = this.getConfigurationDAO().getResource(name, resourceType.getId(), getTenantId());
         if (resource == null) {
             if (log.isDebugEnabled()) {
                 log.debug("No resource found for the name " + name);
@@ -91,6 +96,21 @@ public class ConfigurationManagerImpl implements ConfigurationManager {
             throw ConfigurationUtils.handleClientException(ErrorMessages.ERROR_CODE_CONFIGURATION_NAME_INVALID, null);
         }
         return resource;
+    }
+
+    private void validateResourceRetrieveRequest(String name, String resourceType) throws ConfigurationManagementException {
+
+        if (StringUtils.isEmpty(name) || StringUtils.isEmpty(resourceType)) {
+            if (log.isDebugEnabled()) {
+                log.debug("Invalid resource identifier with name: " + name + " and resourceType: " + resourceType + ".");
+            }
+            throw handleClientException(ERROR_CODE_RESOURCE_GET_REQUEST_INVALID, null);
+        }
+    }
+
+    private int getTenantId() {
+
+        return PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
     }
 
     /**
@@ -111,11 +131,57 @@ public class ConfigurationManagerImpl implements ConfigurationManager {
     public Resource addResource(String resourceType, ResourceAdd resourceAdd) throws ConfigurationManagementException {
 
         // TODO: 10/29/18 DAO will handle conflict error
+        validateResourceCreateRequest(resourceType, resourceAdd);
         this.getConfigurationDAO().addResource(resourceType, resourceAdd);
         if (log.isDebugEnabled()) {
             log.debug(resourceAdd.getName() + " resource created successfully.");
         }
         return null;
+    }
+
+    private void validateResourceCreateRequest(String resourceType, ResourceAdd resourceAdd) throws ConfigurationManagementException {
+
+        if (StringUtils.isEmpty(resourceType) || !isResourceAddParameterValid(resourceAdd)) {
+            throw handleClientException(ERROR_CODE_RESOURCE_ADD_REQUEST_INVALID, null);
+        }
+
+        if (isResourceExists(resourceAdd.getName(), resourceType)) {
+
+        }
+    }
+
+    private boolean isResourceAddParameterValid(ResourceAdd resourceAdd) {
+
+        if (StringUtils.isEmpty(resourceAdd.getName())) {
+            if (log.isDebugEnabled()) {
+                log.debug("Resource name: " + resourceAdd.getName() + " is not valid.");
+            }
+            return false;
+        }
+
+        // Invalid if both attributes and file fields are empty.
+        if ((resourceAdd.getAttributes() == null || resourceAdd.getAttributes().size() == 0) &&
+                (resourceAdd.getFile() == null || resourceAdd.getFile().getValue() == null)) {
+            if (log.isDebugEnabled()) {
+                log.debug("A resource must contain either an attributes or a file.");
+            }
+            return false;
+        }
+
+        return true;
+    }
+
+    private boolean isResourceExists(String resourceName, String resoureType) throws ConfigurationManagementException {
+
+        try {
+            getResource(resourceName, resoureType, null);
+            return false;
+        } catch (ConfigurationManagementClientException e) {
+            if (e.getErrorCode().equals(ERROR_CODE_RESOURCE_TYPE_NAME_INVALID.getCode())) {
+                return true;
+            }
+            throw e;
+        }
     }
 
     /**
@@ -295,7 +361,7 @@ public class ConfigurationManagerImpl implements ConfigurationManager {
         );
     }
 
-    private void validateResourceTypeReplaceRequest(String name) throws ConfigurationManagementException{
+    private void validateResourceTypeReplaceRequest(String name) throws ConfigurationManagementException {
 
         if (StringUtils.isEmpty(name)) {
             throw handleClientException(ERROR_CODE_RESOURCE_TYPE_NAME_MISSING, null);

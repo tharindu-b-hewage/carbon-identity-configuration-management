@@ -25,7 +25,7 @@ public interface ConfigurationDAO {
      * @param name Name id of the {@link Resource} to retrieve.
      * @return {@link Resource} for the given name.
      */
-    Resource getResource(String name) throws ConfigurationManagementException;
+    Resource getResource(String name, String resourceTypeId, int tenantId) throws ConfigurationManagementException;
 
     /**
      * Delete {@link Resource} by the given name.
