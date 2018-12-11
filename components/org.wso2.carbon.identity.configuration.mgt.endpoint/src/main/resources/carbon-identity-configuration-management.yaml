@@ -67,6 +67,15 @@ paths:
           description: Successful response
       tags:
       - File Upload
+    get:
+      summary: Downloads a file
+      produces:
+        - application/pdf
+      responses:
+        200:
+          description: Ok
+          schema:
+            type: file
 
   # Endpoint used to perform tenant based search
   "/search":
