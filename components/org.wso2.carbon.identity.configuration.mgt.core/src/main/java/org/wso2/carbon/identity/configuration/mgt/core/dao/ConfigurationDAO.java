@@ -49,26 +49,24 @@ public interface ConfigurationDAO {
     /**
      * Replace given {@link Resource} or add if existing {@link Resource} is not present.
      *
-     * @param name Name id of the {@link Resource}
      * @param resource New {@link Resource} to replace the existing.
      * @return Name id of the added {@link Resource}.
      * @throws ConfigurationManagementException Resource management exception.
      */
-    Resource replaceResource(String name, Resource resource) throws ConfigurationManagementException;
+    Resource replaceResource(String resourceType, ResourceAdd resource) throws ConfigurationManagementException;
 
     /**
      * Update given {@link Resource}.
      *
-     * @param name Name id of the {@link Resource}
      * @param resource New {@link Resource} to update the existing.
      * @return Name id of the added {@link Resource}.
      * @throws ConfigurationManagementException Resource management exception.
      */
-    Resource updateConfiguration(String name, Resource resource) throws ConfigurationManagementException;
+    Resource updateResource(String resourceType, ResourceAdd resource) throws ConfigurationManagementException;
 
-    void addResourceType(ResourceType resourceType) throws ConfigurationManagementException;
+    ResourceType addResourceType(ResourceType resourceType) throws ConfigurationManagementException;
 
-    void replaceResourceType(ResourceType resourceType) throws ConfigurationManagementException;
+    ResourceType replaceResourceType(ResourceType resourceType) throws ConfigurationManagementException;
 
     ResourceType getResourceTypeByName(String name) throws ConfigurationManagementException;
 
