@@ -34,17 +34,16 @@ public interface ConfigurationDAO {
      * @return Name id of the deleted {@link Resource}.
      * @throws ConfigurationManagementException Resource management exception.
      */
-    void deleteResource(String name) throws ConfigurationManagementException;
+    void deleteResource(String name, String resourceType) throws ConfigurationManagementException;
 
     /**
      * Add given {@link Resource}.
      *
-     * @param resourceType Name id of the {@link Resource}
      * @param resource {@link Resource} to be added.
      * @return Name id of the added {@link Resource}.
      * @throws ConfigurationManagementException Resource management exception.
      */
-    Resource addResource(String resourceType, ResourceAdd resource) throws ConfigurationManagementException;
+    void addResource(Resource resource) throws ConfigurationManagementException;
 
     /**
      * Replace given {@link Resource} or add if existing {@link Resource} is not present.
@@ -54,7 +53,7 @@ public interface ConfigurationDAO {
      * @return Name id of the added {@link Resource}.
      * @throws ConfigurationManagementException Resource management exception.
      */
-    Resource replaceResource(String name, Resource resource) throws ConfigurationManagementException;
+    void replaceResource(String name, Resource resource) throws ConfigurationManagementException;
 
     /**
      * Update given {@link Resource}.
@@ -64,7 +63,7 @@ public interface ConfigurationDAO {
      * @return Name id of the added {@link Resource}.
      * @throws ConfigurationManagementException Resource management exception.
      */
-    Resource updateConfiguration(String name, Resource resource) throws ConfigurationManagementException;
+    void updateConfiguration(String name, Resource resource) throws ConfigurationManagementException;
 
     void addResourceType(ResourceType resourceType) throws ConfigurationManagementException;
 

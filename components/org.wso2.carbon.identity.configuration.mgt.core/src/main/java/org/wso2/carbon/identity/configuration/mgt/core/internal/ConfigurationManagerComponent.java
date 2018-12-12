@@ -44,7 +44,7 @@ import java.util.List;
 )
 public class ConfigurationManagerComponent {
 
-    private static final Log log = LogFactory.getLog(ConfigurationManager.class);
+    private static final Log log = LogFactory.getLog(ConfigurationManagerComponent.class);
     private List<ConfigurationDAO> configurationDAOS = new ArrayList<>();
 
     /**

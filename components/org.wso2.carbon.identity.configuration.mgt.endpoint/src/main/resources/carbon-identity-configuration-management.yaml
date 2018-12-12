@@ -52,31 +52,6 @@ consumes:
 produces:
 - application/json
 paths:
-  "/upload":
-    post:
-      summary: Uploads a file
-      consumes:
-      - multipart/form-data
-      parameters:
-      - in: formData
-        name: upfile
-        type: file
-        description: The file to be uploaded
-      responses:
-        201:
-          description: Successful response
-      tags:
-      - File Upload
-    get:
-      summary: Downloads a file
-      produces:
-        - application/pdf
-      responses:
-        200:
-          description: Ok
-          schema:
-            type: file
-
   # Endpoint used to perform tenant based search
   "/search":
     get:
@@ -835,10 +810,13 @@ definitions:
   Resource:
     type: object
     required:
+    - resourceId
     - resourceName
     - resourceType
     - lastModified
     properties:
+      resourceId:
+        type: string
       tenantDomain:
         type: string
       resourceName:
@@ -851,11 +829,10 @@ definitions:
         type: array
         items:
           $ref: '#/definitions/Attribute'
-      file:
-        type: object
-        properties:
-          value:
-            type: string
+      files:
+        type: array
+        items:
+          $ref: '#/definitions/ResourceFile'
   #-----------------------------------------------------
   # Resource Add object
   #-----------------------------------------------------
@@ -868,11 +845,6 @@ definitions:
         type: array
         items:
           $ref: '#/definitions/Attribute'
-      file:
-        type: object
-        properties:
-          value:
-            type: string
   #-----------------------------------------------------
   # Resource Type object
   #-----------------------------------------------------
@@ -907,4 +879,14 @@ definitions:
       key:
         type: string
       value:
+        type: string
+  #-----------------------------------------------------
+  # Resource File Object
+  #-----------------------------------------------------
+  ResourceFile:
+    type: object
+    required:
+    - path
+    properties:
+      path:
         type: string

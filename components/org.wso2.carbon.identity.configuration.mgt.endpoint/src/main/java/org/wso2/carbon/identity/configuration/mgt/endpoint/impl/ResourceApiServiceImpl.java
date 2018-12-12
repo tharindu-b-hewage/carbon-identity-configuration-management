@@ -34,10 +34,10 @@ public class ResourceApiServiceImpl extends ResourceApiService {
     private static final Log LOG = LogFactory.getLog(ResourceApiServiceImpl.class);
 
     @Override
-    public Response resourceGet(SearchContext searchContext) {
+    public Response resourceGet() {
 
         try {
-            Resources resources = getConfigurationManager().getResources(getSearchCondition(searchContext));
+            Resources resources = getConfigurationManager().getResources(getSearchCondition(null));
             ResourcesDTO resourcesDTO = getResourcesDTO(resources);
             return Response.ok().entity(resourcesDTO).build();
         } catch (ConfigurationManagementClientException e) {
@@ -50,10 +50,10 @@ public class ResourceApiServiceImpl extends ResourceApiService {
     }
 
     @Override
-    public Response resourceResourceTypeResourceTypeNameGet(String resourceTypeName, SearchContext searchContext) {
+    public Response resourceResourceTypeResourceTypeNameGet(String resourceTypeName) {
 
         try {
-            Resources resources = getConfigurationManager().getResourcesByType(resourceTypeName, getSearchCondition(searchContext));
+            Resources resources = getConfigurationManager().getResourcesByType(resourceTypeName, getSearchCondition(null));
             return Response.ok().entity(getResourcesDTO(resources)).build();
         } catch (ConfigurationManagementClientException e) {
             return handleBadRequestResponse(e, LOG);
@@ -126,7 +126,7 @@ public class ResourceApiServiceImpl extends ResourceApiService {
 
     @Override
     public Response resourceResourceTypeResourceNameAttributeKeyGet(String resourceName, String resourceType,
-                                                                    String attributeKey, SearchContext searchContext) {
+                                                                    String attributeKey) {
 
         try {
             AttributePathParameter attributePathParameter = new AttributePathParameter();
@@ -134,7 +134,7 @@ public class ResourceApiServiceImpl extends ResourceApiService {
             attributePathParameter.setResourceName(resourceName);
             attributePathParameter.setResourceType(resourceType);
 
-            Attribute attribute = getConfigurationManager().getAttribute(attributePathParameter, getSearchCondition(searchContext));
+            Attribute attribute = getConfigurationManager().getAttribute(attributePathParameter, getSearchCondition(null));
             return Response.ok().entity(getAttributeDTO(attribute)).build();
         } catch (ConfigurationManagementClientException e) {
             return handleBadRequestResponse(e, LOG);
@@ -161,10 +161,10 @@ public class ResourceApiServiceImpl extends ResourceApiService {
     }
 
     @Override
-    public Response resourceResourceTypeResourceNameGet(String resourceName, String resourceType, SearchContext searchContext) {
+    public Response resourceResourceTypeResourceNameGet(String resourceName, String resourceType) {
 
         try {
-            Resource resource = getConfigurationManager().getResource(resourceName, resourceType, getSearchCondition(searchContext));
+            Resource resource = getConfigurationManager().getResource(resourceName, resourceType, getSearchCondition(null));
             return Response.ok().entity(getResourceDTO(resource)).build();
         } catch (ConfigurationManagementClientException e) {
             return handleBadRequestResponse(e, LOG);

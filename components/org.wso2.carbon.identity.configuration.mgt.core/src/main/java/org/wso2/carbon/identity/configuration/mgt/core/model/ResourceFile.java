@@ -7,6 +7,15 @@ public class ResourceFile {
 
     private String value;
 
+    public ResourceFile() {
+
+    }
+
+    public ResourceFile(String value) {
+
+        this.value = value;
+    }
+
     public String getValue() {
 
         return value;

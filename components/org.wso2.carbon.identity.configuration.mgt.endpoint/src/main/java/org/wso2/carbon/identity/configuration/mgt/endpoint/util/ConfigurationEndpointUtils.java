@@ -45,9 +45,16 @@ import org.wso2.carbon.identity.configuration.mgt.endpoint.exception.ForbiddenEx
 import org.wso2.carbon.identity.configuration.mgt.endpoint.exception.InternalServerErrorException;
 import org.wso2.carbon.identity.configuration.mgt.endpoint.exception.NotFoundException;
 
+import java.util.ArrayList;
 import java.util.stream.Collectors;
 import javax.ws.rs.core.Response;
 
+import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_RESOURCE_ALREADY_EXISTS;
+import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_RESOURCE_DOES_NOT_EXISTS;
+import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_RESOURCE_NAME_INVALID;
+import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_RESOURCE_TYPE_ALREADY_EXISTS;
+import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_RESOURCE_TYPE_DOES_NOT_EXISTS;
+import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_RESOURCE_TYPE_NAME_INVALID;
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_UNEXPECTED;
 
 /**
@@ -68,12 +75,23 @@ public class ConfigurationEndpointUtils {
         resourceDTO.setResourceType(resource.getResourceType());
         resourceDTO.setLastModified(resource.getLastModified());
         resourceDTO.setTenantDomain(resource.getTenantDomain());
+        resourceDTO.setResourceId(resource.getResourceId());
+        resourceDTO.setTenantDomain(resource.getTenantDomain());
         resourceDTO.setAttributes(
-                resource.getAttribute().stream().map(
-                        ConfigurationEndpointUtils::getAttributeDTO
-                ).collect(Collectors.toList())
+                resource.getAttribute() != null ?
+                        resource.getAttribute()
+                                .stream()
+                                .map(ConfigurationEndpointUtils::getAttributeDTO)
+                                .collect(Collectors.toList())
+                        : new ArrayList<>(0)
         );
-        resourceDTO.setFile(getResourceFileDTO(resource.getFile()));
+        resourceDTO.setFiles(resource.getFile() != null ?
+                resource.getFile()
+                        .stream()
+                        .map(ConfigurationEndpointUtils::getResourceFileDTO)
+                        .collect(Collectors.toList())
+                : new ArrayList<>(0)
+        );
         return resourceDTO;
     }
 
@@ -100,7 +118,7 @@ public class ConfigurationEndpointUtils {
     public static ResourceFileDTO getResourceFileDTO(ResourceFile resourceFile) {
 
         ResourceFileDTO resourceFileDTO = new ResourceFileDTO();
-        resourceFileDTO.setValue(resourceFile.getValue());
+        resourceFileDTO.setPath(resourceFile.getValue());
         return resourceFileDTO;
     }
 
@@ -112,14 +130,13 @@ public class ConfigurationEndpointUtils {
                 .stream()
                 .map(ConfigurationEndpointUtils::getAttributeFromDTO)
                 .collect(Collectors.toList()));
-        resourceAdd.setFile(getResourceFileFromDTO(resourceAddDTO.getFile()));
         return resourceAdd;
     }
 
     public static ResourceFile getResourceFileFromDTO(ResourceFileDTO resourceFileDTO) {
 
         ResourceFile resourceFile = new ResourceFile();
-        resourceFile.setValue(resourceFileDTO.getValue());
+        resourceFile.setValue(resourceFileDTO.getPath());
         return resourceFile;
     }
 
@@ -181,12 +198,14 @@ public class ConfigurationEndpointUtils {
 
     private static boolean isNotFoundError(ConfigurationManagementClientException e) {
 
-        return ConfigurationConstants.ErrorMessages.ERROR_CODE_RESOURCE_TYPE_NAME_INVALID.getCode().equals(e.getErrorCode());
+        return ERROR_CODE_RESOURCE_TYPE_DOES_NOT_EXISTS.getCode().equals(e.getErrorCode()) ||
+                ERROR_CODE_RESOURCE_DOES_NOT_EXISTS.getCode().equals(e.getErrorCode());
     }
 
     private static boolean isConflictError(ConfigurationManagementClientException e) {
 
-        return ConfigurationConstants.ErrorMessages.ERROR_CODE_RESOURCE_TYPE_ALREADY_EXISTS.getCode().equals(e.getErrorCode());
+        return ERROR_CODE_RESOURCE_TYPE_ALREADY_EXISTS.getCode().equals(e.getErrorCode()) ||
+                ERROR_CODE_RESOURCE_ALREADY_EXISTS.getCode().equals(e.getErrorCode());
     }
 
     private static boolean isForbiddenError(ConfigurationManagementClientException e) {

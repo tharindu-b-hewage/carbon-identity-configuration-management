@@ -4,6 +4,9 @@ import java.util.List;
 
 public class ResourceAdd {
 
+    private String name;
+    private List<Attribute> attributes;
+
     public String getName() {
 
         return name;
@@ -24,17 +27,4 @@ public class ResourceAdd {
         this.attributes = attributes;
     }
 
-    public ResourceFile getFile() {
-
-        return file;
-    }
-
-    public void setFile(ResourceFile file) {
-
-        this.file = file;
-    }
-
-    private String name;
-    private List<Attribute> attributes;
-    private ResourceFile file;
 }

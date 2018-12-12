@@ -5,10 +5,10 @@ import org.wso2.carbon.identity.configuration.mgt.endpoint.impl.ResourceApiServi
 
 public class ResourceApiServiceFactory {
 
-    private final static ResourceApiService service = new ResourceApiServiceImpl();
+   private final static ResourceApiService service = new ResourceApiServiceImpl();
 
-    public static ResourceApiService getResourceApi() {
-
-        return service;
-    }
+   public static ResourceApiService getResourceApi()
+   {
+      return service;
+   }
 }

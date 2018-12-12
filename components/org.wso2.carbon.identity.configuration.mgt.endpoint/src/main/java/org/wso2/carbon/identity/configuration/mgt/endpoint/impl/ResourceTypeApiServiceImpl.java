@@ -87,10 +87,10 @@ public class ResourceTypeApiServiceImpl extends ResourceTypeApiService {
     }
 
     @Override
-    public Response resourceTypeResourceTypeNameGet(String resourceTypeName, SearchContext searchContext) {
+    public Response resourceTypeResourceTypeNameGet(String resourceTypeName) {
 
         try {
-            ResourceType resourceType = getConfigurationManager().getResourceType(resourceTypeName, getSearchCondition(searchContext));
+            ResourceType resourceType = getConfigurationManager().getResourceType(resourceTypeName, getSearchCondition(null));
             return Response.ok().entity(getResourceTypeDTO(resourceType)).build();
         } catch (ConfigurationManagementClientException e) {
             return handleBadRequestResponse(e, LOG);

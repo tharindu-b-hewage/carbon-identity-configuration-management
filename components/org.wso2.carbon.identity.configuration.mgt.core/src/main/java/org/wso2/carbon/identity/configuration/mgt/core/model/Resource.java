@@ -23,11 +23,12 @@ import java.util.List;
  */
 public class Resource {
 
+    private String resourceId;
     private String tenantDomain;
     private String resourceName;
     private String resourceType;
     private String lastModified;
-    private ResourceFile file;
+    private List<ResourceFile> file;
     private List<Attribute> attribute;
 
     /**
@@ -40,6 +41,20 @@ public class Resource {
 
         this.resourceName = resourceName;
         this.resourceType = resourceType;
+    }
+
+    public Resource() {
+
+    }
+
+    public String getResourceId() {
+
+        return resourceId;
+    }
+
+    public void setResourceId(String resourceId) {
+
+        this.resourceId = resourceId;
     }
 
     public String getTenantDomain() {
@@ -72,12 +87,12 @@ public class Resource {
         this.resourceType = resourceType;
     }
 
-    public ResourceFile getFile() {
+    public List<ResourceFile> getFile() {
 
         return file;
     }
 
-    public void setFile(ResourceFile file) {
+    public void setFile(List<ResourceFile> file) {
 
         this.file = file;
     }

@@ -29,9 +29,9 @@ public class ConfigurationConstants {
         ERROR_CODE_NO_USER_FOUND("CONFIGM_00003", "No authenticated user found to perform the operation: %s."),
         ERROR_CODE_UNEXPECTED("CONFIGM_00004", "Unexpected Error"),
         ERROR_CODE_CONFIGURATION_NAME_REQUIRED("CONFIGM_00005", "Resource name is required."),
-        ERROR_CODE_CONFIGURATION_NAME_INVALID("CONFIGM_00006", "Invalid Resource Name: %s"),
+        ERROR_CODE_RESOURCE_NAME_INVALID("CONFIGM_00006", "Invalid Resource Name: %s"),
         ERROR_CODE_GET_DAO("CONFIGM_00007", "No %s are registered."),
-        ERROR_CODE_RESOURCE_TYPE_NAME_MISSING("CONFIGM_00008", "Missing mandatory resource type name."),
+        ERROR_CODE_RESOURCE_TYPE_NAME_REQUIRED("CONFIGM_00008", "Resource type name: %s validation failed."),
         ERROR_CODE_DATABASE_CONNECTION("CONFIGM_00009", "Error when creating the database connection."),
         ERROR_CODE_ADD_RESOURCE_TYPE("CONFIGM_00010", "Error while adding the resource type: %s."),
         ERROR_CODE_RESOURCE_TYPE_ALREADY_EXISTS("CONFIGM_00011", "Resource type with the name: %s already exists."),
@@ -41,10 +41,19 @@ public class ConfigurationConstants {
         ERROR_CODE_RESOURCE_TYPE_NAME_INVALID("CONFIGM_00014", "Invalid resource type name: %s."),
         ERROR_CODE_RESOURCE_TYPE_DOES_NOT_EXISTS("CONFIGM_00015", "Resource type with the name: %s does not exists."),
         ERROR_CODE_DELETE_RESOURCE_TYPE("CONFIGM_00016", "Error while deleting the resource type: %s."),
-        ERROR_CODE_REPLACE_RESOURCE_TYPE("CONFIGM_00010", "Error while replacing the resource type: %s."),
-        ERROR_CODE_RESOURCE_ADD_REQUEST_INVALID("CONFIGM_00011", "Resource add request validation failed. " +
+        ERROR_CODE_REPLACE_RESOURCE_TYPE("CONFIGM_00017", "Error while replacing the resource type: %s."),
+        ERROR_CODE_RESOURCE_ADD_REQUEST_INVALID("CONFIGM_00018", "Resource add request validation failed. " +
                 "Invalid resource add request."),
-        ERROR_CODE_RESOURCE_GET_REQUEST_INVALID("CONFIGM_00012", "Resource get request validation failed"),
+        ERROR_CODE_RESOURCE_GET_REQUEST_INVALID("CONFIGM_00019", "Resource get request validation failed"),
+        ERROR_CODE_GET_RESOURCE("CONFIGM_00020", "Error while getting the resource : %s."),
+        ERROR_CODE_RESOURCE_ALREADY_EXISTS("CONFIGM_00021", "Resource with the name: %s already exists."),
+        ERROR_CODE_ADD_RESOURCE("CONFIGM_00021", "Error while adding the resource : %s."),
+        ERROR_CODE_QUERY_LENGTH_EXCEEDED("CONFIGM_00022", "Too large SQL query length."),
+        ERROR_CODE_RESOURCE_DELETE_REQUEST_REQUIRED("CONFIGM_00023", "Resource delete request validation failed. " +
+                "Invalid resource delete request."),
+        ERROR_CODE_RESOURCE_DOES_NOT_EXISTS("CONFIGM_00024", "Resource with the name: %s does not exists."),
+        ERROR_CODE_ADD_DELETE_RESOURCE("CONFIGM_00025", "Error while deleting the resource: %s."),
+
         ;
 
         private final String code;
