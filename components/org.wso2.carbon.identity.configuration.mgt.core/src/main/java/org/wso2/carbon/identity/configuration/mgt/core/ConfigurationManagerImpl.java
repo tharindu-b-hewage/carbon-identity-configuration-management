@@ -32,12 +32,15 @@ import org.wso2.carbon.identity.configuration.mgt.core.model.ResourceAdd;
 import org.wso2.carbon.identity.configuration.mgt.core.model.ResourceType;
 import org.wso2.carbon.identity.configuration.mgt.core.model.ResourceTypeAdd;
 import org.wso2.carbon.identity.configuration.mgt.core.model.Resources;
+import org.wso2.carbon.identity.configuration.mgt.core.model.search.ResourceSearchBean;
 import org.wso2.carbon.identity.configuration.mgt.core.model.search.SearchCondition;
 import org.wso2.carbon.identity.configuration.mgt.core.util.ConfigurationUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_GET_DAO;
+import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_QUERY_LENGTH_EXCEEDED;
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_RESOURCE_ADD_REQUEST_INVALID;
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_RESOURCE_ALREADY_EXISTS;
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_RESOURCE_DELETE_REQUEST_REQUIRED;
@@ -47,11 +50,14 @@ import static org.wso2.carbon.identity.configuration.mgt.core.constant.Configura
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_RESOURCE_TYPE_DOES_NOT_EXISTS;
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_RESOURCE_TYPE_NAME_INVALID;
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_RESOURCE_TYPE_NAME_REQUIRED;
+import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_SEARCH_REQUEST_INVALID;
+import static org.wso2.carbon.identity.configuration.mgt.core.constant.SQLConstants.MAX_QUERY_LENGTH_SQL;
 import static org.wso2.carbon.identity.configuration.mgt.core.util.ConfigurationUtils.generateUniqueID;
 import static org.wso2.carbon.identity.configuration.mgt.core.util.ConfigurationUtils.handleClientException;
 import static org.wso2.carbon.identity.configuration.mgt.core.util.ConfigurationUtils.handleServerException;
 // TODO: 12/12/18 Implement file upload and download endpoints
 // TODO: 12/12/18 '/id' endpoint implementation for every call to support call by id
+
 /**
  * Resource Manager service implementation.
  */
@@ -69,9 +75,29 @@ public class ConfigurationManagerImpl implements ConfigurationManager {
     /**
      * {@inheritDoc}
      */
-    public Resources getTenantResources(SearchCondition searchCondition) throws ConfigurationManagementException {
+    public Resources getTenantResources(String searchExpressionSQL) throws ConfigurationManagementException {
 
-        return null;
+        validateSearchRequest(searchExpressionSQL);
+        return getConfigurationDAO().getTenantResources(searchExpressionSQL);
+    }
+
+    private void validateSearchRequest(String searchExpressionSQL) throws ConfigurationManagementClientException {
+
+        if (StringUtils.isEmpty(searchExpressionSQL)) {
+            if (log.isDebugEnabled()) {
+                log.debug("Search filter expression: " + searchExpressionSQL + " is not valid");
+            }
+            throw handleClientException(ERROR_CODE_SEARCH_REQUEST_INVALID, null);
+        }
+
+        if (searchExpressionSQL.length() > MAX_QUERY_LENGTH_SQL) {
+            if (log.isDebugEnabled()) {
+                log.debug("Error building SQL query for the search. Search expression " +
+                        "query length: " + searchExpressionSQL.length() + " exceeds the maximum limit: " +
+                        MAX_QUERY_LENGTH_SQL);
+            }
+            throw ConfigurationUtils.handleClientException(ERROR_CODE_QUERY_LENGTH_EXCEEDED, null);
+        }
     }
 
     public Resources getResources(SearchCondition searchCondition) throws ConfigurationManagementException {

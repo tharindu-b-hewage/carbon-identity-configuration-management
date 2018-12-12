@@ -62,10 +62,32 @@ public class SQLConstants {
             "  R.NAME = ?\n" +
             "  AND R.TENANT_ID = ?\n" +
             "  AND R.TYPE_ID = ?";
+    public static final String GET_TENANT_RESOURCES_SELECT_COLLUMNS_MYSQL = "SELECT\n" +
+            "  R.ID,\n" +
+            "  R.TENANT_ID,\n" +
+            "  R.NAME,\n" +
+            "  R.LAST_MODIFIED,\n" +
+            "  T.NAME AS RESOURCE_TYPE,\n" +
+            "  T.DESCRIPTION AS DESCRIPTION,\n" +
+            "  F.ID AS FILE_ID,\n" +
+            "  A.ATTR_KEY AS ATTR_KEY,\n" +
+            "  A.ATTR_VALUE AS ATTR_VALUE\n" +
+            "FROM\n" +
+            "  IDN_CONFIG_RESOURCE AS R\n" +
+            "  INNER JOIN IDN_CONFIG_TYPE AS T ON R.TYPE_ID = T.ID\n" +
+            "  LEFT JOIN IDN_CONFIG_ATTRIBUTE AS A ON (\n" +
+            "    R.HAS_ATTRIBUTE = TRUE\n" +
+            "    AND A.RESOURCE_ID = R.ID\n" +
+            "  )\n" +
+            "  LEFT JOIN IDN_CONFIG_FILE AS F ON (\n" +
+            "    R.HAS_FILE = TRUE\n" +
+            "    AND F.RESOURCE_ID = R.ID\n" +
+            "  )\n";
     public static final String DELETE_RESOURCE_SQL = "DELETE FROM\n" +
             "  IDN_CONFIG_RESOURCE\n" +
             "WHERE\n" +
             "  NAME = ?\n" +
             "  AND TENANT_ID = ?\n" +
             "  AND TYPE_ID = ?";
+
 }

@@ -2,8 +2,8 @@ package org.wso2.carbon.identity.configuration.mgt.core.dao;
 
 import org.wso2.carbon.identity.configuration.mgt.core.exception.ConfigurationManagementException;
 import org.wso2.carbon.identity.configuration.mgt.core.model.Resource;
-import org.wso2.carbon.identity.configuration.mgt.core.model.ResourceAdd;
 import org.wso2.carbon.identity.configuration.mgt.core.model.ResourceType;
+import org.wso2.carbon.identity.configuration.mgt.core.model.Resources;
 
 /**
  * Perform CRUD operations for {@link Resource}.
@@ -18,6 +18,8 @@ public interface ConfigurationDAO {
      * @return Priority value for the DAO.
      */
     int getPriority();
+
+    Resources getTenantResources(String searchExpressionSQL) throws ConfigurationManagementException;
 
     /**
      * Returns {@link Resource} by name;
@@ -48,7 +50,7 @@ public interface ConfigurationDAO {
     /**
      * Replace given {@link Resource} or add if existing {@link Resource} is not present.
      *
-     * @param name Name id of the {@link Resource}
+     * @param name     Name id of the {@link Resource}
      * @param resource New {@link Resource} to replace the existing.
      * @return Name id of the added {@link Resource}.
      * @throws ConfigurationManagementException Resource management exception.
@@ -58,7 +60,7 @@ public interface ConfigurationDAO {
     /**
      * Update given {@link Resource}.
      *
-     * @param name Name id of the {@link Resource}
+     * @param name     Name id of the {@link Resource}
      * @param resource New {@link Resource} to update the existing.
      * @return Name id of the added {@link Resource}.
      * @throws ConfigurationManagementException Resource management exception.

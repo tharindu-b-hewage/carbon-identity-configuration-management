@@ -25,6 +25,7 @@ public class ConfigurationConstants {
             = "org.apache.olingo.odata2.api.uri.expression.ExpressionParserException";
     public static final String STATUS_ODATA_EXPRESSION_PARSER_ERROR_MESSAGE
             = "Error occurred while parsing the odata2 search expression.";
+    public static final String BEAN_FIELD_FLAG = "BEAN_FIELD_FLAG__";
 
     public enum ErrorMessages {
         ERROR_CODE_SELECT_CONFIGURATION_BY_ID("CONFIGM_00001", "Error occurred while retrieving configuration " +
@@ -57,7 +58,10 @@ public class ConfigurationConstants {
                 "Invalid resource delete request."),
         ERROR_CODE_RESOURCE_DOES_NOT_EXISTS("CONFIGM_00024", "Resource with the name: %s does not exists."),
         ERROR_CODE_ADD_DELETE_RESOURCE("CONFIGM_00025", "Error while deleting the resource: %s."),
-
+        ERROR_CODE_SEARCH_REQUEST_INVALID("CONFIGM_00026", "Search request validation failed. " +
+                "Invalid search filter expression."),
+        ERROR_CODE_SEARCH_SQL_EXPRESSION_INVALID("CONFIGM_00027", "Search query expression: %s is not valid."),
+        ERROR_CODE_SEARCH_TENANT_RESOURCES("CONFIGM_00028", "Error while searching the resource: %s."),
         ;
 
         private final String code;
@@ -86,14 +90,14 @@ public class ConfigurationConstants {
         }
     }
 
-    public enum SearchConditionType {
-        AND,
-        EQUALS,
-        GREATER_OR_EQUALS,
-        GREATER_THAN,
-        LESS_OR_EQUAL,
-        LESS_THAN,
-        NOT_EQUALS,
-        OR
+    public enum OdataLogicalOperator{
+        eq,
+        ne,
+        lt,
+        le,
+        gt,
+        ge,
+        and,
+        or
     }
 }

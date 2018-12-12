@@ -25,6 +25,7 @@ import org.wso2.carbon.identity.configuration.mgt.core.model.ResourceType;
 import org.wso2.carbon.identity.configuration.mgt.core.model.ResourceTypeAdd;
 import org.wso2.carbon.identity.configuration.mgt.core.model.Resources;
 import org.wso2.carbon.identity.configuration.mgt.core.model.search.SearchCondition;
+import org.wso2.carbon.user.core.model.OperationalCondition;
 
 /**
  * Resource manager service interface.
@@ -39,7 +40,7 @@ public interface ConfigurationManager {
      * @return
      * @throws ConfigurationManagementException
      */
-    Resources getTenantResources(SearchCondition searchCondition) throws ConfigurationManagementException;
+    Resources getTenantResources(String searchExpressionSQL) throws ConfigurationManagementException;
 
     // --------------------------------Resource Type--------------------------------------------------------------
     ResourceType addResourceType(ResourceTypeAdd resourceTypeAdd) throws ConfigurationManagementException;

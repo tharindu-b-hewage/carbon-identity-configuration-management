@@ -15,25 +15,33 @@ import org.wso2.carbon.identity.configuration.mgt.core.model.Attribute;
 import org.wso2.carbon.identity.configuration.mgt.core.model.Resource;
 import org.wso2.carbon.identity.configuration.mgt.core.model.ResourceFile;
 import org.wso2.carbon.identity.configuration.mgt.core.model.ResourceType;
+import org.wso2.carbon.identity.configuration.mgt.core.model.Resources;
+import org.wso2.carbon.identity.configuration.mgt.core.model.search.ResourceSearchBean;
 import org.wso2.carbon.identity.configuration.mgt.core.util.ConfigurationUtils;
 import org.wso2.carbon.identity.configuration.mgt.core.util.JdbcUtils;
 import org.wso2.carbon.identity.core.util.IdentityTenantUtil;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
 
 import static java.time.ZoneOffset.UTC;
+import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.BEAN_FIELD_FLAG;
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_ADD_RESOURCE;
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_ADD_RESOURCE_TYPE;
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_DELETE_RESOURCE_TYPE;
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_GET_RESOURCE;
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_QUERY_LENGTH_EXCEEDED;
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_RETRIEVE_RESOURCE_TYPE;
+import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_SEARCH_SQL_EXPRESSION_INVALID;
+import static org.wso2.carbon.identity.configuration.mgt.core.constant.SQLConstants.GET_TENANT_RESOURCES_SELECT_COLLUMNS_MYSQL;
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.SQLConstants.MAX_QUERY_LENGTH_SQL;
 
 public class ConfigurationDAOImpl implements ConfigurationDAO {
@@ -47,6 +55,112 @@ public class ConfigurationDAOImpl implements ConfigurationDAO {
     public int getPriority() {
 
         return 1;
+    }
+
+    public Resources getTenantResources(String searchExpressionSQL) throws ConfigurationManagementException {
+
+        // TODO: 12/13/18 Validate for the search parameter is not present in the bean.
+        // To collect object and position for the preparedStatement.
+        Map<Integer, Object> fieldValueCollector = new HashMap<>();
+        Map<String, String> resourceFieldTypeMapper = buildResourceSearchFieldTypeMapper();
+
+        String placeholderSQL = validatePropertyAndBuildPlaceholderSQL(
+                searchExpressionSQL, resourceFieldTypeMapper, fieldValueCollector
+        );
+        return null;
+//        JdbcTemplate jdbcTemplate = JdbcUtils.getNewTemplate();
+//        List<ConfigurationRawDataCollector> configurationRawDataCollectors;
+//        try {
+//            configurationRawDataCollectors = jdbcTemplate.executeQuery(SQLConstants.GET_RESOURCE_MYSQL,
+//                    (resultSet, rowNumber) -> new ConfigurationRawDataCollector.ConfigurationRawDataCollectorBuilder()
+//                            .setResourceId(resultSet.getString("ID"))
+//                            .setTenantId(resultSet.getInt("TENANT_ID"))
+//                            .setResourceName(resultSet.getString("NAME"))
+//                            .setLastModified(resultSet.getString("LAST_MODIFIED"))
+//                            .setResourceName(resultSet.getString("NAME"))
+//                            .setResourceTypeName(resultSet.getString("RESOURCE_TYPE"))
+//                            .setResourceTypeDescription(resultSet.getString("DESCRIPTION"))
+//                            .setAttributeKey(resultSet.getString("ATTR_KEY"))
+//                            .setAttributeValue(resultSet.getString("ATTR_VALUE"))
+//                            .setFileId(resultSet.getString("FILE_ID"))
+//                            .build(), preparedStatement -> {
+//                        for (int count = 1; count < fieldValueCollector.size(); count++) {
+//                            if (fieldValueCollector.get(count) instanceof Integer) {
+//                                preparedStatement.setInt(count, ((Integer) fieldValueCollector.get(count)).intValue());
+//                            } else {
+//                                preparedStatement.setString(count, (String) fieldValueCollector.get(count));
+//                            }
+//                        }
+//                    });
+//            /*
+//            Database call can contain duplicate data for some columns. Need to filter them in order to build the
+//            resource.
+//            */
+//            return configurationRawDataCollectors == null || configurationRawDataCollectors.size() == 0 ?
+//                    null : buildResourcesFromRawData(configurationRawDataCollectors);
+//        } catch (DataAccessException e) {
+//            throw ConfigurationUtils.handleServerException(ERROR_CODE_GET_RESOURCE, name, e);
+//        }
+    }
+
+    private Map<String, String> buildResourceSearchFieldTypeMapper() {
+
+        Map<String, String> fieldTypeMapper = new HashMap<>();
+        for (Field field : ResourceSearchBean.class.getDeclaredFields()) {
+            fieldTypeMapper.put(field.getName(), field.getGenericType().toString());
+        }
+        return fieldTypeMapper;
+    }
+
+    private String validatePropertyAndBuildPlaceholderSQL(String searchExpressionSQL,
+                                                          Map<String, String> resourceFieldTypeMapper,
+                                                          Map<Integer, Object> fieldValueCollector)
+            throws ConfigurationManagementException {
+
+        StringBuilder sb = new StringBuilder(); // Build placeholder SQL.
+        String[] splittedByParametersSQL = searchExpressionSQL.split(BEAN_FIELD_FLAG);
+
+        // First element of the array should start with 'SELECT'.
+        if (StringUtils.isEmpty(splittedByParametersSQL[0]) || !splittedByParametersSQL[0].trim().startsWith("SELECT")) {
+            throw ConfigurationUtils.handleClientException(
+                    ERROR_CODE_SEARCH_SQL_EXPRESSION_INVALID,
+                    searchExpressionSQL
+            );
+        }
+
+        sb.append(GET_TENANT_RESOURCES_SELECT_COLLUMNS_MYSQL);
+
+        // Then start building from 'WHERE' clause.
+        sb.append(splittedByParametersSQL[0].split("TABLE", 2)[1]);
+
+        // Each substring has the form: "{fieldName} {operator} '{value}'---remainings".
+        for (int count = 1; count < splittedByParametersSQL.length; count++) {
+            String fieldName = splittedByParametersSQL[count].split("\\s+")[0];
+            String operator = splittedByParametersSQL[count].split("\\s+")[1];
+            String value = splittedByParametersSQL[count].split("\\s+")[2].split("'")[1]; // First one is empty
+
+            // remainings can contain "'" character. Therefore split on the first occurrence only.
+            String remainings = splittedByParametersSQL[count].split("\\s+", 3)[2].split("'", 3)[2];
+            if (StringUtils.isEmpty(fieldName) || StringUtils.isEmpty(value)) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Could not find parameters field name and value from: "
+                            + splittedByParametersSQL[count] + " while building placeholder SQL.");
+                }
+                throw ConfigurationUtils.handleClientException(
+                        ERROR_CODE_SEARCH_SQL_EXPRESSION_INVALID,
+                        searchExpressionSQL
+                );
+            }
+            fieldValueCollector.put(count, getValueFromString(resourceFieldTypeMapper.get(fieldName), value));
+            sb.append(ResourceSearchBean.getDBQualifiedFieldName(fieldName) + ' ' + operator + ' ' + '?' + remainings);
+            // TODO: 12/13/18 Continue from here. Append table identifier to the field name. 
+        }
+        return sb.toString();
+    }
+
+    private Object getValueFromString(String fieldType, String valueString) {
+
+        return fieldType.equals("int") ? Integer.valueOf(valueString) : valueString;
     }
 
     /**

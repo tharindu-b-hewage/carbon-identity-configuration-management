@@ -37,7 +37,7 @@ public class ResourceApiServiceImpl extends ResourceApiService {
     public Response resourceGet() {
 
         try {
-            Resources resources = getConfigurationManager().getResources(getSearchCondition(null));
+            Resources resources = getConfigurationManager().getResources(null);
             ResourcesDTO resourcesDTO = getResourcesDTO(resources);
             return Response.ok().entity(resourcesDTO).build();
         } catch (ConfigurationManagementClientException e) {
@@ -53,7 +53,7 @@ public class ResourceApiServiceImpl extends ResourceApiService {
     public Response resourceResourceTypeResourceTypeNameGet(String resourceTypeName) {
 
         try {
-            Resources resources = getConfigurationManager().getResourcesByType(resourceTypeName, getSearchCondition(null));
+            Resources resources = getConfigurationManager().getResourcesByType(resourceTypeName, null);
             return Response.ok().entity(getResourcesDTO(resources)).build();
         } catch (ConfigurationManagementClientException e) {
             return handleBadRequestResponse(e, LOG);
@@ -134,7 +134,7 @@ public class ResourceApiServiceImpl extends ResourceApiService {
             attributePathParameter.setResourceName(resourceName);
             attributePathParameter.setResourceType(resourceType);
 
-            Attribute attribute = getConfigurationManager().getAttribute(attributePathParameter, getSearchCondition(null));
+            Attribute attribute = getConfigurationManager().getAttribute(attributePathParameter, null);
             return Response.ok().entity(getAttributeDTO(attribute)).build();
         } catch (ConfigurationManagementClientException e) {
             return handleBadRequestResponse(e, LOG);
@@ -164,7 +164,7 @@ public class ResourceApiServiceImpl extends ResourceApiService {
     public Response resourceResourceTypeResourceNameGet(String resourceName, String resourceType) {
 
         try {
-            Resource resource = getConfigurationManager().getResource(resourceName, resourceType, getSearchCondition(null));
+            Resource resource = getConfigurationManager().getResource(resourceName, resourceType, null);
             return Response.ok().entity(getResourceDTO(resource)).build();
         } catch (ConfigurationManagementClientException e) {
             return handleBadRequestResponse(e, LOG);

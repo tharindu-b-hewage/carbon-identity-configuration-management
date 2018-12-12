@@ -17,7 +17,9 @@
 package org.wso2.carbon.identity.configuration.mgt.endpoint.util;
 
 import org.apache.commons.logging.Log;
+import org.apache.cxf.jaxrs.ext.search.SearchCondition;
 import org.apache.cxf.jaxrs.ext.search.SearchContext;
+import org.apache.cxf.jaxrs.ext.search.sql.SQLPrinterVisitor;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.identity.configuration.mgt.core.ConfigurationManager;
 import org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants;
@@ -30,7 +32,7 @@ import org.wso2.carbon.identity.configuration.mgt.core.model.ResourceFile;
 import org.wso2.carbon.identity.configuration.mgt.core.model.ResourceType;
 import org.wso2.carbon.identity.configuration.mgt.core.model.ResourceTypeAdd;
 import org.wso2.carbon.identity.configuration.mgt.core.model.Resources;
-import org.wso2.carbon.identity.configuration.mgt.core.model.search.SearchCondition;
+import org.wso2.carbon.identity.configuration.mgt.core.model.search.ResourceSearchBean;
 import org.wso2.carbon.identity.configuration.mgt.endpoint.dto.AttributeDTO;
 import org.wso2.carbon.identity.configuration.mgt.endpoint.dto.ErrorDTO;
 import org.wso2.carbon.identity.configuration.mgt.endpoint.dto.ResourceAddDTO;
@@ -45,10 +47,14 @@ import org.wso2.carbon.identity.configuration.mgt.endpoint.exception.ForbiddenEx
 import org.wso2.carbon.identity.configuration.mgt.endpoint.exception.InternalServerErrorException;
 import org.wso2.carbon.identity.configuration.mgt.endpoint.exception.NotFoundException;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.stream.Collectors;
 import javax.ws.rs.core.Response;
 
+import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.BEAN_FIELD_FLAG;
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_RESOURCE_ALREADY_EXISTS;
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_RESOURCE_DOES_NOT_EXISTS;
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_RESOURCE_TYPE_ALREADY_EXISTS;
@@ -298,7 +304,23 @@ public class ConfigurationEndpointUtils {
 
     public static SearchCondition getSearchCondition(SearchContext searchContext) {
         // TODO: 12/10/18 Implementation
-        return new SearchCondition(null);
+        return null;
+    }
+
+    public static String buildFlaggedSQLFromSearchExpression(SearchContext searchContext) {
+
+        if (searchContext.getSearchExpression() == null) {
+            return null;
+        }
+        SearchCondition<ResourceSearchBean> searchCondition = searchContext.getCondition(ResourceSearchBean.class);
+
+        Map<String, String> fieldMap = new HashMap<>();
+        for (Field field : ResourceSearchBean.class.getDeclaredFields()) {
+            fieldMap.put(field.getName(), BEAN_FIELD_FLAG + field.getName());
+        }
+        SQLPrinterVisitor<ResourceSearchBean> visitor = new SQLPrinterVisitor<>(fieldMap, "TABLE", null);
+        searchCondition.accept(visitor);
+        return visitor.getQuery();
     }
 
     private static void logDebug(Log log, Throwable throwable) {
