@@ -50,7 +50,8 @@ import static org.wso2.carbon.identity.configuration.mgt.core.constant.Configura
 import static org.wso2.carbon.identity.configuration.mgt.core.util.ConfigurationUtils.generateUniqueID;
 import static org.wso2.carbon.identity.configuration.mgt.core.util.ConfigurationUtils.handleClientException;
 import static org.wso2.carbon.identity.configuration.mgt.core.util.ConfigurationUtils.handleServerException;
-
+// TODO: 12/12/18 Implement file upload and download endpoints
+// TODO: 12/12/18 '/id' endpoint implementation for every call to support call by id
 /**
  * Resource Manager service implementation.
  */
@@ -202,7 +203,7 @@ public class ConfigurationManagerImpl implements ConfigurationManager {
             }
             return false;
         }
-        // TODO: 12/11/18 Changing to file upload endpoint: Check with the DB for existing file then do the validation for attributes.
+        // TODO: 12/11/18 Changing to file upload endpoint: Since this is the POST validation, files are always null for the incoming request in the DB.
         //        // Invalid if both attributes and file fields are empty.
         //        if ((resourceAdd.getAttributes() == null || resourceAdd.getAttributes().size() == 0) &&
         //                (resourceAdd.getFile() == null || resourceAdd.getFile().getValue() == null)) {

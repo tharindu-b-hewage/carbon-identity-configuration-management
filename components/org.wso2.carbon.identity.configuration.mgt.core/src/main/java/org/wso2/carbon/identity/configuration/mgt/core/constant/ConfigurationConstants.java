@@ -21,6 +21,10 @@ public class ConfigurationConstants {
     public static final String S_MICROSOFT = "microsoft";
     public static final String INFORMIX = "Informix";
     public static final String H2 = "H2";
+    public static final String ODATA2_API_URI_EXPRESSION_PARSER_ERROR
+            = "org.apache.olingo.odata2.api.uri.expression.ExpressionParserException";
+    public static final String STATUS_ODATA_EXPRESSION_PARSER_ERROR_MESSAGE
+            = "Error occurred while parsing the odata2 search expression.";
 
     public enum ErrorMessages {
         ERROR_CODE_SELECT_CONFIGURATION_BY_ID("CONFIGM_00001", "Error occurred while retrieving configuration " +

@@ -51,11 +51,10 @@ import javax.ws.rs.core.Response;
 
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_RESOURCE_ALREADY_EXISTS;
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_RESOURCE_DOES_NOT_EXISTS;
-import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_RESOURCE_NAME_INVALID;
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_RESOURCE_TYPE_ALREADY_EXISTS;
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_RESOURCE_TYPE_DOES_NOT_EXISTS;
-import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_RESOURCE_TYPE_NAME_INVALID;
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_UNEXPECTED;
+import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ODATA2_API_URI_EXPRESSION_PARSER_ERROR;
 
 /**
  * Utility functions required for configuration endpoint
@@ -275,10 +274,26 @@ public class ConfigurationEndpointUtils {
     public static InternalServerErrorException buildInternalServerErrorException(String code,
                                                                                  Log log, Throwable e) {
 
-        ErrorDTO errorDTO = getErrorDTO(ConfigurationConstants.STATUS_INTERNAL_SERVER_ERROR_MESSAGE_DEFAULT,
-                ConfigurationConstants.STATUS_INTERNAL_SERVER_ERROR_MESSAGE_DEFAULT, code);
+        String description = generateInternalServerErrorDescription(e.getMessage());
+        ErrorDTO errorDTO = getErrorDTO(
+                ConfigurationConstants.STATUS_INTERNAL_SERVER_ERROR_MESSAGE_DEFAULT,
+                description != null ? description : ConfigurationConstants.STATUS_INTERNAL_SERVER_ERROR_MESSAGE_DEFAULT,
+                code
+        );
         logError(log, e);
         return new InternalServerErrorException(errorDTO);
+    }
+
+    /*
+    This method will generate use-case specific description messages for the error message.
+     */
+    private static String generateInternalServerErrorDescription(String errorMessage) {
+
+        // Handle errors while parsing Odata expressions with apache cxf support for jax-rs search.
+        if (errorMessage.equals(ODATA2_API_URI_EXPRESSION_PARSER_ERROR)) {
+            return ConfigurationConstants.STATUS_ODATA_EXPRESSION_PARSER_ERROR_MESSAGE;
+        }
+        return null;
     }
 
     public static SearchCondition getSearchCondition(SearchContext searchContext) {
