@@ -1,14 +1,31 @@
 package org.wso2.carbon.identity.configuration.mgt.core.model.search;
 
+import org.apache.commons.lang.StringUtils;
+import org.wso2.carbon.identity.configuration.mgt.core.exception.ConfigurationManagementException;
+import org.wso2.carbon.identity.configuration.mgt.core.util.ConfigurationUtils;
+
+import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_SEARCH_QUERY_PARAM_DOES_NOT_EXISTS;
+
 public class ResourceSearchBean {
 
-    private int tenantId;
+    private int tenantId;// TODO: 12/13/18 Change to the tenantDomain
+    private String tenantDomain;
     private String resourceTypeId;
     private String resourceTypeName;
     private String resourceId;
     private String resourceName;
     private String attributeKey;
     private String attributeValue;
+
+    public String getTenantDomain() {
+
+        return tenantDomain;
+    }
+
+    public void setTenantDomain(String tenantDomain) {
+
+        this.tenantDomain = tenantDomain;
+    }
 
     public int getTenantId() {
 
@@ -85,7 +102,7 @@ public class ResourceSearchBean {
      *
      * @return
      */
-    public static String getDBQualifiedFieldName(String fieldName) {
+    public static String getDBQualifiedFieldName(String fieldName) throws ConfigurationManagementException {
 
         String dbQualifiedFieldName = null;
         switch (fieldName) {
@@ -110,6 +127,9 @@ public class ResourceSearchBean {
             case "attributeValue":
                 dbQualifiedFieldName = "A.ATTR_VALUE";
                 break;
+        }
+        if (StringUtils.isEmpty(dbQualifiedFieldName)) {
+            throw ConfigurationUtils.handleClientException(ERROR_CODE_SEARCH_QUERY_PARAM_DOES_NOT_EXISTS, fieldName);
         }
         return dbQualifiedFieldName;
     }

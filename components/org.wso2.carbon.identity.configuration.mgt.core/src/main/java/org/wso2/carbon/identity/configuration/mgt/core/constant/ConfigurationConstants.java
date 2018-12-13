@@ -23,8 +23,10 @@ public class ConfigurationConstants {
     public static final String H2 = "H2";
     public static final String ODATA2_API_URI_EXPRESSION_PARSER_ERROR
             = "org.apache.olingo.odata2.api.uri.expression.ExpressionParserException";
+    public static final String ODATA2_API_URI_EXPRESSION_PARSER_TOKENIZE_ERROR
+        = "org.apache.olingo.odata2.core.uri.expression.TokenizerException";
     public static final String STATUS_ODATA_EXPRESSION_PARSER_ERROR_MESSAGE
-            = "Error occurred while parsing the odata2 search expression.";
+            = "Error occurred while parsing the odata2 search expression. Please check the filter query syntax.";
     public static final String BEAN_FIELD_FLAG = "BEAN_FIELD_FLAG__";
 
     public enum ErrorMessages {
@@ -61,7 +63,10 @@ public class ConfigurationConstants {
         ERROR_CODE_SEARCH_REQUEST_INVALID("CONFIGM_00026", "Search request validation failed. " +
                 "Invalid search filter expression."),
         ERROR_CODE_SEARCH_SQL_EXPRESSION_INVALID("CONFIGM_00027", "Search query expression: %s is not valid."),
-        ERROR_CODE_SEARCH_TENANT_RESOURCES("CONFIGM_00028", "Error while searching the resource: %s."),
+        ERROR_CODE_SEARCH_TENANT_RESOURCES("CONFIGM_00028", "Error occurred while searching for resources."),
+        ERROR_CODE_RESOURCES_DOES_NOT_EXISTS("CONFIGM_00029", "Resources does not exists."),
+        ERROR_CODE_SEARCH_QUERY_PARAM_DOES_NOT_EXISTS("CONFIGM_00030", "Search query condition: %s is either invalid or not " +
+                "found in the permitted parameters."),
         ;
 
         private final String code;

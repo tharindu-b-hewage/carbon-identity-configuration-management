@@ -78,7 +78,14 @@ public class ConfigurationManagerImpl implements ConfigurationManager {
     public Resources getTenantResources(String searchExpressionSQL) throws ConfigurationManagementException {
 
         validateSearchRequest(searchExpressionSQL);
-        return getConfigurationDAO().getTenantResources(searchExpressionSQL);
+        Resources resources = getConfigurationDAO().getTenantResources(searchExpressionSQL);
+        if (resources == null) {
+            if (log.isDebugEnabled()) {
+                log.debug("No resources found for the search.");
+            }
+            throw ConfigurationUtils.handleClientException(ErrorMessages.ERROR_CODE_RESOURCES_DOES_NOT_EXISTS, null);
+        }
+        return resources;
     }
 
     private void validateSearchRequest(String searchExpressionSQL) throws ConfigurationManagementClientException {
@@ -388,7 +395,7 @@ public class ConfigurationManagerImpl implements ConfigurationManager {
         try {
             getResourceType(resourceTypeName, null);
         } catch (ConfigurationManagementClientException e) {
-            if (e.getErrorCode().equals(ERROR_CODE_RESOURCE_TYPE_NAME_INVALID.getCode())) {
+            if (e.getErrorCode().equals(ERROR_CODE_RESOURCE_TYPE_DOES_NOT_EXISTS.getCode())) {
                 return false;
             } else {
                 throw e; // TODO: 12/9/18 For any other exception, throw. Verify this.

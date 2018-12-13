@@ -58,6 +58,7 @@
                             org.wso2.carbon.context.*; version="${carbon.core.version.range}",
                             org.wso2.carbon.identity.core.*; version="${carbon.identity.framework.imp.pkg.version.range}",
                             org.wso2.carbon.database.utils.*;version="${org.wso2.carbon.database.utils.version.range}",
+                            org.wso2.carbon.identity.base.*,
                         </Import-Package>
                         <Export-Package>
                             !org.wso2.carbon.identity.configuration.mgt.core.internal,

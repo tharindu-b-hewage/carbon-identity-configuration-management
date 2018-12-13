@@ -7,6 +7,7 @@ import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.database.utils.jdbc.JdbcTemplate;
 import org.wso2.carbon.database.utils.jdbc.exceptions.DataAccessException;
 import org.wso2.carbon.database.utils.jdbc.exceptions.TransactionException;
+import org.wso2.carbon.identity.base.IdentityRuntimeException;
 import org.wso2.carbon.identity.configuration.mgt.core.constant.SQLConstants;
 import org.wso2.carbon.identity.configuration.mgt.core.dao.ConfigurationDAO;
 import org.wso2.carbon.identity.configuration.mgt.core.exception.ConfigurationManagementClientException;
@@ -16,6 +17,7 @@ import org.wso2.carbon.identity.configuration.mgt.core.model.Resource;
 import org.wso2.carbon.identity.configuration.mgt.core.model.ResourceFile;
 import org.wso2.carbon.identity.configuration.mgt.core.model.ResourceType;
 import org.wso2.carbon.identity.configuration.mgt.core.model.Resources;
+import org.wso2.carbon.identity.configuration.mgt.core.model.search.PrimitiveSearchExpression;
 import org.wso2.carbon.identity.configuration.mgt.core.model.search.ResourceSearchBean;
 import org.wso2.carbon.identity.configuration.mgt.core.util.ConfigurationUtils;
 import org.wso2.carbon.identity.configuration.mgt.core.util.JdbcUtils;
@@ -40,7 +42,9 @@ import static org.wso2.carbon.identity.configuration.mgt.core.constant.Configura
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_GET_RESOURCE;
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_QUERY_LENGTH_EXCEEDED;
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_RETRIEVE_RESOURCE_TYPE;
+import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_SEARCH_QUERY_PARAM_DOES_NOT_EXISTS;
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_SEARCH_SQL_EXPRESSION_INVALID;
+import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_SEARCH_TENANT_RESOURCES;
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.SQLConstants.GET_TENANT_RESOURCES_SELECT_COLLUMNS_MYSQL;
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.SQLConstants.MAX_QUERY_LENGTH_SQL;
 
@@ -59,7 +63,7 @@ public class ConfigurationDAOImpl implements ConfigurationDAO {
 
     public Resources getTenantResources(String searchExpressionSQL) throws ConfigurationManagementException {
 
-        // TODO: 12/13/18 Validate for the search parameter is not present in the bean.
+        // TODO: 12/13/18 Validate for :-> A parameter is not present in the resource search bean.
         // To collect object and position for the preparedStatement.
         Map<Integer, Object> fieldValueCollector = new HashMap<>();
         Map<String, String> resourceFieldTypeMapper = buildResourceSearchFieldTypeMapper();
@@ -67,47 +71,47 @@ public class ConfigurationDAOImpl implements ConfigurationDAO {
         String placeholderSQL = validatePropertyAndBuildPlaceholderSQL(
                 searchExpressionSQL, resourceFieldTypeMapper, fieldValueCollector
         );
-        return null;
-//        JdbcTemplate jdbcTemplate = JdbcUtils.getNewTemplate();
-//        List<ConfigurationRawDataCollector> configurationRawDataCollectors;
-//        try {
-//            configurationRawDataCollectors = jdbcTemplate.executeQuery(SQLConstants.GET_RESOURCE_MYSQL,
-//                    (resultSet, rowNumber) -> new ConfigurationRawDataCollector.ConfigurationRawDataCollectorBuilder()
-//                            .setResourceId(resultSet.getString("ID"))
-//                            .setTenantId(resultSet.getInt("TENANT_ID"))
-//                            .setResourceName(resultSet.getString("NAME"))
-//                            .setLastModified(resultSet.getString("LAST_MODIFIED"))
-//                            .setResourceName(resultSet.getString("NAME"))
-//                            .setResourceTypeName(resultSet.getString("RESOURCE_TYPE"))
-//                            .setResourceTypeDescription(resultSet.getString("DESCRIPTION"))
-//                            .setAttributeKey(resultSet.getString("ATTR_KEY"))
-//                            .setAttributeValue(resultSet.getString("ATTR_VALUE"))
-//                            .setFileId(resultSet.getString("FILE_ID"))
-//                            .build(), preparedStatement -> {
-//                        for (int count = 1; count < fieldValueCollector.size(); count++) {
-//                            if (fieldValueCollector.get(count) instanceof Integer) {
-//                                preparedStatement.setInt(count, ((Integer) fieldValueCollector.get(count)).intValue());
-//                            } else {
-//                                preparedStatement.setString(count, (String) fieldValueCollector.get(count));
-//                            }
-//                        }
-//                    });
-//            /*
-//            Database call can contain duplicate data for some columns. Need to filter them in order to build the
-//            resource.
-//            */
-//            return configurationRawDataCollectors == null || configurationRawDataCollectors.size() == 0 ?
-//                    null : buildResourcesFromRawData(configurationRawDataCollectors);
-//        } catch (DataAccessException e) {
-//            throw ConfigurationUtils.handleServerException(ERROR_CODE_GET_RESOURCE, name, e);
-//        }
+
+        JdbcTemplate jdbcTemplate = JdbcUtils.getNewTemplate();
+        List<ConfigurationRawDataCollector> configurationRawDataCollectors;
+        try {
+            configurationRawDataCollectors = jdbcTemplate.executeQuery(placeholderSQL,
+                    (resultSet, rowNumber) -> new ConfigurationRawDataCollector.ConfigurationRawDataCollectorBuilder()
+                            .setResourceId(resultSet.getString("ID"))
+                            .setTenantId(resultSet.getInt("TENANT_ID"))
+                            .setResourceName(resultSet.getString("NAME"))
+                            .setLastModified(resultSet.getString("LAST_MODIFIED"))
+                            .setResourceName(resultSet.getString("NAME"))
+                            .setResourceTypeName(resultSet.getString("RESOURCE_TYPE"))
+                            .setResourceTypeDescription(resultSet.getString("DESCRIPTION"))
+                            .setAttributeKey(resultSet.getString("ATTR_KEY"))
+                            .setAttributeValue(resultSet.getString("ATTR_VALUE"))
+                            .setFileId(resultSet.getString("FILE_ID"))
+                            .build(), preparedStatement -> {
+                        for (int count = 1; count <= fieldValueCollector.size(); count++) {
+                            if (fieldValueCollector.get(count).getClass().equals(Integer.class)) {
+                                preparedStatement.setInt(count, ((Integer) fieldValueCollector.get(count)).intValue());
+                            } else {
+                                preparedStatement.setString(count, (String) fieldValueCollector.get(count));
+                            }
+                        }
+                    });
+            /*
+            Database call can contain duplicate data for some columns. Need to filter them in order to build the
+            resource.
+            */
+            return configurationRawDataCollectors == null || configurationRawDataCollectors.size() == 0 ?
+                    null : buildResourcesFromRawData(configurationRawDataCollectors);
+        } catch (DataAccessException e) {
+            throw ConfigurationUtils.handleServerException(ERROR_CODE_SEARCH_TENANT_RESOURCES, null, e);
+        }
     }
 
     private Map<String, String> buildResourceSearchFieldTypeMapper() {
 
         Map<String, String> fieldTypeMapper = new HashMap<>();
         for (Field field : ResourceSearchBean.class.getDeclaredFields()) {
-            fieldTypeMapper.put(field.getName(), field.getGenericType().toString());
+            fieldTypeMapper.put(field.getName(), field.getType().getName());
         }
         return fieldTypeMapper;
     }
@@ -147,20 +151,107 @@ public class ConfigurationDAOImpl implements ConfigurationDAO {
                             + splittedByParametersSQL[count] + " while building placeholder SQL.");
                 }
                 throw ConfigurationUtils.handleClientException(
-                        ERROR_CODE_SEARCH_SQL_EXPRESSION_INVALID,
-                        searchExpressionSQL
-                );
+                        ERROR_CODE_SEARCH_SQL_EXPRESSION_INVALID, searchExpressionSQL);
             }
-            fieldValueCollector.put(count, getValueFromString(resourceFieldTypeMapper.get(fieldName), value));
-            sb.append(ResourceSearchBean.getDBQualifiedFieldName(fieldName) + ' ' + operator + ' ' + '?' + remainings);
+
+            // Get mapped parameter values if parameter mapping available for the search expression.
+            PrimitiveSearchExpression mappedExpression
+                    = mapPrimitiveCondition(new PrimitiveSearchExpression(fieldName, operator, value));
+            String dbQualifiedFieldName = ResourceSearchBean.getDBQualifiedFieldName(mappedExpression.getProperty());
+            String fieldNameType = resourceFieldTypeMapper.get(mappedExpression.getProperty());
+            fieldValueCollector.put(
+                    count,
+                    getValueFromString(
+                            fieldNameType, mappedExpression.getValue()
+                    )
+            );
+
+            sb.append(dbQualifiedFieldName + ' ' + operator + ' ' + '?' + remainings);
             // TODO: 12/13/18 Continue from here. Append table identifier to the field name. 
         }
         return sb.toString();
     }
 
+    /**
+     * This method allow mapping of {@link PrimitiveSearchExpression}.
+     *
+     * @param primitiveSearchExpression Primitive search expression to be mapped.
+     */
+    PrimitiveSearchExpression mapPrimitiveCondition(PrimitiveSearchExpression primitiveSearchExpression)
+            throws ConfigurationManagementException{
+
+        // Map tenant domain to tenant id
+        if (primitiveSearchExpression.getProperty().equals("tenantDomain")) {
+            try {
+                primitiveSearchExpression.setValue(String.valueOf(
+                        IdentityTenantUtil.getTenantId(
+                                primitiveSearchExpression.getValue()
+                        )
+                ));
+            } catch (IdentityRuntimeException e) {
+                throw ConfigurationUtils.handleClientException(
+                        ERROR_CODE_SEARCH_QUERY_PARAM_DOES_NOT_EXISTS, primitiveSearchExpression.getProperty(), e);
+            }
+            primitiveSearchExpression.setProperty("tenantId");
+        }
+        return primitiveSearchExpression;
+    }
+
     private Object getValueFromString(String fieldType, String valueString) {
 
         return fieldType.equals("int") ? Integer.valueOf(valueString) : valueString;
+    }
+
+    private Resources buildResourcesFromRawData(List<ConfigurationRawDataCollector> configurationRawDataCollectors) {
+
+        Map<String, Resource> resourcesCollector = new HashMap<>();
+        Map<String, List<Attribute>> attributes = new HashMap<>(0); // attribute list pet resource
+        Map<String, List<ResourceFile>> resourceFiles = new HashMap<>(0); // file list pet resource
+        Map<String, List<String>> attributeKeySet = new HashMap<>();
+        Map<String, List<String>> resourceFileIdSet = new HashMap<>();
+
+        configurationRawDataCollectors.forEach(configurationRawDataCollector -> {
+            String eachResourceId = configurationRawDataCollector.getResourceId();
+            if (resourcesCollector.get(eachResourceId) == null) {
+                Resource resource = new Resource();
+                resource.setResourceId(configurationRawDataCollector.getResourceId());
+                resource.setResourceName(configurationRawDataCollector.getResourceName());
+                resource.setResourceType(configurationRawDataCollector.getResourceTypeName());
+                resource.setLastModified(configurationRawDataCollector.getLastModified());
+                resource.setTenantDomain(
+                        IdentityTenantUtil.getTenantDomain(configurationRawDataCollector.getTenantId())
+                );
+
+                // Initialize collectors for the resource
+                attributes.put(eachResourceId, new ArrayList<>());
+                attributeKeySet.put(eachResourceId, new ArrayList<>());
+                resourceFiles.put(eachResourceId, new ArrayList<>());
+                resourceFileIdSet.put(eachResourceId, new ArrayList<>());
+
+                resourcesCollector.put(eachResourceId, resource);
+            }
+
+            if (!attributeKeySet.get(eachResourceId).contains(configurationRawDataCollector.getAttributeKey())) {
+                attributeKeySet.get(eachResourceId).add(configurationRawDataCollector.getAttributeKey());
+                if (configurationRawDataCollector.getAttributeKey() != null) {
+                    attributes.get(eachResourceId).add(new Attribute(
+                            configurationRawDataCollector.getAttributeKey(),
+                            configurationRawDataCollector.getAttributeValue()
+                    ));
+                }
+            }
+            if (!resourceFileIdSet.get(eachResourceId).contains(configurationRawDataCollector.getFileId())) {
+                resourceFileIdSet.get(eachResourceId).add(configurationRawDataCollector.getFileId());
+                if (configurationRawDataCollector.getFileId() != null) {
+                    resourceFiles.get(eachResourceId).add(new ResourceFile(configurationRawDataCollector.getFileId()));
+                }
+            }
+        });
+        resourcesCollector.values().forEach(resource -> {
+            resource.setAttribute(attributes.get(resource.getResourceId()));
+            resource.setFile(resourceFiles.get(resource.getResourceId()));
+        });
+        return new Resources(new ArrayList<>(resourcesCollector.values()));
     }
 
     /**

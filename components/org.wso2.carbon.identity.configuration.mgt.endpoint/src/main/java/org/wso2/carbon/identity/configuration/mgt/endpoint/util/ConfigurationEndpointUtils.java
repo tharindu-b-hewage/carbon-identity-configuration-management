@@ -55,12 +55,15 @@ import java.util.stream.Collectors;
 import javax.ws.rs.core.Response;
 
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.BEAN_FIELD_FLAG;
+import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_RESOURCES_DOES_NOT_EXISTS;
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_RESOURCE_ALREADY_EXISTS;
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_RESOURCE_DOES_NOT_EXISTS;
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_RESOURCE_TYPE_ALREADY_EXISTS;
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_RESOURCE_TYPE_DOES_NOT_EXISTS;
+import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_SEARCH_QUERY_PARAM_DOES_NOT_EXISTS;
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_UNEXPECTED;
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ODATA2_API_URI_EXPRESSION_PARSER_ERROR;
+import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ODATA2_API_URI_EXPRESSION_PARSER_TOKENIZE_ERROR;
 
 /**
  * Utility functions required for configuration endpoint
@@ -204,7 +207,9 @@ public class ConfigurationEndpointUtils {
     private static boolean isNotFoundError(ConfigurationManagementClientException e) {
 
         return ERROR_CODE_RESOURCE_TYPE_DOES_NOT_EXISTS.getCode().equals(e.getErrorCode()) ||
-                ERROR_CODE_RESOURCE_DOES_NOT_EXISTS.getCode().equals(e.getErrorCode());
+                ERROR_CODE_RESOURCE_DOES_NOT_EXISTS.getCode().equals(e.getErrorCode()) ||
+                ERROR_CODE_RESOURCES_DOES_NOT_EXISTS.getCode().equals(e.getErrorCode()) ||
+                ERROR_CODE_SEARCH_QUERY_PARAM_DOES_NOT_EXISTS.getCode().equals(e.getErrorCode());
     }
 
     private static boolean isConflictError(ConfigurationManagementClientException e) {
@@ -296,7 +301,8 @@ public class ConfigurationEndpointUtils {
     private static String generateInternalServerErrorDescription(String errorMessage) {
 
         // Handle errors while parsing Odata expressions with apache cxf support for jax-rs search.
-        if (errorMessage.equals(ODATA2_API_URI_EXPRESSION_PARSER_ERROR)) {
+        if (errorMessage.equals(ODATA2_API_URI_EXPRESSION_PARSER_ERROR) ||
+        errorMessage.equals(ODATA2_API_URI_EXPRESSION_PARSER_TOKENIZE_ERROR)) {
             return ConfigurationConstants.STATUS_ODATA_EXPRESSION_PARSER_ERROR_MESSAGE;
         }
         return null;

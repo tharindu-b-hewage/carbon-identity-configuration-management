@@ -6,6 +6,15 @@ public class Resources {
 
     private List<Resource> resources;
 
+    public Resources(List<Resource> resources) {
+
+        this.resources = resources;
+    }
+
+    public Resources() {
+
+    }
+
     public List<Resource> getResources() {
 
         return resources;
