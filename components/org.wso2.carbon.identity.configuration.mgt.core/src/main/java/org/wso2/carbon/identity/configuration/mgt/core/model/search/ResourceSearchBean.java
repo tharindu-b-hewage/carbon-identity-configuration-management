@@ -4,11 +4,11 @@ import org.apache.commons.lang.StringUtils;
 import org.wso2.carbon.identity.configuration.mgt.core.exception.ConfigurationManagementException;
 import org.wso2.carbon.identity.configuration.mgt.core.util.ConfigurationUtils;
 
-import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_SEARCH_QUERY_PARAM_DOES_NOT_EXISTS;
+import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_SEARCH_QUERY_PROPERTY_DOES_NOT_EXISTS;
 
 public class ResourceSearchBean {
 
-    private int tenantId;// TODO: 12/13/18 Change to the tenantDomain
+    private int tenantId;
     private String tenantDomain;
     private String resourceTypeId;
     private String resourceTypeName;
@@ -129,7 +129,7 @@ public class ResourceSearchBean {
                 break;
         }
         if (StringUtils.isEmpty(dbQualifiedFieldName)) {
-            throw ConfigurationUtils.handleClientException(ERROR_CODE_SEARCH_QUERY_PARAM_DOES_NOT_EXISTS, fieldName);
+            throw ConfigurationUtils.handleClientException(ERROR_CODE_SEARCH_QUERY_PROPERTY_DOES_NOT_EXISTS, fieldName);
         }
         return dbQualifiedFieldName;
     }

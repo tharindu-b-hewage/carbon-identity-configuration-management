@@ -42,9 +42,9 @@ import static org.wso2.carbon.identity.configuration.mgt.core.constant.Configura
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_GET_RESOURCE;
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_QUERY_LENGTH_EXCEEDED;
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_RETRIEVE_RESOURCE_TYPE;
-import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_SEARCH_QUERY_PARAM_DOES_NOT_EXISTS;
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_SEARCH_SQL_EXPRESSION_INVALID;
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_SEARCH_TENANT_RESOURCES;
+import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.NON_EXISTING_TENANT_ID;
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.SQLConstants.GET_TENANT_RESOURCES_SELECT_COLLUMNS_MYSQL;
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.SQLConstants.MAX_QUERY_LENGTH_SQL;
 
@@ -90,7 +90,7 @@ public class ConfigurationDAOImpl implements ConfigurationDAO {
                             .build(), preparedStatement -> {
                         for (int count = 1; count <= fieldValueCollector.size(); count++) {
                             if (fieldValueCollector.get(count).getClass().equals(Integer.class)) {
-                                preparedStatement.setInt(count, ((Integer) fieldValueCollector.get(count)).intValue());
+                                preparedStatement.setInt(count, (Integer) fieldValueCollector.get(count));
                             } else {
                                 preparedStatement.setString(count, (String) fieldValueCollector.get(count));
                             }
@@ -165,9 +165,12 @@ public class ConfigurationDAOImpl implements ConfigurationDAO {
                             fieldNameType, mappedExpression.getValue()
                     )
             );
-
-            sb.append(dbQualifiedFieldName + ' ' + operator + ' ' + '?' + remainings);
-            // TODO: 12/13/18 Continue from here. Append table identifier to the field name. 
+            sb.append(dbQualifiedFieldName);
+            sb.append(' ');
+            sb.append(operator);
+            sb.append(' ');
+            sb.append('?');
+            sb.append(remainings);
         }
         return sb.toString();
     }
@@ -177,8 +180,7 @@ public class ConfigurationDAOImpl implements ConfigurationDAO {
      *
      * @param primitiveSearchExpression Primitive search expression to be mapped.
      */
-    PrimitiveSearchExpression mapPrimitiveCondition(PrimitiveSearchExpression primitiveSearchExpression)
-            throws ConfigurationManagementException{
+    PrimitiveSearchExpression mapPrimitiveCondition(PrimitiveSearchExpression primitiveSearchExpression) {
 
         // Map tenant domain to tenant id
         if (primitiveSearchExpression.getProperty().equals("tenantDomain")) {
@@ -189,8 +191,18 @@ public class ConfigurationDAOImpl implements ConfigurationDAO {
                         )
                 ));
             } catch (IdentityRuntimeException e) {
-                throw ConfigurationUtils.handleClientException(
-                        ERROR_CODE_SEARCH_QUERY_PARAM_DOES_NOT_EXISTS, primitiveSearchExpression.getProperty(), e);
+                /*
+                Search filter value for the tenant domain is possibly invalid. Therefore log the error and set
+                a non-existing tenant domain string as the primitive search expression value. This will preserve the
+                expected flow for an invalid search condition property value.
+                 */
+                if (log.isDebugEnabled()) {
+                    log.debug(
+                            "Error while retrieving tenant id for the tenant domain: "
+                                    + primitiveSearchExpression.getValue() + ".", e
+                    );
+                }
+                primitiveSearchExpression.setValue(NON_EXISTING_TENANT_ID);
             }
             primitiveSearchExpression.setProperty("tenantId");
         }
@@ -374,7 +386,12 @@ public class ConfigurationDAOImpl implements ConfigurationDAO {
                     preparedStatement.setString(3, resource.getResourceName());
                     preparedStatement.setTimestamp(4, new java.sql.Timestamp(new Date().getTime()),
                             Calendar.getInstance(TimeZone.getTimeZone(UTC)));
-                    preparedStatement.setBoolean(5, true); // TODO: 12/12/18 Validate with the file existence earlier in the flow
+                    /*
+                    Resource files are uploaded using a separate endpoint. Therefore resource creation does not create
+                    files. It is allowed to create a resource without files or attributes in order to allow file upload
+                    after resource creation.
+                     */
+                    preparedStatement.setBoolean(5, false);
                     preparedStatement.setBoolean(6, isAttributeExists);
                     preparedStatement.setString(7, resourceTypeId);
                 }, resource, false);

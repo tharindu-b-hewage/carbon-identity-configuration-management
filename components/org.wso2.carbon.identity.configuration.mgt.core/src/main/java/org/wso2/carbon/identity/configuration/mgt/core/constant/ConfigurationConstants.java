@@ -1,11 +1,15 @@
 package org.wso2.carbon.identity.configuration.mgt.core.constant;
 
+import java.util.Random;
+
 /**
  * Constants related to configuration management.
  */
 public class ConfigurationConstants {
 
+    public static final String NON_EXISTING_TENANT_ID = String.valueOf(new Random().nextInt());
     public static final String STATUS_BAD_REQUEST_MESSAGE_DEFAULT = "Bad Request";
+    public static final String STATUS_NOT_FOUND_MESSAGE_DEFAULT = "Not Found";
     public static final String HEADER_CONTENT_TYPE = "Content-Type";
     public static final String APPLICATION_JSON = "application/json";
     public static final String DEFAULT_RESPONSE_CONTENT_TYPE = APPLICATION_JSON;
@@ -25,6 +29,7 @@ public class ConfigurationConstants {
             = "org.apache.olingo.odata2.api.uri.expression.ExpressionParserException";
     public static final String ODATA2_API_URI_EXPRESSION_PARSER_TOKENIZE_ERROR
         = "org.apache.olingo.odata2.core.uri.expression.TokenizerException";
+    public static final String CXF_SEARCH_PARSER_ERROR = "org.apache.cxf.jaxrs.ext.search.SearchParseException";
     public static final String STATUS_ODATA_EXPRESSION_PARSER_ERROR_MESSAGE
             = "Error occurred while parsing the odata2 search expression. Please check the filter query syntax.";
     public static final String BEAN_FIELD_FLAG = "BEAN_FIELD_FLAG__";
@@ -65,8 +70,10 @@ public class ConfigurationConstants {
         ERROR_CODE_SEARCH_SQL_EXPRESSION_INVALID("CONFIGM_00027", "Search query expression: %s is not valid."),
         ERROR_CODE_SEARCH_TENANT_RESOURCES("CONFIGM_00028", "Error occurred while searching for resources."),
         ERROR_CODE_RESOURCES_DOES_NOT_EXISTS("CONFIGM_00029", "Resources does not exists."),
-        ERROR_CODE_SEARCH_QUERY_PARAM_DOES_NOT_EXISTS("CONFIGM_00030", "Search query condition: %s is either invalid or not " +
-                "found in the permitted parameters."),
+        ERROR_CODE_SEARCH_QUERY_PROPERTY_DOES_NOT_EXISTS("CONFIGM_00030", "Search query property: %s is either invalid or not " +
+                "found in the permitted properties."),
+        ERROR_CODE_SEARCH_QUERY_SQL_PROPERTY_PARSE_ERROR("CONFIGM_00031", "Search query syntax error in the condition: %s."),
+        ERROR_CODE_SEARCH_QUERY_SQL_PARSE_ERROR("CONFIGM_00032", "Search query syntax error"),
         ;
 
         private final String code;

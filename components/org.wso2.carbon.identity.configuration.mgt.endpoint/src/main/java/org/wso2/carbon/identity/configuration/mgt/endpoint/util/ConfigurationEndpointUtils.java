@@ -19,7 +19,10 @@ package org.wso2.carbon.identity.configuration.mgt.endpoint.util;
 import org.apache.commons.logging.Log;
 import org.apache.cxf.jaxrs.ext.search.SearchCondition;
 import org.apache.cxf.jaxrs.ext.search.SearchContext;
+import org.apache.cxf.jaxrs.ext.search.SearchParseException;
 import org.apache.cxf.jaxrs.ext.search.sql.SQLPrinterVisitor;
+import org.apache.cxf.jaxrs.ext.search.visitor.PropertyValidationException;
+import org.apache.olingo.odata2.api.uri.expression.ExpressionParserException;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.identity.configuration.mgt.core.ConfigurationManager;
 import org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants;
@@ -46,6 +49,7 @@ import org.wso2.carbon.identity.configuration.mgt.endpoint.exception.ConflictReq
 import org.wso2.carbon.identity.configuration.mgt.endpoint.exception.ForbiddenException;
 import org.wso2.carbon.identity.configuration.mgt.endpoint.exception.InternalServerErrorException;
 import org.wso2.carbon.identity.configuration.mgt.endpoint.exception.NotFoundException;
+import org.wso2.carbon.identity.configuration.mgt.endpoint.util.validator.ResourceSearchBeanPropertyValidator;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -55,12 +59,15 @@ import java.util.stream.Collectors;
 import javax.ws.rs.core.Response;
 
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.BEAN_FIELD_FLAG;
+import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.CXF_SEARCH_PARSER_ERROR;
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_RESOURCES_DOES_NOT_EXISTS;
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_RESOURCE_ALREADY_EXISTS;
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_RESOURCE_DOES_NOT_EXISTS;
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_RESOURCE_TYPE_ALREADY_EXISTS;
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_RESOURCE_TYPE_DOES_NOT_EXISTS;
-import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_SEARCH_QUERY_PARAM_DOES_NOT_EXISTS;
+import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_SEARCH_QUERY_PROPERTY_DOES_NOT_EXISTS;
+import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_SEARCH_QUERY_SQL_PARSE_ERROR;
+import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_SEARCH_QUERY_SQL_PROPERTY_PARSE_ERROR;
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_UNEXPECTED;
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ODATA2_API_URI_EXPRESSION_PARSER_ERROR;
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ODATA2_API_URI_EXPRESSION_PARSER_TOKENIZE_ERROR;
@@ -178,6 +185,21 @@ public class ConfigurationEndpointUtils {
         return errorDTO;
     }
 
+    public static Response handleSearchQueryParseError(PropertyValidationException e, Log LOG) {
+
+        String searchQueryErrorMessage = "property = '" + e.getName() + "' and value = '" + e.getValue() + "'";
+        String message = String.format(ERROR_CODE_SEARCH_QUERY_SQL_PROPERTY_PARSE_ERROR.getMessage(), searchQueryErrorMessage);
+        throw ConfigurationEndpointUtils.buildBadRequestException(
+                message, ERROR_CODE_SEARCH_QUERY_SQL_PROPERTY_PARSE_ERROR.getCode(), LOG, e);
+    }
+
+    public static Response handleSearchQueryParseError(SearchParseException e, Log LOG) {
+
+        throw ConfigurationEndpointUtils.buildBadRequestException(
+                ERROR_CODE_SEARCH_QUERY_SQL_PARSE_ERROR.getMessage(),
+                ERROR_CODE_SEARCH_QUERY_SQL_PARSE_ERROR.getCode(), LOG, e);
+    }
+
     public static Response handleBadRequestResponse(ConfigurationManagementClientException e, Log LOG) {
 
         if (isNotFoundError(e)) {
@@ -209,7 +231,7 @@ public class ConfigurationEndpointUtils {
         return ERROR_CODE_RESOURCE_TYPE_DOES_NOT_EXISTS.getCode().equals(e.getErrorCode()) ||
                 ERROR_CODE_RESOURCE_DOES_NOT_EXISTS.getCode().equals(e.getErrorCode()) ||
                 ERROR_CODE_RESOURCES_DOES_NOT_EXISTS.getCode().equals(e.getErrorCode()) ||
-                ERROR_CODE_SEARCH_QUERY_PARAM_DOES_NOT_EXISTS.getCode().equals(e.getErrorCode());
+                ERROR_CODE_SEARCH_QUERY_PROPERTY_DOES_NOT_EXISTS.getCode().equals(e.getErrorCode());
     }
 
     private static boolean isConflictError(ConfigurationManagementClientException e) {
@@ -226,7 +248,7 @@ public class ConfigurationEndpointUtils {
     public static NotFoundException buildNotFoundRequestException(String description, String code,
                                                                   Log log, Throwable e) {
 
-        ErrorDTO errorDTO = getErrorDTO(ConfigurationConstants.STATUS_BAD_REQUEST_MESSAGE_DEFAULT, description, code);
+        ErrorDTO errorDTO = getErrorDTO(ConfigurationConstants.STATUS_NOT_FOUND_MESSAGE_DEFAULT, description, code);
         logDebug(log, e);
         return new NotFoundException(errorDTO);
     }
@@ -302,22 +324,21 @@ public class ConfigurationEndpointUtils {
 
         // Handle errors while parsing Odata expressions with apache cxf support for jax-rs search.
         if (errorMessage.equals(ODATA2_API_URI_EXPRESSION_PARSER_ERROR) ||
-        errorMessage.equals(ODATA2_API_URI_EXPRESSION_PARSER_TOKENIZE_ERROR)) {
+                errorMessage.equals(ODATA2_API_URI_EXPRESSION_PARSER_TOKENIZE_ERROR) ||
+                errorMessage.equals(CXF_SEARCH_PARSER_ERROR)) {
             return ConfigurationConstants.STATUS_ODATA_EXPRESSION_PARSER_ERROR_MESSAGE;
         }
         return null;
     }
 
-    public static SearchCondition getSearchCondition(SearchContext searchContext) {
-        // TODO: 12/10/18 Implementation
-        return null;
-    }
-
-    public static String buildFlaggedSQLFromSearchExpression(SearchContext searchContext) {
+    public static String buildFlaggedSQLFromSearchExpression(SearchContext searchContext)
+            throws PropertyValidationException, ExpressionParserException {
 
         if (searchContext.getSearchExpression() == null) {
             return null;
         }
+
+        // With an unchecked ExpressionParserException.
         SearchCondition<ResourceSearchBean> searchCondition = searchContext.getCondition(ResourceSearchBean.class);
 
         Map<String, String> fieldMap = new HashMap<>();
@@ -325,6 +346,7 @@ public class ConfigurationEndpointUtils {
             fieldMap.put(field.getName(), BEAN_FIELD_FLAG + field.getName());
         }
         SQLPrinterVisitor<ResourceSearchBean> visitor = new SQLPrinterVisitor<>(fieldMap, "TABLE", null);
+        visitor.setValidator(new ResourceSearchBeanPropertyValidator<>());
         searchCondition.accept(visitor);
         return visitor.getQuery();
     }
