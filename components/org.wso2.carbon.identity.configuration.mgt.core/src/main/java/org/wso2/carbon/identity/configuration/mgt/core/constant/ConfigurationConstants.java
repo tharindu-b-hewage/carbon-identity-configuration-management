@@ -74,6 +74,9 @@ public class ConfigurationConstants {
                 "found in the permitted properties."),
         ERROR_CODE_SEARCH_QUERY_SQL_PROPERTY_PARSE_ERROR("CONFIGM_00031", "Search query syntax error in the condition: %s."),
         ERROR_CODE_SEARCH_QUERY_SQL_PARSE_ERROR("CONFIGM_00032", "Search query syntax error"),
+        ERROR_CODE_ATTRIBUTE_IDENTIFIERS_REQUIRED("CONFIGM_00033", "One or more identifiers for the attribute: %s " +
+                "validation failed."),
+        ERROR_CODE_REPLACE_ATTRIBUTE("CONFIGM_00034", "Error while replacing the resource type: %s."),
         ;
 
         private final String code;

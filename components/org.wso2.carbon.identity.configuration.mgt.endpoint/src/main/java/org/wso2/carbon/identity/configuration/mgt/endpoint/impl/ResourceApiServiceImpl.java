@@ -35,7 +35,7 @@ public class ResourceApiServiceImpl extends ResourceApiService {
     public Response resourceGet() {
 
         try {
-            Resources resources = getConfigurationManager().getResources(null);
+            Resources resources = getConfigurationManager().getResources();
             ResourcesDTO resourcesDTO = getResourcesDTO(resources);
             return Response.ok().entity(resourcesDTO).build();
         } catch (ConfigurationManagementClientException e) {
@@ -51,7 +51,7 @@ public class ResourceApiServiceImpl extends ResourceApiService {
     public Response resourceResourceTypeResourceTypeNameGet(String resourceTypeName) {
 
         try {
-            Resources resources = getConfigurationManager().getResourcesByType(resourceTypeName, null);
+            Resources resources = getConfigurationManager().getResourcesByType(resourceTypeName);
             return Response.ok().entity(getResourcesDTO(resources)).build();
         } catch (ConfigurationManagementClientException e) {
             return handleBadRequestResponse(e, LOG);
@@ -127,12 +127,7 @@ public class ResourceApiServiceImpl extends ResourceApiService {
                                                                     String attributeKey) {
 
         try {
-            AttributePathParameter attributePathParameter = new AttributePathParameter();
-            attributePathParameter.setAttributeKey(attributeKey);
-            attributePathParameter.setResourceName(resourceName);
-            attributePathParameter.setResourceType(resourceType);
-
-            Attribute attribute = getConfigurationManager().getAttribute(attributePathParameter, null);
+            Attribute attribute = getConfigurationManager().getAttribute(resourceType, resourceName, attributeKey);
             return Response.ok().entity(getAttributeDTO(attribute)).build();
         } catch (ConfigurationManagementClientException e) {
             return handleBadRequestResponse(e, LOG);
@@ -162,7 +157,7 @@ public class ResourceApiServiceImpl extends ResourceApiService {
     public Response resourceResourceTypeResourceNameGet(String resourceName, String resourceType) {
 
         try {
-            Resource resource = getConfigurationManager().getResource(resourceName, resourceType, null);
+            Resource resource = getConfigurationManager().getResource(resourceName, resourceType);
             return Response.ok().entity(getResourceDTO(resource)).build();
         } catch (ConfigurationManagementClientException e) {
             return handleBadRequestResponse(e, LOG);
@@ -207,7 +202,8 @@ public class ResourceApiServiceImpl extends ResourceApiService {
     public Response resourceResourceTypeResourceNamePut(String resourceName, String resourceType, AttributeDTO attributeDTO) {
 
         try {
-            Attribute attribute = getConfigurationManager().replaceAttribute(resourceName, resourceType, getAttributeFromDTO(attributeDTO));
+            Attribute attribute = getConfigurationManager().replaceAttribute(
+                    resourceName, resourceType, getAttributeFromDTO(attributeDTO));
             return Response.created(new URI(BASE_PATH + resourceName)).entity(getAttributeDTO(attribute)).build();
         } catch (ConfigurationManagementClientException e) {
             return handleBadRequestResponse(e, LOG);

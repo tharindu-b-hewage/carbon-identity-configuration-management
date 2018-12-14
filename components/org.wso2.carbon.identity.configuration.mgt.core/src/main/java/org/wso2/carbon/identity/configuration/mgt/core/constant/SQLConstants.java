@@ -28,6 +28,9 @@ public class SQLConstants {
             "  )\n" +
             "VALUES(?, ?, ?, ?)";
     public static final String INSERT_ATTRIBUTE_KEY_VALUE_SQL = ", (?, ?, ?, ?)";
+    public static final String INSERT_OR_UPDATE_ATTRIBUTE_MYSQL = "INSERT INTO IDN_CONFIG_ATTRIBUTE(ID, RESOURCE_ID," +
+            " ATTR_KEY, ATTR_VALUE) VALUES(?, ?, ?, ?) ON DUPLICATE KEY UPDATE ATTR_KEY = VALUES(ATTR_KEY), " +
+            "ATTR_VALUE = VALUES(ATTR_VALUE)";
 
     // Name is not update since for being the only possible duplicate key
     public static final String REPLACE_RESOURCE_TYPE_SQL = "INSERT INTO IDN_CONFIG_TYPE (ID, NAME, DESCRIPTION) " +

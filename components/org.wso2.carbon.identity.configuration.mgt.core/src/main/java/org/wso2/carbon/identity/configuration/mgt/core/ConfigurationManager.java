@@ -49,7 +49,7 @@ public interface ConfigurationManager {
 
     ResourceType updateResourceType(ResourceTypeAdd resourceTypeAdd) throws ConfigurationManagementException;
 
-    ResourceType getResourceType(String name, SearchCondition searchCondition)
+    ResourceType getResourceType(String name)
             throws ConfigurationManagementException;
 
     void deleteResourceType(String name) throws ConfigurationManagementException;
@@ -62,9 +62,9 @@ public interface ConfigurationManager {
      * @return
      * @throws ConfigurationManagementException
      */
-    Resources getResources(SearchCondition searchCondition) throws ConfigurationManagementException;
+    Resources getResources() throws ConfigurationManagementException;
 
-    Resources getResourcesByType(String resourceType, SearchCondition searchCondition)
+    Resources getResourcesByType(String resourceType)
             throws ConfigurationManagementException;
 
     // --------------------------------Resource---------------------------------------------------------------------
@@ -75,7 +75,7 @@ public interface ConfigurationManager {
      * @return 201 created. Returns resource change response with resource name, tenant domain and change state.
      * @throws ConfigurationManagementException Resource management exception.
      */
-    Resource addResource(String resourceType, ResourceAdd resourceAdd) throws ConfigurationManagementException;
+    Resource addResource(String resourceTypeName, ResourceAdd resourceAdd) throws ConfigurationManagementException;
 
     /**
      * This API is used to replace the existing resource with the given resource or add the given
@@ -84,7 +84,7 @@ public interface ConfigurationManager {
      * @return 201 created. Returns resource change response with resource name, tenant domain and change state.
      * @throws ConfigurationManagementException Resource management exception.
      */
-    Resource replaceResource(String resourceType, ResourceAdd resourceAdd) throws ConfigurationManagementException;
+    Resource replaceResource(String resourceTypeName, ResourceAdd resourceAdd) throws ConfigurationManagementException;
 
     /**
      * This API is used to update the existing resource with the given resource.
@@ -92,35 +92,26 @@ public interface ConfigurationManager {
      * @return 201 created. Returns resource change response with resource name, tenant domain and change state.
      * @throws ConfigurationManagementException Resource management exception.
      */
-    Resource updateResource(String resourceType, ResourceAdd resourceAdd) throws ConfigurationManagementException;
+    Resource updateResource(String resourceTypeName, ResourceAdd resourceAdd) throws ConfigurationManagementException;
 
-    /**
-     * This API is used to get the configuration by configuration name
-     *
-     * @param name Name id of the configuration.
-     * @return 200 OK with configuration element.
-     * @throws Resource Management Exception.
-     */
-    Resource getResource(String name, String resourceType, SearchCondition searchCondition)
+    Resource getResource(String resourceName, String resourceTypeName)
             throws ConfigurationManagementException;
 
-    /**
-     * This API is used to delete the configuration by configuration name
-     *
-     * @param name Name  id of the configuration.
-     * @throws ConfigurationManagementException Resource management exception.
-     */
-    void deleteResource(String name, String resourceType) throws ConfigurationManagementException;
+    void deleteResource(String resourceName, String resourceTypeName) throws ConfigurationManagementException;
 
     // -------------------------------- Attribute-------------------------------------------------------------------
-    Attribute addAttribute(String name, String resourceType, Attribute attribute) throws ConfigurationManagementException;
-
-    Attribute replaceAttribute(String name, String resourceType, Attribute attribute) throws ConfigurationManagementException;
-
-    Attribute updateAttribute(String name, String resourceType, Attribute attribute) throws ConfigurationManagementException;
-
-    Attribute getAttribute(AttributePathParameter attributePathParameter, SearchCondition searchCondition)
+    Attribute addAttribute(String resourceTypeName, String resourceName, Attribute attribute)
             throws ConfigurationManagementException;
 
-    void deleteAttribute(String name, String resourceType, String attribute) throws ConfigurationManagementException;
+    Attribute replaceAttribute(String resourceTypeName, String resourceName, Attribute attribute)
+            throws ConfigurationManagementException;
+
+    Attribute updateAttribute(String resourceTypeName, String resourceName, Attribute attribute)
+            throws ConfigurationManagementException;
+
+    Attribute getAttribute(String resourceTypeName, String resourceName, String attributeKey)
+            throws ConfigurationManagementException;
+
+    void deleteAttribute(String resourceTypeName, String resourceName, String attributeKey)
+            throws ConfigurationManagementException;
 }

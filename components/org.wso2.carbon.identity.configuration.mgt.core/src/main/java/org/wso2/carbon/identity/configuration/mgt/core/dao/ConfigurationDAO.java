@@ -1,6 +1,7 @@
 package org.wso2.carbon.identity.configuration.mgt.core.dao;
 
 import org.wso2.carbon.identity.configuration.mgt.core.exception.ConfigurationManagementException;
+import org.wso2.carbon.identity.configuration.mgt.core.model.Attribute;
 import org.wso2.carbon.identity.configuration.mgt.core.model.Resource;
 import org.wso2.carbon.identity.configuration.mgt.core.model.ResourceType;
 import org.wso2.carbon.identity.configuration.mgt.core.model.Resources;
@@ -76,4 +77,7 @@ public interface ConfigurationDAO {
     ResourceType getResourceTypeById(String id) throws ConfigurationManagementException;
 
     void deleteResourceTypeByName(String name) throws ConfigurationManagementException;
+
+    void replaceAttribute(String attributeId, String resourceId, Attribute attribute)
+            throws ConfigurationManagementException;
 }
