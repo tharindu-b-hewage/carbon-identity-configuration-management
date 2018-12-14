@@ -874,7 +874,7 @@ definitions:
     type: object
     required:
     - key
-      - value
+    - value
     properties:
       key:
         type: string

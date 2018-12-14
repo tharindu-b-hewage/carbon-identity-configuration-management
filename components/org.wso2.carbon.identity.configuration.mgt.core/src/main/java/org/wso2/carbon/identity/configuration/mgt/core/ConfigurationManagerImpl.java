@@ -35,7 +35,9 @@ import org.wso2.carbon.identity.configuration.mgt.core.util.ConfigurationUtils;
 
 import java.util.List;
 
+import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_ATTRIBUTE_DOES_NOT_EXISTS;
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_ATTRIBUTE_IDENTIFIERS_REQUIRED;
+import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_ATTRIBUTE_REQUIRED;
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_GET_DAO;
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_QUERY_LENGTH_EXCEEDED;
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_RESOURCE_ADD_REQUEST_INVALID;
@@ -450,18 +452,66 @@ public class ConfigurationManagerImpl implements ConfigurationManager {
         return null;
     }
 
-    public void deleteAttribute(String resourceTypeName, String resourceName, String attribute) throws ConfigurationManagementException {
+    public void deleteAttribute(String resourceTypeName, String resourceName, String attributeKey) throws ConfigurationManagementException {
 
+        validateAttributeDeleteRequest(resourceTypeName, resourceName, attributeKey);
+        Attribute existingAttribute = getAttribute(resourceTypeName, resourceName, attributeKey);
+        getConfigurationDAO().deleteAttribute(existingAttribute.getAttributeId(), attributeKey);
+        if (log.isDebugEnabled()) {
+            log.debug("Attribute: " + attributeKey + " successfully deleted.");
+        }
+    }
+
+    private void validateAttributeDeleteRequest(String resourceTypeName, String resourceName, String attributeKey)
+    throws ConfigurationManagementException{
+
+        validateAttributeGetRequest(resourceTypeName, resourceName, attributeKey);
     }
 
     public Attribute getAttribute(String resourceTypeName, String resourceName, String attributeKey) throws ConfigurationManagementException {
 
-        return null;
+        validateAttributeGetRequest(resourceTypeName, resourceName, attributeKey);
+        String resourceId = getResourceId(resourceTypeName, resourceName);
+        Attribute attribute = getConfigurationDAO().getAttribute(resourceId, attributeKey);
+        if (attribute == null || attribute.getKey() == null) {
+            if (log.isDebugEnabled()) {
+                log.debug("Resource Type: " + attributeKey + " does not exists.");
+            }
+            throw handleClientException(ERROR_CODE_ATTRIBUTE_DOES_NOT_EXISTS, attributeKey);
+        }
+
+        if (log.isDebugEnabled()) {
+            log.debug("Resource type: " + attributeKey + " retrieved successfully.");
+        }
+        return attribute;
+    }
+
+    private void validateAttributeGetRequest(String resourceTypeName, String resourceName, String attributeKey)
+            throws ConfigurationManagementException {
+
+        if (StringUtils.isEmpty(resourceName) || StringUtils.isEmpty(resourceTypeName) || StringUtils.isEmpty(attributeKey)) {
+            String attributeIdentifiers = "resourceName = " + resourceName + ", resourceTypeName = " + resourceTypeName
+                    + ", attributeKey = " + attributeKey;
+            throw handleClientException(ERROR_CODE_ATTRIBUTE_IDENTIFIERS_REQUIRED, attributeIdentifiers);
+        }
     }
 
     public Attribute updateAttribute(String resourceTypeName, String resourceName, Attribute attribute) throws ConfigurationManagementException {
 
-        return null;
+        validateAttributeReplaceRequest(attribute);
+        Attribute existingAttribute = getAttribute(resourceTypeName, resourceName, attribute.getKey());
+        getConfigurationDAO().updateAttribute(existingAttribute.getAttributeId(), attribute);
+        if (log.isDebugEnabled()) {
+            log.debug("Attribute: " + attribute.getKey() + " successfully updated.");
+        }
+        return attribute;
+    }
+
+    private void validateAttributeReplaceRequest(Attribute attribute) throws ConfigurationManagementException {
+
+        if (attribute == null || StringUtils.isEmpty(attribute.getKey())) {
+            throw handleClientException(ERROR_CODE_ATTRIBUTE_REQUIRED, null);
+        }
     }
 
     public Attribute addAttribute(String resourceTypeName, String resourceName, Attribute attribute) throws ConfigurationManagementException {
@@ -472,41 +522,18 @@ public class ConfigurationManagerImpl implements ConfigurationManager {
     public Attribute replaceAttribute(String resourceTypeName, String resourceName, Attribute attribute)
             throws ConfigurationManagementException {
 
-        validateAttributeReplaceRequest(resourceTypeName, resourceName, attribute);
+        return null;
 
-        String attributeId = generateUniqueID();
-        if (log.isDebugEnabled()) {
-            log.debug("Attribute id: " + attributeId + " generated in the replace request for possible " +
-                    "attribute creation if not already exists.");
-        }
-        String resourceId = getResourceId(resourceName, resourceTypeName); // TODO: 12/14/18 HTTP PATCH required. move to update
-        getAttribute(resourceTypeName, resourceName, attribute.getKey());
-        getConfigurationDAO().replaceAttribute(attributeId, resourceId, attribute);
-        if (log.isDebugEnabled()) {
-            log.debug("Attribute: " + attribute.getKey() + " successfully replaced with the id: "
-                    + attributeId);
-        }
-        return attribute;
     }
 
-    private String getResourceId(String resourceType, String resourceName) throws ConfigurationManagementException {
+    private String getResourceId(String resourceTypeName, String resourceName) throws ConfigurationManagementException {
 
-        String resourceTypeId = getConfigurationDAO().getResourceTypeByName(resourceType).getId();
+        String resourceTypeId = getConfigurationDAO().getResourceTypeByName(resourceTypeName).getId();
         return getConfigurationDAO().getResource(
                 PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(),
                 resourceTypeId,
                 resourceName
         ).getResourceId();
-    }
-
-    private void validateAttributeReplaceRequest(String resourceTypeName, String resourceName, Attribute attribute)
-            throws ConfigurationManagementException {
-
-        if (StringUtils.isEmpty(resourceName) || StringUtils.isEmpty(resourceTypeName) || (attribute == null)) {
-            String attributeIdentifiers = "resourceName = " + resourceName + ", resourceTypeName = " + resourceTypeName
-                    + (attribute == null ? ", attribute = null." : ".");
-            throw handleClientException(ERROR_CODE_ATTRIBUTE_IDENTIFIERS_REQUIRED, attributeIdentifiers);
-        }
     }
 
     /**

@@ -76,7 +76,12 @@ public class ConfigurationConstants {
         ERROR_CODE_SEARCH_QUERY_SQL_PARSE_ERROR("CONFIGM_00032", "Search query syntax error"),
         ERROR_CODE_ATTRIBUTE_IDENTIFIERS_REQUIRED("CONFIGM_00033", "One or more identifiers for the attribute: %s " +
                 "validation failed."),
-        ERROR_CODE_REPLACE_ATTRIBUTE("CONFIGM_00034", "Error while replacing the resource type: %s."),
+        ERROR_CODE_REPLACE_ATTRIBUTE("CONFIGM_00034", "Error while replacing the attribute: %s."),
+        ERROR_CODE_GET_ATTRIBUTE("CONFIGM_00035", "Error while getting the attribute: %s."),
+        ERROR_CODE_ATTRIBUTE_REQUIRED("CONFIGM_00036", "Attribute validation failed"),
+        ERROR_CODE_ATTRIBUTE_DOES_NOT_EXISTS("CONFIGM_00037", "Attribute with the key: %s does not exists."),
+        ERROR_CODE_UPDATE_ATTRIBUTE("CONFIGM_00038", "Error while updating the attribute: %s."),
+        ERROR_CODE_DELETE_ATTRIBUTE("CONFIGM_00039", "Error while deleting the attribute: %s."),
         ;
 
         private final String code;

@@ -31,6 +31,18 @@ public class SQLConstants {
     public static final String INSERT_OR_UPDATE_ATTRIBUTE_MYSQL = "INSERT INTO IDN_CONFIG_ATTRIBUTE(ID, RESOURCE_ID," +
             " ATTR_KEY, ATTR_VALUE) VALUES(?, ?, ?, ?) ON DUPLICATE KEY UPDATE ATTR_KEY = VALUES(ATTR_KEY), " +
             "ATTR_VALUE = VALUES(ATTR_VALUE)";
+    public static final String UPDATE_ATTRIBUTE_MYSQL = "UPDATE IDN_CONFIG_ATTRIBUTE SET ATTR_VALUE = ? WHERE ID = ?";
+    public static final String GET_ATTRIBUTE_SQL = "SELECT\n" +
+            "  ID,\n" +
+            "  RESOURCE_ID,\n" +
+            "  ATTR_KEY,\n" +
+            "  ATTR_VALUE\n" +
+            "FROM\n" +
+            "  IDN_CONFIG_ATTRIBUTE\n" +
+            "WHERE\n" +
+            "  ATTR_KEY = ?\n" +
+            "  AND RESOURCE_ID = ?";
+    public static final String DELETE_ATTRIBUTE_SQL = "DELETE FROM IDN_CONFIG_ATTRIBUTE WHERE ID = ?";
 
     // Name is not update since for being the only possible duplicate key
     public static final String REPLACE_RESOURCE_TYPE_SQL = "INSERT INTO IDN_CONFIG_TYPE (ID, NAME, DESCRIPTION) " +

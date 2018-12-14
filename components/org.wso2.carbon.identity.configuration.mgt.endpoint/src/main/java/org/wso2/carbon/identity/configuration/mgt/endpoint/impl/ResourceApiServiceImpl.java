@@ -5,7 +5,6 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.identity.configuration.mgt.core.exception.ConfigurationManagementClientException;
 import org.wso2.carbon.identity.configuration.mgt.core.exception.ConfigurationManagementException;
 import org.wso2.carbon.identity.configuration.mgt.core.model.Attribute;
-import org.wso2.carbon.identity.configuration.mgt.core.model.AttributePathParameter;
 import org.wso2.carbon.identity.configuration.mgt.core.model.Resource;
 import org.wso2.carbon.identity.configuration.mgt.core.model.Resources;
 import org.wso2.carbon.identity.configuration.mgt.endpoint.ResourceApiService;
@@ -173,7 +172,7 @@ public class ResourceApiServiceImpl extends ResourceApiService {
 
         try {
             Attribute attribute = getConfigurationManager().updateAttribute(resourceType, resourceName, getAttributeFromDTO(attributeDTO));
-            return Response.created(new URI(BASE_PATH + resourceName)).entity(getAttributeDTO(attribute)).build();
+            return Response.ok().entity(getAttributeDTO(attribute)).build();
         } catch (ConfigurationManagementClientException e) {
             return handleBadRequestResponse(e, LOG);
         } catch (ConfigurationManagementException e) {

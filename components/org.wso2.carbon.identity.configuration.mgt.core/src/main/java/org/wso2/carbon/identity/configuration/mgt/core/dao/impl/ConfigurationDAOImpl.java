@@ -38,6 +38,7 @@ import static java.time.ZoneOffset.UTC;
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.BEAN_FIELD_FLAG;
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_ADD_RESOURCE;
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_ADD_RESOURCE_TYPE;
+import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_DELETE_ATTRIBUTE;
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_DELETE_RESOURCE_TYPE;
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_GET_RESOURCE;
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_QUERY_LENGTH_EXCEEDED;
@@ -45,7 +46,9 @@ import static org.wso2.carbon.identity.configuration.mgt.core.constant.Configura
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_RETRIEVE_RESOURCE_TYPE;
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_SEARCH_SQL_EXPRESSION_INVALID;
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_SEARCH_TENANT_RESOURCES;
+import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_UPDATE_ATTRIBUTE;
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.NON_EXISTING_TENANT_ID;
+import static org.wso2.carbon.identity.configuration.mgt.core.constant.SQLConstants.DELETE_ATTRIBUTE_SQL;
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.SQLConstants.GET_TENANT_RESOURCES_SELECT_COLLUMNS_MYSQL;
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.SQLConstants.MAX_QUERY_LENGTH_SQL;
 
@@ -551,20 +554,48 @@ public class ConfigurationDAOImpl implements ConfigurationDAO {
                 SQLConstants.DELETE_RESOURCE_TYPE_BY_ID_SQL;
     }
 
-    public void replaceAttribute(String attributeId, String resourceId, Attribute attribute)
-            throws ConfigurationManagementException {
+    public void deleteAttribute(String attributeId, String attributeKey) throws ConfigurationManagementException {
 
         JdbcTemplate jdbcTemplate = JdbcUtils.getNewTemplate();
         try {
-            jdbcTemplate.executeInsert(SQLConstants.INSERT_OR_UPDATE_ATTRIBUTE_MYSQL, preparedStatement -> {
+            jdbcTemplate.executeUpdate(DELETE_ATTRIBUTE_SQL, (preparedStatement -> {
                 preparedStatement.setString(1, attributeId);
-                preparedStatement.setString(2, resourceId);
-                preparedStatement.setString(3, attribute.getKey());
-                preparedStatement.setString(4, attribute.getValue());
-            }, attribute, false);
+            }
+            ));
         } catch (DataAccessException e) {
-            throw ConfigurationUtils.handleServerException(ERROR_CODE_REPLACE_ATTRIBUTE, attribute.getKey(), e);
+            throw ConfigurationUtils.handleServerException(ERROR_CODE_DELETE_ATTRIBUTE, attributeKey, e);
         }
     }
 
+    public void updateAttribute(String attributeId, Attribute attribute) throws ConfigurationManagementException {
+
+        JdbcTemplate jdbcTemplate = JdbcUtils.getNewTemplate();
+        try {
+            jdbcTemplate.executeUpdate(SQLConstants.UPDATE_ATTRIBUTE_MYSQL, preparedStatement -> {
+                preparedStatement.setString(1, attribute.getValue());
+                preparedStatement.setString(2, attributeId);
+            });
+        } catch (DataAccessException e) {
+                throw ConfigurationUtils.handleServerException(ERROR_CODE_UPDATE_ATTRIBUTE, attribute.getKey(), e);
+        }
+    }
+
+    public Attribute getAttribute(String resourceId, String attributeKey) throws ConfigurationManagementException {
+
+        JdbcTemplate jdbcTemplate = JdbcUtils.getNewTemplate();
+        try {
+            return jdbcTemplate.fetchSingleRecord(SQLConstants.GET_ATTRIBUTE_SQL,
+                    (resultSet, rowNumber) -> new Attribute(
+                            resultSet.getString("ATTR_KEY"),
+                            resultSet.getString("ATTR_VALUE"),
+                            resultSet.getString("ID")
+                    ),
+                    preparedStatement -> {
+                        preparedStatement.setString(1, attributeKey);
+                        preparedStatement.setString(2, resourceId);
+                    });
+        } catch (DataAccessException e) {
+            throw ConfigurationUtils.handleServerException(ERROR_CODE_REPLACE_ATTRIBUTE, attributeKey, e);
+        }
+    }
 }

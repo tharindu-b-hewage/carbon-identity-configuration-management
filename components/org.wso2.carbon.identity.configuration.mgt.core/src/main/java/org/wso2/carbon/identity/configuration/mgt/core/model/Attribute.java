@@ -24,6 +24,17 @@ public class Attribute {
 
     private String key;
     private String value;
+    private String attributeId;
+
+    public String getAttributeId() {
+
+        return attributeId;
+    }
+
+    public void setAttributeId(String attributeId) {
+
+        this.attributeId = attributeId;
+    }
 
     /**
      * Initialize an Attribute object with a key,value pair.
@@ -35,6 +46,17 @@ public class Attribute {
 
         this.key = key;
         this.value = value;
+    }
+
+    public Attribute(String key, String value, String attributeId) {
+
+        this.key = key;
+        this.value = value;
+        this.attributeId = attributeId;
+    }
+
+    public Attribute() {
+
     }
 
     public String getKey() {
