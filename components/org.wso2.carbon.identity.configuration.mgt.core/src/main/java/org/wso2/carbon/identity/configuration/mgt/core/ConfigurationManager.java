@@ -94,10 +94,10 @@ public interface ConfigurationManager {
      */
     Resource updateResource(String resourceTypeName, ResourceAdd resourceAdd) throws ConfigurationManagementException;
 
-    Resource getResource(String resourceName, String resourceTypeName)
+    Resource getResource(String resourceTypeName, String resourceName)
             throws ConfigurationManagementException;
 
-    void deleteResource(String resourceName, String resourceTypeName) throws ConfigurationManagementException;
+    void deleteResource(String resourceTypeName, String resourceName) throws ConfigurationManagementException;
 
     // -------------------------------- Attribute-------------------------------------------------------------------
     Attribute addAttribute(String resourceTypeName, String resourceName, Attribute attribute)
