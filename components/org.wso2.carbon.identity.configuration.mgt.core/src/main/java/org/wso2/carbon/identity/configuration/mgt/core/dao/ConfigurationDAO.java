@@ -28,16 +28,16 @@ public interface ConfigurationDAO {
      * @param name Name id of the {@link Resource} to retrieve.
      * @return {@link Resource} for the given name.
      */
-    Resource getResource(String name, String resourceTypeId, int tenantId) throws ConfigurationManagementException;
+    Resource getResource(int tenantId, String resourceTypeId, String name) throws ConfigurationManagementException;
 
     /**
-     * Delete {@link Resource} by the given name.
+     * Delete {@link Resource} by the given resourceName.
      *
-     * @param name Name id of the {@link Resource} to delete.
+     * @param resourceName Name id of the {@link Resource} to delete.
      * @return Name id of the deleted {@link Resource}.
      * @throws ConfigurationManagementException Resource management exception.
      */
-    void deleteResource(String name, String resourceType) throws ConfigurationManagementException;
+    void deleteResource(String resourceTypeName, String resourceName) throws ConfigurationManagementException;
 
     /**
      * Add given {@link Resource}.
@@ -51,32 +51,32 @@ public interface ConfigurationDAO {
     /**
      * Replace given {@link Resource} or add if existing {@link Resource} is not present.
      *
-     * @param name     Name id of the {@link Resource}
+     * @param resourceName     Name id of the {@link Resource}
      * @param resource New {@link Resource} to replace the existing.
      * @return Name id of the added {@link Resource}.
      * @throws ConfigurationManagementException Resource management exception.
      */
-    void replaceResource(String name, Resource resource) throws ConfigurationManagementException;
+    void replaceResource(String resourceName, Resource resource) throws ConfigurationManagementException;
 
     /**
      * Update given {@link Resource}.
      *
-     * @param name     Name id of the {@link Resource}
+     * @param resourceName     Name id of the {@link Resource}
      * @param resource New {@link Resource} to update the existing.
      * @return Name id of the added {@link Resource}.
      * @throws ConfigurationManagementException Resource management exception.
      */
-    void updateConfiguration(String name, Resource resource) throws ConfigurationManagementException;
+    void updateResource(String resourceName, Resource resource) throws ConfigurationManagementException;
 
     void addResourceType(ResourceType resourceType) throws ConfigurationManagementException;
 
     void replaceResourceType(ResourceType resourceType) throws ConfigurationManagementException;
 
-    ResourceType getResourceTypeByName(String name) throws ConfigurationManagementException;
+    ResourceType getResourceTypeByName(String resourceTypeName) throws ConfigurationManagementException;
 
-    ResourceType getResourceTypeById(String id) throws ConfigurationManagementException;
+    ResourceType getResourceTypeById(String resourceTypeId) throws ConfigurationManagementException;
 
-    void deleteResourceTypeByName(String name) throws ConfigurationManagementException;
+    void deleteResourceTypeByName(String resourceTypeName) throws ConfigurationManagementException;
 
     void replaceAttribute(String attributeId, String resourceId, Attribute attribute)
             throws ConfigurationManagementException;

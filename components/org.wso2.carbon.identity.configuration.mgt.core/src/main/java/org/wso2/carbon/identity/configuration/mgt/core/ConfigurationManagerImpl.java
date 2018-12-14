@@ -116,26 +116,27 @@ public class ConfigurationManagerImpl implements ConfigurationManager {
     /**
      * {@inheritDoc}
      */
-    public Resource getResource(String resourceName, String resourceTypeName)
+    public Resource getResource(String resourceTypeName, String resourceName)
             throws ConfigurationManagementException {
 
-        validateResourceRetrieveRequest(resourceName, resourceTypeName);
+        validateResourceRetrieveRequest(resourceTypeName, resourceName);
         ResourceType resourceType = getResourceType(resourceTypeName);
-        Resource resource = this.getConfigurationDAO().getResource(resourceName, resourceType.getId(), getTenantId());
+        Resource resource = this.getConfigurationDAO().getResource(getTenantId(), resourceType.getId(), resourceName);
         if (resource == null) {
             if (log.isDebugEnabled()) {
                 log.debug("No resource found for the resourceName: " + resourceName);
             }
-            throw ConfigurationUtils.handleClientException(ErrorMessages.ERROR_CODE_RESOURCE_DOES_NOT_EXISTS, resourceName, null);
+            throw ConfigurationUtils.handleClientException(
+                    ErrorMessages.ERROR_CODE_RESOURCE_DOES_NOT_EXISTS, resourceName, null);
         }
         return resource;
     }
 
-    private void validateResourceRetrieveRequest(String resourceName, String resourceType) throws ConfigurationManagementException {
+    private void validateResourceRetrieveRequest(String resourceTypeName, String resourceName) throws ConfigurationManagementException {
 
-        if (StringUtils.isEmpty(resourceName) || StringUtils.isEmpty(resourceType)) {
+        if (StringUtils.isEmpty(resourceName) || StringUtils.isEmpty(resourceTypeName)) {
             if (log.isDebugEnabled()) {
-                log.debug("Invalid resource identifier with resourceName: " + resourceName + " and resourceType: " + resourceType + ".");
+                log.debug("Invalid resource identifier with resourceName: " + resourceName + " and resourceTypeName: " + resourceTypeName + ".");
             }
             throw handleClientException(ERROR_CODE_RESOURCE_GET_REQUEST_INVALID, null);
         }
@@ -154,27 +155,27 @@ public class ConfigurationManagerImpl implements ConfigurationManager {
     /**
      * {@inheritDoc}
      */
-    public void deleteResource(String resourceName, String resourceType) throws ConfigurationManagementException {
+    public void deleteResource(String resourceTypeName, String resourceName) throws ConfigurationManagementException {
 
-        validateResourceDeleteRequest(resourceName, resourceType);
-        this.getConfigurationDAO().deleteResource(resourceName, resourceType);
+        validateResourceDeleteRequest(resourceTypeName, resourceName);
+        this.getConfigurationDAO().deleteResource(resourceTypeName, resourceName);
         if (log.isDebugEnabled()) {
             log.debug(StringUtils.capitalize(resourceName) + " configuration deleted successfully.");
         }
     }
 
-    private void validateResourceDeleteRequest(String resourceName, String resourceType)
+    private void validateResourceDeleteRequest(String resourceTypeName, String resourceName)
             throws ConfigurationManagementException {
 
-        if (StringUtils.isEmpty(resourceName) || StringUtils.isEmpty(resourceType)) {
+        if (StringUtils.isEmpty(resourceName) || StringUtils.isEmpty(resourceTypeName)) {
             if (log.isDebugEnabled()) {
                 log.debug("Error identifying the resource with resource name: " + resourceName + " and resource type:"
-                        + resourceType + ".");
+                        + resourceTypeName + ".");
             }
             throw handleClientException(ERROR_CODE_RESOURCE_DELETE_REQUEST_REQUIRED, null);
         }
 
-        if (!isResourceExists(resourceName, resourceType)) {
+        if (!isResourceExists(resourceTypeName, resourceName)) {
             if (log.isDebugEnabled()) {
                 log.debug("A resource with the name: " + resourceName + " does not exists.");
             }
@@ -208,7 +209,7 @@ public class ConfigurationManagerImpl implements ConfigurationManager {
         resource.setTenantDomain(getTenantDomain());
         resource.setResourceName(resourceAdd.getName());
         resource.setResourceType(resourceTypeName);
-        resource.setAttribute(resourceAdd.getAttributes());
+        resource.setAttributes(resourceAdd.getAttributes());
         resource.setLastModified(java.time.Instant.now().toString());
         return resource;
     }
@@ -219,7 +220,7 @@ public class ConfigurationManagerImpl implements ConfigurationManager {
             throw handleClientException(ERROR_CODE_RESOURCE_ADD_REQUEST_INVALID, null);
         }
 
-        if (isResourceExists(resourceAdd.getName(), resourceTypeName)) {
+        if (isResourceExists(resourceTypeName, resourceAdd.getName())) {
             throw handleClientException(ERROR_CODE_RESOURCE_ALREADY_EXISTS, resourceAdd.getName());
         }
     }
@@ -244,10 +245,10 @@ public class ConfigurationManagerImpl implements ConfigurationManager {
         return true;
     }
 
-    private boolean isResourceExists(String resourceName, String resourceTypeName) throws ConfigurationManagementException {
+    private boolean isResourceExists(String resourceTypeName, String resourceName) throws ConfigurationManagementException {
 
         try {
-            getResource(resourceName, resourceTypeName);
+            getResource(resourceTypeName, resourceName);
             return true;
         } catch (ConfigurationManagementClientException e) {
             if (e.getErrorCode().equals(ERROR_CODE_RESOURCE_DOES_NOT_EXISTS.getCode())) {
@@ -471,7 +472,7 @@ public class ConfigurationManagerImpl implements ConfigurationManager {
     public Attribute replaceAttribute(String resourceTypeName, String resourceName, Attribute attribute)
             throws ConfigurationManagementException {
 
-        validateAttributeReplaceRequest(resourceName, resourceTypeName, attribute);
+        validateAttributeReplaceRequest(resourceTypeName, resourceName, attribute);
 
         String attributeId = generateUniqueID();
         if (log.isDebugEnabled()) {
@@ -488,17 +489,17 @@ public class ConfigurationManagerImpl implements ConfigurationManager {
         return attribute;
     }
 
-    private String getResourceId(String resourceName, String resourceType) throws ConfigurationManagementException {
+    private String getResourceId(String resourceType, String resourceName) throws ConfigurationManagementException {
 
         String resourceTypeId = getConfigurationDAO().getResourceTypeByName(resourceType).getId();
         return getConfigurationDAO().getResource(
-                resourceName,
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(),
                 resourceTypeId,
-                PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId()
+                resourceName
         ).getResourceId();
     }
 
-    private void validateAttributeReplaceRequest(String resourceName, String resourceTypeName, Attribute attribute)
+    private void validateAttributeReplaceRequest(String resourceTypeName, String resourceName, Attribute attribute)
             throws ConfigurationManagementException {
 
         if (StringUtils.isEmpty(resourceName) || StringUtils.isEmpty(resourceTypeName) || (attribute == null)) {

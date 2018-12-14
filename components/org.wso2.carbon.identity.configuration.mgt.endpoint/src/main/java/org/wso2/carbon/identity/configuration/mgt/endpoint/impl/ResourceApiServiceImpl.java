@@ -111,7 +111,7 @@ public class ResourceApiServiceImpl extends ResourceApiService {
     public Response resourceResourceTypeResourceNameAttributeKeyDelete(String resourceName, String resourceType, String attributeKey) {
 
         try {
-            getConfigurationManager().deleteAttribute(resourceName, resourceType, attributeKey);
+            getConfigurationManager().deleteAttribute(resourceType, resourceName, attributeKey);
             return Response.ok().build();
         } catch (ConfigurationManagementClientException e) {
             return handleBadRequestResponse(e, LOG);
@@ -142,7 +142,7 @@ public class ResourceApiServiceImpl extends ResourceApiService {
     public Response resourceResourceTypeResourceNameDelete(String resourceName, String resourceType) {
 
         try {
-            getConfigurationManager().deleteResource(resourceName, resourceType);
+            getConfigurationManager().deleteResource(resourceType, resourceName);
             return Response.ok().build();
         } catch (ConfigurationManagementClientException e) {
             return handleBadRequestResponse(e, LOG);
@@ -157,7 +157,7 @@ public class ResourceApiServiceImpl extends ResourceApiService {
     public Response resourceResourceTypeResourceNameGet(String resourceName, String resourceType) {
 
         try {
-            Resource resource = getConfigurationManager().getResource(resourceName, resourceType);
+            Resource resource = getConfigurationManager().getResource(resourceType, resourceName);
             return Response.ok().entity(getResourceDTO(resource)).build();
         } catch (ConfigurationManagementClientException e) {
             return handleBadRequestResponse(e, LOG);
@@ -172,7 +172,7 @@ public class ResourceApiServiceImpl extends ResourceApiService {
     public Response resourceResourceTypeResourceNamePatch(String resourceName, String resourceType, AttributeDTO attributeDTO) {
 
         try {
-            Attribute attribute = getConfigurationManager().updateAttribute(resourceName, resourceType, getAttributeFromDTO(attributeDTO));
+            Attribute attribute = getConfigurationManager().updateAttribute(resourceType, resourceName, getAttributeFromDTO(attributeDTO));
             return Response.created(new URI(BASE_PATH + resourceName)).entity(getAttributeDTO(attribute)).build();
         } catch (ConfigurationManagementClientException e) {
             return handleBadRequestResponse(e, LOG);
@@ -187,7 +187,7 @@ public class ResourceApiServiceImpl extends ResourceApiService {
     public Response resourceResourceTypeResourceNamePost(String resourceName, String resourceType, AttributeDTO attributeDTO) {
 
         try {
-            Attribute attribute = getConfigurationManager().addAttribute(resourceName, resourceType, getAttributeFromDTO(attributeDTO));
+            Attribute attribute = getConfigurationManager().addAttribute(resourceType, resourceName, getAttributeFromDTO(attributeDTO));
             return Response.created(new URI(BASE_PATH + resourceName)).entity(getAttributeDTO(attribute)).build();
         } catch (ConfigurationManagementClientException e) {
             return handleBadRequestResponse(e, LOG);
@@ -203,7 +203,7 @@ public class ResourceApiServiceImpl extends ResourceApiService {
 
         try {
             Attribute attribute = getConfigurationManager().replaceAttribute(
-                    resourceName, resourceType, getAttributeFromDTO(attributeDTO));
+                    resourceType, resourceName, getAttributeFromDTO(attributeDTO));
             return Response.created(new URI(BASE_PATH + resourceName)).entity(getAttributeDTO(attribute)).build();
         } catch (ConfigurationManagementClientException e) {
             return handleBadRequestResponse(e, LOG);

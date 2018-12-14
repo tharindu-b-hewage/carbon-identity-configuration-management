@@ -28,8 +28,8 @@ public class Resource {
     private String resourceName;
     private String resourceType;
     private String lastModified;
-    private List<ResourceFile> file;
-    private List<Attribute> attribute;
+    private List<ResourceFile> files;
+    private List<Attribute> attributes;
 
     /**
      * Initialize a Resource object.
@@ -87,19 +87,19 @@ public class Resource {
         this.resourceType = resourceType;
     }
 
-    public List<ResourceFile> getFile() {
+    public List<ResourceFile> getFiles() {
 
-        return file;
+        return files;
     }
 
-    public void setFile(List<ResourceFile> file) {
+    public void setFiles(List<ResourceFile> files) {
 
-        this.file = file;
+        this.files = files;
     }
 
-    public List<Attribute> getAttribute() {
+    public List<Attribute> getAttributes() {
 
-        return attribute;
+        return attributes;
     }
 
     public String getResourceName() {
@@ -107,9 +107,9 @@ public class Resource {
         return resourceName;
     }
 
-    public void setAttribute(List<Attribute> attribute) {
+    public void setAttributes(List<Attribute> attributes) {
 
-        this.attribute = attribute;
+        this.attributes = attributes;
     }
 
     public void setResourceName(String resourceName) {

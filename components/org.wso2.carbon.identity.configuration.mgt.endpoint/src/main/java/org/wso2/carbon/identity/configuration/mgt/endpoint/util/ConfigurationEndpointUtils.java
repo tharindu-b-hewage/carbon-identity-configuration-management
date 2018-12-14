@@ -93,15 +93,15 @@ public class ConfigurationEndpointUtils {
         resourceDTO.setResourceId(resource.getResourceId());
         resourceDTO.setTenantDomain(resource.getTenantDomain());
         resourceDTO.setAttributes(
-                resource.getAttribute() != null ?
-                        resource.getAttribute()
+                resource.getAttributes() != null ?
+                        resource.getAttributes()
                                 .stream()
                                 .map(ConfigurationEndpointUtils::getAttributeDTO)
                                 .collect(Collectors.toList())
                         : new ArrayList<>(0)
         );
-        resourceDTO.setFiles(resource.getFile() != null ?
-                resource.getFile()
+        resourceDTO.setFiles(resource.getFiles() != null ?
+                resource.getFiles()
                         .stream()
                         .map(ConfigurationEndpointUtils::getResourceFileDTO)
                         .collect(Collectors.toList())

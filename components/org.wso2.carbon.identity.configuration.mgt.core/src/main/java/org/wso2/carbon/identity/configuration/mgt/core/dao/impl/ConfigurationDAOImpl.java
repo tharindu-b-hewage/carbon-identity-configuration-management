@@ -261,8 +261,8 @@ public class ConfigurationDAOImpl implements ConfigurationDAO {
             }
         });
         resourcesCollector.values().forEach(resource -> {
-            resource.setAttribute(attributes.get(resource.getResourceId()));
-            resource.setFile(resourceFiles.get(resource.getResourceId()));
+            resource.setAttributes(attributes.get(resource.getResourceId()));
+            resource.setFiles(resourceFiles.get(resource.getResourceId()));
         });
         return new Resources(new ArrayList<>(resourcesCollector.values()));
     }
@@ -270,7 +270,7 @@ public class ConfigurationDAOImpl implements ConfigurationDAO {
     /**
      * {@inheritDoc}
      */
-    public Resource getResource(String name, String resourceTypeId, int tenantId)
+    public Resource getResource(int tenantId, String resourceTypeId, String resourceName)
             throws ConfigurationManagementException {
 
         JdbcTemplate jdbcTemplate = JdbcUtils.getNewTemplate();
@@ -289,7 +289,7 @@ public class ConfigurationDAOImpl implements ConfigurationDAO {
                             .setAttributeValue(resultSet.getString("ATTR_VALUE"))
                             .setFileId(resultSet.getString("FILE_ID"))
                             .build(), preparedStatement -> {
-                        preparedStatement.setString(1, name);
+                        preparedStatement.setString(1, resourceName);
                         preparedStatement.setInt(2, tenantId);
                         preparedStatement.setString(3, resourceTypeId);
                     });
@@ -300,7 +300,7 @@ public class ConfigurationDAOImpl implements ConfigurationDAO {
             return configurationRawDataCollectors == null || configurationRawDataCollectors.size() == 0 ?
                     null : buildResourceFromRawData(configurationRawDataCollectors);
         } catch (DataAccessException e) {
-            throw ConfigurationUtils.handleServerException(ERROR_CODE_GET_RESOURCE, name, e);
+            throw ConfigurationUtils.handleServerException(ERROR_CODE_GET_RESOURCE, resourceName, e);
         }
     }
 
@@ -343,27 +343,27 @@ public class ConfigurationDAOImpl implements ConfigurationDAO {
                 }
             }
         });
-        resource.setAttribute(attributes);
-        resource.setFile(resourceFiles);
+        resource.setAttributes(attributes);
+        resource.setFiles(resourceFiles);
         return resource;
     }
 
     /**
      * {@inheritDoc}
      */
-    public void deleteResource(String name, String resourceType) throws ConfigurationManagementException {
+    public void deleteResource(String resourceTypeName, String resourceName) throws ConfigurationManagementException {
 
         JdbcTemplate jdbcTemplate = JdbcUtils.getNewTemplate();
-        String resourceTypeId = getResourceTypeByName(resourceType).getId();
+        String resourceTypeId = getResourceTypeByName(resourceTypeName).getId();
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
         try {
             jdbcTemplate.executeUpdate(SQLConstants.DELETE_RESOURCE_SQL, preparedStatement -> {
-                preparedStatement.setString(1, name);
+                preparedStatement.setString(1, resourceName);
                 preparedStatement.setInt(2, tenantId);
                 preparedStatement.setString(3, resourceTypeId);
             });
         } catch (DataAccessException e) {
-            throw ConfigurationUtils.handleServerException(ERROR_CODE_DELETE_RESOURCE_TYPE, name, e);
+            throw ConfigurationUtils.handleServerException(ERROR_CODE_DELETE_RESOURCE_TYPE, resourceName, e);
         }
     }
 
@@ -377,7 +377,7 @@ public class ConfigurationDAOImpl implements ConfigurationDAO {
         JdbcTemplate jdbcTemplate = JdbcUtils.getNewTemplate();
         try {
             jdbcTemplate.withTransaction(template -> {
-                boolean isAttributeExists = resource.getAttribute() != null;
+                boolean isAttributeExists = resource.getAttributes() != null;
 
                 // Insert resource metadata.
                 template.executeInsert(SQLConstants.INSERT_RESOURCE_SQL, preparedStatement -> {
@@ -403,7 +403,7 @@ public class ConfigurationDAOImpl implements ConfigurationDAO {
                     String attributesQuery = buildQueryForAttributes(resource);
                     template.executeInsert(attributesQuery, preparedStatement -> {
                         int attributeCount = 0;
-                        for (Attribute attribute : resource.getAttribute()) {
+                        for (Attribute attribute : resource.getAttributes()) {
                             preparedStatement.setString(++attributeCount, ConfigurationUtils.generateUniqueID());
                             preparedStatement.setString(++attributeCount, resource.getResourceId());
                             preparedStatement.setString(++attributeCount, attribute.getKey());
@@ -424,12 +424,12 @@ public class ConfigurationDAOImpl implements ConfigurationDAO {
         sb.append(SQLConstants.INSERT_ATTRIBUTES_SQL);
 
         // Since attributes exist, query is already built for the first attribute.
-        for (int i = 1; i < resource.getAttribute().size(); i++) {
+        for (int i = 1; i < resource.getAttributes().size(); i++) {
             sb.append(SQLConstants.INSERT_ATTRIBUTE_KEY_VALUE_SQL);
             if (sb.length() > MAX_QUERY_LENGTH_SQL) {
                 if (log.isDebugEnabled()) {
                     log.debug("Error building SQL query for the attribute insert. Number of attributes: " +
-                            resource.getAttribute().size() + " exceeds the maximum limit: " +
+                            resource.getAttributes().size() + " exceeds the maximum limit: " +
                             MAX_QUERY_LENGTH_SQL);
                 }
                 throw ConfigurationUtils.handleClientException(ERROR_CODE_QUERY_LENGTH_EXCEEDED, null);
@@ -441,7 +441,7 @@ public class ConfigurationDAOImpl implements ConfigurationDAO {
     /**
      * {@inheritDoc}
      */
-    public void replaceResource(String name, Resource resource) throws ConfigurationManagementException {
+    public void replaceResource(String resourceName, Resource resource) throws ConfigurationManagementException {
 
 //        return new Resource("test", "test");
     }
@@ -449,7 +449,7 @@ public class ConfigurationDAOImpl implements ConfigurationDAO {
     /**
      * {@inheritDoc}
      */
-    public void updateConfiguration(String name, Resource resource) throws ConfigurationManagementException {
+    public void updateResource(String resourceName, Resource resource) throws ConfigurationManagementException {
 
 //        return new Resource("test", "test");
     }
@@ -493,15 +493,15 @@ public class ConfigurationDAOImpl implements ConfigurationDAO {
     }
 
     @Override
-    public ResourceType getResourceTypeByName(String name) throws ConfigurationManagementException {
+    public ResourceType getResourceTypeByName(String resourceTypeName) throws ConfigurationManagementException {
 
-        return getResourceTypeByIdentifier(name, null);
+        return getResourceTypeByIdentifier(resourceTypeName, null);
     }
 
     @Override
-    public ResourceType getResourceTypeById(String id) throws ConfigurationManagementException {
+    public ResourceType getResourceTypeById(String resourceTypeId) throws ConfigurationManagementException {
 
-        return getResourceTypeByIdentifier(null, id);
+        return getResourceTypeByIdentifier(null, resourceTypeId);
     }
 
     private ResourceType getResourceTypeByIdentifier(String name, String id) throws ConfigurationManagementException {
@@ -532,16 +532,16 @@ public class ConfigurationDAOImpl implements ConfigurationDAO {
                 SQLConstants.GET_RESOURCE_TYPE_BY_ID_SQL;
     }
 
-    public void deleteResourceTypeByName(String name) throws ConfigurationManagementException {
+    public void deleteResourceTypeByName(String resourceTypeName) throws ConfigurationManagementException {
 
         JdbcTemplate jdbcTemplate = JdbcUtils.getNewTemplate();
         try {
             jdbcTemplate.executeUpdate(selectDeleteResourceTypeQuery(null), (preparedStatement -> {
-                preparedStatement.setString(1, name);
+                preparedStatement.setString(1, resourceTypeName);
             }
             ));
         } catch (DataAccessException e) {
-            throw ConfigurationUtils.handleServerException(ERROR_CODE_DELETE_RESOURCE_TYPE, name, e);
+            throw ConfigurationUtils.handleServerException(ERROR_CODE_DELETE_RESOURCE_TYPE, resourceTypeName, e);
         }
     }
 
