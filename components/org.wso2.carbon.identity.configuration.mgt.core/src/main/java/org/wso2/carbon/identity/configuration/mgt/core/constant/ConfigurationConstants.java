@@ -7,7 +7,7 @@ import java.util.Random;
  */
 public class ConfigurationConstants {
 
-    public static final String NON_EXISTING_TENANT_ID = String.valueOf(new Random().nextInt());
+    public static final int NON_EXISTING_TENANT_ID = new Random().nextInt();
     public static final String STATUS_BAD_REQUEST_MESSAGE_DEFAULT = "Bad Request";
     public static final String STATUS_NOT_FOUND_MESSAGE_DEFAULT = "Not Found";
     public static final String HEADER_CONTENT_TYPE = "Content-Type";
@@ -66,7 +66,7 @@ public class ConfigurationConstants {
         ERROR_CODE_RESOURCE_DOES_NOT_EXISTS("CONFIGM_00024", "Resource with the name: %s does not exists."),
         ERROR_CODE_ADD_DELETE_RESOURCE("CONFIGM_00025", "Error while deleting the resource: %s."),
         ERROR_CODE_SEARCH_REQUEST_INVALID("CONFIGM_00026", "Search request validation failed. " +
-                "Invalid search filter expression."),
+                "Invalid search filter."),
         ERROR_CODE_SEARCH_SQL_EXPRESSION_INVALID("CONFIGM_00027", "Search query expression: %s is not valid."),
         ERROR_CODE_SEARCH_TENANT_RESOURCES("CONFIGM_00028", "Error occurred while searching for resources."),
         ERROR_CODE_RESOURCES_DOES_NOT_EXISTS("CONFIGM_00029", "Resources does not exists."),

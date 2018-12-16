@@ -1,8 +1,13 @@
-package org.wso2.carbon.identity.configuration.mgt.core.model.search;
+package org.wso2.carbon.identity.configuration.mgt.core.model;
 
 import org.apache.commons.lang.StringUtils;
 import org.wso2.carbon.identity.configuration.mgt.core.exception.ConfigurationManagementException;
+import org.wso2.carbon.identity.configuration.mgt.core.search.PrimitiveCondition;
+import org.wso2.carbon.identity.configuration.mgt.core.search.constant.ConditionType;
+import org.wso2.carbon.identity.configuration.mgt.core.search.exception.PrimitiveConditionValidationException;
 import org.wso2.carbon.identity.configuration.mgt.core.util.ConfigurationUtils;
+
+import java.lang.reflect.Field;
 
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_SEARCH_QUERY_PROPERTY_DOES_NOT_EXISTS;
 
@@ -95,6 +100,37 @@ public class ResourceSearchBean {
     public void setAttributeValue(String attributeValue) {
 
         this.attributeValue = attributeValue;
+    }
+
+    public static void validate(PrimitiveCondition primitiveCondition)
+            throws PrimitiveConditionValidationException{
+
+        String property = primitiveCondition.getProperty();
+        ConditionType conditionType = primitiveCondition.getOperation();
+        Object value = primitiveCondition.getValue();
+
+        if (property == null || conditionType == null || value == null) {
+            throw new PrimitiveConditionValidationException(
+                    "Invalid primitive condition parameters found in: property = " + property
+                            + (conditionType == null ? ", condition = null" : "")
+                            + (value == null ? ", value = null" : "")
+                            + "."
+            );
+        }
+        try {
+            Field field = ResourceSearchBean.class.getDeclaredField(property);
+            if (!field.getType().getName().equals(value.getClass().getName())) {
+                throw new PrimitiveConditionValidationException(
+                        "Value for the property: " + property + " is expected to be: " + field.getType().getName() +
+                                " but found: " + value.getClass().getName()
+                );
+            }
+        } catch (NoSuchFieldException e) {
+            throw new PrimitiveConditionValidationException(
+                    "Property: " + property + " is not found in the allowed search properties present in the bean " +
+                            "class: " + ResourceSearchBean.class.getName()
+            );
+        }
     }
 
     /**

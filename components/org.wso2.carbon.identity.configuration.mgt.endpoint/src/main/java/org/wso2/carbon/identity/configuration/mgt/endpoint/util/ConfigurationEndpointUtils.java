@@ -17,6 +17,7 @@
 package org.wso2.carbon.identity.configuration.mgt.endpoint.util;
 
 import org.apache.commons.logging.Log;
+import org.apache.cxf.jaxrs.ext.search.PrimitiveStatement;
 import org.apache.cxf.jaxrs.ext.search.SearchCondition;
 import org.apache.cxf.jaxrs.ext.search.SearchContext;
 import org.apache.cxf.jaxrs.ext.search.SearchParseException;
@@ -32,10 +33,14 @@ import org.wso2.carbon.identity.configuration.mgt.core.model.Attribute;
 import org.wso2.carbon.identity.configuration.mgt.core.model.Resource;
 import org.wso2.carbon.identity.configuration.mgt.core.model.ResourceAdd;
 import org.wso2.carbon.identity.configuration.mgt.core.model.ResourceFile;
+import org.wso2.carbon.identity.configuration.mgt.core.model.ResourceSearchBean;
 import org.wso2.carbon.identity.configuration.mgt.core.model.ResourceType;
 import org.wso2.carbon.identity.configuration.mgt.core.model.ResourceTypeAdd;
 import org.wso2.carbon.identity.configuration.mgt.core.model.Resources;
-import org.wso2.carbon.identity.configuration.mgt.core.model.search.ResourceSearchBean;
+import org.wso2.carbon.identity.configuration.mgt.core.search.ComplexCondition;
+import org.wso2.carbon.identity.configuration.mgt.core.search.PrimitiveCondition;
+import org.wso2.carbon.identity.configuration.mgt.core.search.constant.ConditionType;
+import org.wso2.carbon.identity.configuration.mgt.core.search.exception.PrimitiveConditionValidationException;
 import org.wso2.carbon.identity.configuration.mgt.endpoint.dto.AttributeDTO;
 import org.wso2.carbon.identity.configuration.mgt.endpoint.dto.ErrorDTO;
 import org.wso2.carbon.identity.configuration.mgt.endpoint.dto.ResourceAddDTO;
@@ -54,6 +59,7 @@ import org.wso2.carbon.identity.configuration.mgt.endpoint.util.validator.Resour
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import javax.ws.rs.core.Response;
@@ -185,9 +191,9 @@ public class ConfigurationEndpointUtils {
         return errorDTO;
     }
 
-    public static Response handleSearchQueryParseError(PropertyValidationException e, Log LOG) {
+    public static Response handleSearchQueryParseError(PrimitiveConditionValidationException e, Log LOG) {
 
-        String searchQueryErrorMessage = "property = '" + e.getName() + "' and value = '" + e.getValue() + "'";
+        String searchQueryErrorMessage = e.getMessage();
         String message = String.format(ERROR_CODE_SEARCH_QUERY_SQL_PROPERTY_PARSE_ERROR.getMessage(), searchQueryErrorMessage);
         throw ConfigurationEndpointUtils.buildBadRequestException(
                 message, ERROR_CODE_SEARCH_QUERY_SQL_PROPERTY_PARSE_ERROR.getCode(), LOG, e);
@@ -350,6 +356,77 @@ public class ConfigurationEndpointUtils {
         visitor.setValidator(new ResourceSearchBeanPropertyValidator<>());
         searchCondition.accept(visitor);
         return visitor.getQuery();
+    }
+
+    public static <T> ComplexCondition getSearchCondition(SearchContext searchContext, Class<T> reference)
+            throws PrimitiveConditionValidationException{
+
+        SearchCondition<T> searchCondition = searchContext.getCondition(reference);
+        return buildSearchCondition(searchCondition);
+    }
+
+    private static <T> ComplexCondition buildSearchCondition(SearchCondition searchCondition)
+            throws PrimitiveConditionValidationException {
+
+        if (!(searchCondition.getStatement() == null)) {
+            PrimitiveStatement primitiveStatement = searchCondition.getStatement();
+            if (!(primitiveStatement.getProperty() == null)) {
+                PrimitiveCondition primitiveCondition = new PrimitiveCondition(
+                        primitiveStatement.getProperty(),
+                        getConditionTypeFromOdata(primitiveStatement.getCondition()),
+                        primitiveStatement.getValue()
+                );
+                return new ComplexCondition(
+                        getConditionTypeFromOdata(searchCondition.getConditionType()),
+                        primitiveCondition
+                );
+            }
+            return null;
+        } else {
+            List<ComplexCondition> complexConditions = new ArrayList<>();
+            for (Object condition : searchCondition.getSearchConditions()) {
+                ComplexCondition buildCondition = buildSearchCondition((SearchCondition) condition);
+                if (buildCondition != null) {
+                    complexConditions.add(buildCondition);
+                }
+            }
+            return new ComplexCondition(
+                    getConditionTypeFromOdata(searchCondition.getConditionType()),
+                    complexConditions
+            );
+        }
+    }
+
+    private static ConditionType getConditionTypeFromOdata(org.apache.cxf.jaxrs.ext.search.ConditionType odataConditionType) {
+
+        ConditionType conditionType = null;
+        switch (odataConditionType) {
+            case OR:
+                conditionType = ConditionType.OR;
+                break;
+            case AND:
+                conditionType = ConditionType.AND;
+                break;
+            case EQUALS:
+                conditionType = ConditionType.EQUALS;
+                break;
+            case GREATER_OR_EQUALS:
+                conditionType = ConditionType.GREATER_OR_EQUALS;
+                break;
+            case LESS_OR_EQUALS:
+                conditionType = ConditionType.LESS_OR_EQUALS;
+                break;
+            case GREATER_THAN:
+                conditionType = ConditionType.GREATER_THAN;
+                break;
+            case NOT_EQUALS:
+                conditionType = ConditionType.NOT_EQUALS;
+                break;
+            case LESS_THAN:
+                conditionType = ConditionType.LESS_THAN;
+                break;
+        }
+        return conditionType;
     }
 
     private static void logDebug(Log log, Throwable throwable) {

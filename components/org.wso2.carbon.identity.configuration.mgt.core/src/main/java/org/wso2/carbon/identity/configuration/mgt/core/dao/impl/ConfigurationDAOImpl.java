@@ -15,10 +15,12 @@ import org.wso2.carbon.identity.configuration.mgt.core.exception.ConfigurationMa
 import org.wso2.carbon.identity.configuration.mgt.core.model.Attribute;
 import org.wso2.carbon.identity.configuration.mgt.core.model.Resource;
 import org.wso2.carbon.identity.configuration.mgt.core.model.ResourceFile;
+import org.wso2.carbon.identity.configuration.mgt.core.model.ResourceSearchBean;
 import org.wso2.carbon.identity.configuration.mgt.core.model.ResourceType;
 import org.wso2.carbon.identity.configuration.mgt.core.model.Resources;
-import org.wso2.carbon.identity.configuration.mgt.core.model.search.PrimitiveSearchExpression;
-import org.wso2.carbon.identity.configuration.mgt.core.model.search.ResourceSearchBean;
+import org.wso2.carbon.identity.configuration.mgt.core.search.ComplexCondition;
+import org.wso2.carbon.identity.configuration.mgt.core.search.PrimitiveCondition;
+import org.wso2.carbon.identity.configuration.mgt.core.search.exception.PrimitiveConditionValidationException;
 import org.wso2.carbon.identity.configuration.mgt.core.util.ConfigurationUtils;
 import org.wso2.carbon.identity.configuration.mgt.core.util.JdbcUtils;
 import org.wso2.carbon.identity.core.util.IdentityTenantUtil;
@@ -35,7 +37,6 @@ import java.util.Set;
 import java.util.TimeZone;
 
 import static java.time.ZoneOffset.UTC;
-import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.BEAN_FIELD_FLAG;
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_ADD_RESOURCE;
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_ADD_RESOURCE_TYPE;
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_DELETE_ATTRIBUTE;
@@ -44,7 +45,7 @@ import static org.wso2.carbon.identity.configuration.mgt.core.constant.Configura
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_QUERY_LENGTH_EXCEEDED;
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_REPLACE_ATTRIBUTE;
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_RETRIEVE_RESOURCE_TYPE;
-import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_SEARCH_SQL_EXPRESSION_INVALID;
+import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_SEARCH_QUERY_SQL_PROPERTY_PARSE_ERROR;
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_SEARCH_TENANT_RESOURCES;
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_UPDATE_ATTRIBUTE;
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.NON_EXISTING_TENANT_ID;
@@ -65,16 +66,24 @@ public class ConfigurationDAOImpl implements ConfigurationDAO {
         return 1;
     }
 
-    public Resources getTenantResources(String searchExpressionSQL) throws ConfigurationManagementException {
+    public Resources getTenantResources(ComplexCondition complexCondition) throws ConfigurationManagementException {
 
-        // TODO: 12/13/18 Validate for :-> A parameter is not present in the resource search bean.
         // To collect object and position for the preparedStatement.
-        Map<Integer, Object> fieldValueCollector = new HashMap<>();
-        Map<String, String> resourceFieldTypeMapper = buildResourceSearchFieldTypeMapper();
+        ArrayList<Object> fieldValueCollector = new ArrayList<>();
+//        Map<String, String> resourceFieldTypeMapper = buildResourceSearchFieldTypeMapper();
 
-        String placeholderSQL = validatePropertyAndBuildPlaceholderSQL(
-                searchExpressionSQL, resourceFieldTypeMapper, fieldValueCollector
-        );
+//        String placeholderSQL = validatePropertyAndBuildPlaceholderSQL(
+//                searchExpressionSQL, resourceFieldTypeMapper, fieldValueCollector
+//        );
+        String placeholderSQL = buildPlaceholderSQL(complexCondition, fieldValueCollector);
+        if (placeholderSQL.length() > MAX_QUERY_LENGTH_SQL) {
+            if (log.isDebugEnabled()) {
+                log.debug("Error building SQL query for the search. Search expression " +
+                        "query length: " + placeholderSQL.length() + " exceeds the maximum limit: " +
+                        MAX_QUERY_LENGTH_SQL);
+            }
+            throw ConfigurationUtils.handleClientException(ERROR_CODE_QUERY_LENGTH_EXCEEDED, null);
+        }
 
         JdbcTemplate jdbcTemplate = JdbcUtils.getNewTemplate();
         List<ConfigurationRawDataCollector> configurationRawDataCollectors;
@@ -92,11 +101,17 @@ public class ConfigurationDAOImpl implements ConfigurationDAO {
                             .setAttributeValue(resultSet.getString("ATTR_VALUE"))
                             .setFileId(resultSet.getString("FILE_ID"))
                             .build(), preparedStatement -> {
-                        for (int count = 1; count <= fieldValueCollector.size(); count++) {
+                        for (int count = 0; count < fieldValueCollector.size(); count++) {
                             if (fieldValueCollector.get(count).getClass().equals(Integer.class)) {
-                                preparedStatement.setInt(count, (Integer) fieldValueCollector.get(count));
+                                preparedStatement.setInt(
+                                        count + 1,
+                                        (Integer) fieldValueCollector.get(count)
+                                );
                             } else {
-                                preparedStatement.setString(count, (String) fieldValueCollector.get(count));
+                                preparedStatement.setString(
+                                        count + 1,
+                                        (String) fieldValueCollector.get(count)
+                                );
                             }
                         }
                     });
@@ -120,79 +135,124 @@ public class ConfigurationDAOImpl implements ConfigurationDAO {
         return fieldTypeMapper;
     }
 
-    private String validatePropertyAndBuildPlaceholderSQL(String searchExpressionSQL,
-                                                          Map<String, String> resourceFieldTypeMapper,
-                                                          Map<Integer, Object> fieldValueCollector)
+    private String buildPlaceholderSQL(ComplexCondition complexCondition, ArrayList<Object> fieldValueCollector)
             throws ConfigurationManagementException {
 
-        StringBuilder sb = new StringBuilder(); // Build placeholder SQL.
-        String[] splittedByParametersSQL = searchExpressionSQL.split(BEAN_FIELD_FLAG);
-
-        // First element of the array should start with 'SELECT'.
-        if (StringUtils.isEmpty(splittedByParametersSQL[0]) || !splittedByParametersSQL[0].trim().startsWith("SELECT")) {
-            throw ConfigurationUtils.handleClientException(
-                    ERROR_CODE_SEARCH_SQL_EXPRESSION_INVALID,
-                    searchExpressionSQL
-            );
-        }
-
+        StringBuilder sb = new StringBuilder();
         sb.append(GET_TENANT_RESOURCES_SELECT_COLLUMNS_MYSQL);
-
-        // Then start building from 'WHERE' clause.
-        sb.append(splittedByParametersSQL[0].split("TABLE", 2)[1]);
-
-        // Each substring has the form: "{fieldName} {operator} '{value}'---remainings".
-        for (int count = 1; count < splittedByParametersSQL.length; count++) {
-            String fieldName = splittedByParametersSQL[count].split("\\s+")[0];
-            String operator = splittedByParametersSQL[count].split("\\s+")[1];
-            String value = splittedByParametersSQL[count].split("\\s+")[2].split("'")[1]; // First one is empty
-
-            // remainings can contain "'" character. Therefore split on the first occurrence only.
-            String remainings = splittedByParametersSQL[count].split("\\s+", 3)[2].split("'", 3)[2];
-            if (StringUtils.isEmpty(fieldName) || StringUtils.isEmpty(value)) {
-                if (log.isDebugEnabled()) {
-                    log.debug("Could not find parameters field name and value from: "
-                            + splittedByParametersSQL[count] + " while building placeholder SQL.");
-                }
-                throw ConfigurationUtils.handleClientException(
-                        ERROR_CODE_SEARCH_SQL_EXPRESSION_INVALID, searchExpressionSQL);
-            }
-
-            // Get mapped parameter values if parameter mapping available for the search expression.
-            PrimitiveSearchExpression mappedExpression
-                    = mapPrimitiveCondition(new PrimitiveSearchExpression(fieldName, operator, value));
-            String dbQualifiedFieldName = ResourceSearchBean.getDBQualifiedFieldName(mappedExpression.getProperty());
-            String fieldNameType = resourceFieldTypeMapper.get(mappedExpression.getProperty());
-            fieldValueCollector.put(
-                    count,
-                    getValueFromString(
-                            fieldNameType, mappedExpression.getValue()
-                    )
-            );
-            sb.append(dbQualifiedFieldName);
-            sb.append(' ');
-            sb.append(operator);
-            sb.append(' ');
-            sb.append('?');
-            sb.append(remainings);
-        }
+        sb.append("WHERE\n");
+        visitAndPrintPlaceholderSQL(sb, fieldValueCollector, complexCondition);
         return sb.toString();
     }
 
+    private void visitAndPrintPlaceholderSQL(StringBuilder sb, ArrayList<Object> fieldValueCollector,
+                                             ComplexCondition complexCondition)
+            throws ConfigurationManagementException {
+
+        PrimitiveCondition primitiveCondition = complexCondition.getPrimitiveCondition();
+        if (primitiveCondition != null) {
+            try {
+                ResourceSearchBean.validate(primitiveCondition);
+            } catch (PrimitiveConditionValidationException e) {
+                throw ConfigurationUtils.handleClientException(
+                        ERROR_CODE_SEARCH_QUERY_SQL_PROPERTY_PARSE_ERROR, e.getMessage(), e);
+            }
+            primitiveCondition = mapPrimitiveCondition(primitiveCondition);
+            sb.append(ResourceSearchBean.getDBQualifiedFieldName(
+                    primitiveCondition.getProperty()
+            ));
+            sb.append(" ");
+            sb.append(primitiveCondition.getOperation().toSQL());
+            sb.append(" ");
+            sb.append("?");
+            fieldValueCollector.add(primitiveCondition.getValue());
+        } else {
+            boolean first = true;
+            for (Object condition : complexCondition.getComplexConditions()) {
+                ComplexCondition eachComplexCondition = (ComplexCondition) condition;
+                if (!first) {
+                    sb.append(" ").append(complexCondition.getOperation().toSQL()).append(" ");
+                } else {
+                    first = false;
+                }
+                sb.append("(");
+                visitAndPrintPlaceholderSQL(sb, fieldValueCollector, eachComplexCondition);
+                sb.append(")");
+            }
+        }
+    }
+
+//    private String validatePropertyAndBuildPlaceholderSQL(String searchExpressionSQL,
+//                                                          Map<String, String> resourceFieldTypeMapper,
+//                                                          Map<Integer, Object> fieldValueCollector)
+//            throws ConfigurationManagementException {
+//
+//        StringBuilder sb = new StringBuilder(); // Build placeholder SQL.
+//        String[] splittedByParametersSQL = searchExpressionSQL.split(BEAN_FIELD_FLAG);
+//
+//        // First element of the array should start with 'SELECT'.
+//        if (StringUtils.isEmpty(splittedByParametersSQL[0]) || !splittedByParametersSQL[0].trim().startsWith("SELECT")) {
+//            throw ConfigurationUtils.handleClientException(
+//                    ERROR_CODE_SEARCH_SQL_EXPRESSION_INVALID,
+//                    searchExpressionSQL
+//            );
+//        }
+//
+//        sb.append(GET_TENANT_RESOURCES_SELECT_COLLUMNS_MYSQL);
+//
+//        // Then start building from 'WHERE' clause.
+//        sb.append(splittedByParametersSQL[0].split("TABLE", 2)[1]);
+//
+//        // Each substring has the form: "{fieldName} {operator} '{value}'---remainings".
+//        for (int count = 1; count < splittedByParametersSQL.length; count++) {
+//            String fieldName = splittedByParametersSQL[count].split("\\s+")[0];
+//            String operator = splittedByParametersSQL[count].split("\\s+")[1];
+//            String value = splittedByParametersSQL[count].split("\\s+")[2].split("'")[1]; // First one is empty
+//
+//            // remainings can contain "'" character. Therefore split on the first occurrence only.
+//            String remainings = splittedByParametersSQL[count].split("\\s+", 3)[2].split("'", 3)[2];
+//            if (StringUtils.isEmpty(fieldName) || StringUtils.isEmpty(value)) {
+//                if (log.isDebugEnabled()) {
+//                    log.debug("Could not find parameters field name and value from: "
+//                            + splittedByParametersSQL[count] + " while building placeholder SQL.");
+//                }
+//                throw ConfigurationUtils.handleClientException(
+//                        ERROR_CODE_SEARCH_SQL_EXPRESSION_INVALID, searchExpressionSQL);
+//            }
+//
+//            // Get mapped parameter values if parameter mapping available for the search expression.
+//            PrimitiveCondition mappedExpression
+//                    = mapPrimitiveCondition(new PrimitiveCondition(fieldName, operator, value));
+//            String dbQualifiedFieldName = ResourceSearchBean.getDBQualifiedFieldName(mappedExpression.getProperty());
+//            String fieldNameType = resourceFieldTypeMapper.get(mappedExpression.getProperty());
+//            fieldValueCollector.put(
+//                    count,
+//                    getValueFromString(
+//                            fieldNameType, mappedExpression.getValue()
+//                    )
+//            );
+//            sb.append(dbQualifiedFieldName);
+//            sb.append(' ');
+//            sb.append(operator);
+//            sb.append(' ');
+//            sb.append('?');
+//            sb.append(remainings);
+//        }
+//        return sb.toString();
+//    }
+
     /**
-     * This method allow mapping of {@link PrimitiveSearchExpression}.
+     * This method allow mapping of {@link PrimitiveCondition}.
      *
-     * @param primitiveSearchExpression Primitive search expression to be mapped.
+     * @param primitiveCondition Primitive search expression to be mapped.
      */
-    PrimitiveSearchExpression mapPrimitiveCondition(PrimitiveSearchExpression primitiveSearchExpression) {
+    PrimitiveCondition mapPrimitiveCondition(PrimitiveCondition primitiveCondition) {
 
         // Map tenant domain to tenant id
-        if (primitiveSearchExpression.getProperty().equals("tenantDomain")) {
+        if (primitiveCondition.getProperty().equals("tenantDomain")) {
             try {
-                primitiveSearchExpression.setValue(String.valueOf(
-                        IdentityTenantUtil.getTenantId(
-                                primitiveSearchExpression.getValue()
-                        )
+                primitiveCondition.setValue(IdentityTenantUtil.getTenantId(
+                        (String) primitiveCondition.getValue()
                 ));
             } catch (IdentityRuntimeException e) {
                 /*
@@ -203,14 +263,14 @@ public class ConfigurationDAOImpl implements ConfigurationDAO {
                 if (log.isDebugEnabled()) {
                     log.debug(
                             "Error while retrieving tenant id for the tenant domain: "
-                                    + primitiveSearchExpression.getValue() + ".", e
+                                    + primitiveCondition.getValue() + ".", e
                     );
                 }
-                primitiveSearchExpression.setValue(NON_EXISTING_TENANT_ID);
+                primitiveCondition.setValue(NON_EXISTING_TENANT_ID);
             }
-            primitiveSearchExpression.setProperty("tenantId");
+            primitiveCondition.setProperty("tenantId");
         }
-        return primitiveSearchExpression;
+        return primitiveCondition;
     }
 
     private Object getValueFromString(String fieldType, String valueString) {
@@ -576,7 +636,7 @@ public class ConfigurationDAOImpl implements ConfigurationDAO {
                 preparedStatement.setString(2, attributeId);
             });
         } catch (DataAccessException e) {
-                throw ConfigurationUtils.handleServerException(ERROR_CODE_UPDATE_ATTRIBUTE, attribute.getKey(), e);
+            throw ConfigurationUtils.handleServerException(ERROR_CODE_UPDATE_ATTRIBUTE, attribute.getKey(), e);
         }
     }
 

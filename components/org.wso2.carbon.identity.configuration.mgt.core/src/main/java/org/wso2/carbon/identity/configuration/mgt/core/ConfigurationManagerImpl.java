@@ -31,6 +31,7 @@ import org.wso2.carbon.identity.configuration.mgt.core.model.ResourceAdd;
 import org.wso2.carbon.identity.configuration.mgt.core.model.ResourceType;
 import org.wso2.carbon.identity.configuration.mgt.core.model.ResourceTypeAdd;
 import org.wso2.carbon.identity.configuration.mgt.core.model.Resources;
+import org.wso2.carbon.identity.configuration.mgt.core.search.ComplexCondition;
 import org.wso2.carbon.identity.configuration.mgt.core.util.ConfigurationUtils;
 
 import java.util.List;
@@ -73,10 +74,10 @@ public class ConfigurationManagerImpl implements ConfigurationManager {
     /**
      * {@inheritDoc}
      */
-    public Resources getTenantResources(String searchExpressionSQL) throws ConfigurationManagementException {
+    public Resources getTenantResources(ComplexCondition searchCondition) throws ConfigurationManagementException {
 
-        validateSearchRequest(searchExpressionSQL);
-        Resources resources = getConfigurationDAO().getTenantResources(searchExpressionSQL);
+        validateSearchRequest(searchCondition);
+        Resources resources = getConfigurationDAO().getTenantResources(searchCondition);
         if (resources == null) {
             if (log.isDebugEnabled()) {
                 log.debug("No resources found for the search.");
@@ -86,23 +87,23 @@ public class ConfigurationManagerImpl implements ConfigurationManager {
         return resources;
     }
 
-    private void validateSearchRequest(String searchExpressionSQL) throws ConfigurationManagementClientException {
+    private void validateSearchRequest(ComplexCondition complexCondition) throws ConfigurationManagementClientException {
 
-        if (StringUtils.isEmpty(searchExpressionSQL)) {
+        if (complexCondition == null) {
             if (log.isDebugEnabled()) {
-                log.debug("Search filter expression: " + searchExpressionSQL + " is not valid");
+                log.debug("Search condition: " + complexCondition + " is not valid");
             }
             throw handleClientException(ERROR_CODE_SEARCH_REQUEST_INVALID, null);
         }
 
-        if (searchExpressionSQL.length() > MAX_QUERY_LENGTH_SQL) {
-            if (log.isDebugEnabled()) {
-                log.debug("Error building SQL query for the search. Search expression " +
-                        "query length: " + searchExpressionSQL.length() + " exceeds the maximum limit: " +
-                        MAX_QUERY_LENGTH_SQL);
-            }
-            throw ConfigurationUtils.handleClientException(ERROR_CODE_QUERY_LENGTH_EXCEEDED, null);
-        }
+//        if (searchExpressionSQL.length() > MAX_QUERY_LENGTH_SQL) {
+//            if (log.isDebugEnabled()) {
+//                log.debug("Error building SQL query for the search. Search expression " +
+//                        "query length: " + searchExpressionSQL.length() + " exceeds the maximum limit: " +
+//                        MAX_QUERY_LENGTH_SQL);
+//            }
+//            throw ConfigurationUtils.handleClientException(ERROR_CODE_QUERY_LENGTH_EXCEEDED, null);
+//        }
     }
 
     public Resources getResources() throws ConfigurationManagementException {

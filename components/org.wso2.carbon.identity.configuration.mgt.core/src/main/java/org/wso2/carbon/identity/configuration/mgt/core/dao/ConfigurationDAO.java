@@ -6,6 +6,7 @@ import org.wso2.carbon.identity.configuration.mgt.core.model.Attribute;
 import org.wso2.carbon.identity.configuration.mgt.core.model.Resource;
 import org.wso2.carbon.identity.configuration.mgt.core.model.ResourceType;
 import org.wso2.carbon.identity.configuration.mgt.core.model.Resources;
+import org.wso2.carbon.identity.configuration.mgt.core.search.ComplexCondition;
 
 /**
  * Perform CRUD operations for {@link Resource}.
@@ -21,7 +22,7 @@ public interface ConfigurationDAO {
      */
     int getPriority();
 
-    Resources getTenantResources(String searchExpressionSQL) throws ConfigurationManagementException;
+    Resources getTenantResources(ComplexCondition complexCondition) throws ConfigurationManagementException;
 
     /**
      * Returns {@link Resource} by name;

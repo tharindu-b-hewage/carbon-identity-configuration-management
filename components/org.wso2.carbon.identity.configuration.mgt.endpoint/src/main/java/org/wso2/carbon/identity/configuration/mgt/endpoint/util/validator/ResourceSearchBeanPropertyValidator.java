@@ -2,11 +2,9 @@ package org.wso2.carbon.identity.configuration.mgt.endpoint.util.validator;
 
 import org.apache.cxf.jaxrs.ext.search.visitor.PropertyValidationException;
 import org.apache.cxf.jaxrs.ext.search.visitor.PropertyValidator;
-import org.wso2.carbon.identity.configuration.mgt.core.model.search.ResourceSearchBean;
+import org.wso2.carbon.identity.configuration.mgt.core.model.ResourceSearchBean;
 
 import java.lang.reflect.Field;
-import java.util.List;
-import java.util.Set;
 
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.BEAN_FIELD_FLAG;
 
