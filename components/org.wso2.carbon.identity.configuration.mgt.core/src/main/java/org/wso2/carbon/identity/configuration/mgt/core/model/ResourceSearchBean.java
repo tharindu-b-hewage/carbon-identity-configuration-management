@@ -1,10 +1,26 @@
+/*
+ *  Copyright (c) 2018, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *  http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+
 package org.wso2.carbon.identity.configuration.mgt.core.model;
 
 import org.apache.commons.lang.StringUtils;
 import org.wso2.carbon.identity.configuration.mgt.core.exception.ConfigurationManagementException;
 import org.wso2.carbon.identity.configuration.mgt.core.search.PrimitiveCondition;
 import org.wso2.carbon.identity.configuration.mgt.core.search.constant.ConditionType;
-import org.wso2.carbon.identity.configuration.mgt.core.search.exception.PrimitiveConditionValidationException;
+import org.wso2.carbon.identity.configuration.mgt.core.exception.PrimitiveConditionValidationException;
 import org.wso2.carbon.identity.configuration.mgt.core.util.ConfigurationUtils;
 
 import java.lang.reflect.Field;
@@ -21,6 +37,74 @@ public class ResourceSearchBean {
     private String resourceName;
     private String attributeKey;
     private String attributeValue;
+
+    public static void validate(PrimitiveCondition primitiveCondition)
+            throws PrimitiveConditionValidationException {
+
+        String property = primitiveCondition.getProperty();
+        ConditionType conditionType = primitiveCondition.getOperation();
+        Object value = primitiveCondition.getValue();
+
+        if (property == null || conditionType == null || value == null) {
+            throw new PrimitiveConditionValidationException(
+                    "Invalid primitive condition parameters found in: property = " + property
+                            + (conditionType == null ? ", condition = null" : "")
+                            + (value == null ? ", value = null" : "")
+                            + "."
+            );
+        }
+        try {
+            Field field = ResourceSearchBean.class.getDeclaredField(property);
+            if (!field.getType().getName().equals(value.getClass().getName())) {
+                throw new PrimitiveConditionValidationException(
+                        "Value for the property: " + property + " is expected to be: " + field.getType().getName() +
+                                " but found: " + value.getClass().getName()
+                );
+            }
+        } catch (NoSuchFieldException e) {
+            throw new PrimitiveConditionValidationException(
+                    "Property: " + property + " is not found in the allowed search properties present in the bean " +
+                            "class: " + ResourceSearchBean.class.getName()
+            );
+        }
+    }
+
+    /**
+     * Map field name to the DB table identifier.
+     *
+     * @return
+     */
+    public static String getDBQualifiedFieldName(String fieldName) throws ConfigurationManagementException {
+
+        String dbQualifiedFieldName = null;
+        switch (fieldName) {
+            case "tenantId":
+                dbQualifiedFieldName = "R.TENANT_ID";
+                break;
+            case "resourceTypeId":
+                dbQualifiedFieldName = "T.ID";
+                break;
+            case "resourceTypeName":
+                dbQualifiedFieldName = "T.NAME";
+                break;
+            case "resourceId":
+                dbQualifiedFieldName = "R.ID";
+                break;
+            case "resourceName":
+                dbQualifiedFieldName = "R.NAME";
+                break;
+            case "attributeKey":
+                dbQualifiedFieldName = "A.ATTR_KEY";
+                break;
+            case "attributeValue":
+                dbQualifiedFieldName = "A.ATTR_VALUE";
+                break;
+        }
+        if (StringUtils.isEmpty(dbQualifiedFieldName)) {
+            throw ConfigurationUtils.handleClientException(ERROR_CODE_SEARCH_QUERY_PROPERTY_DOES_NOT_EXISTS, fieldName);
+        }
+        return dbQualifiedFieldName;
+    }
 
     public String getTenantDomain() {
 
@@ -100,73 +184,5 @@ public class ResourceSearchBean {
     public void setAttributeValue(String attributeValue) {
 
         this.attributeValue = attributeValue;
-    }
-
-    public static void validate(PrimitiveCondition primitiveCondition)
-            throws PrimitiveConditionValidationException{
-
-        String property = primitiveCondition.getProperty();
-        ConditionType conditionType = primitiveCondition.getOperation();
-        Object value = primitiveCondition.getValue();
-
-        if (property == null || conditionType == null || value == null) {
-            throw new PrimitiveConditionValidationException(
-                    "Invalid primitive condition parameters found in: property = " + property
-                            + (conditionType == null ? ", condition = null" : "")
-                            + (value == null ? ", value = null" : "")
-                            + "."
-            );
-        }
-        try {
-            Field field = ResourceSearchBean.class.getDeclaredField(property);
-            if (!field.getType().getName().equals(value.getClass().getName())) {
-                throw new PrimitiveConditionValidationException(
-                        "Value for the property: " + property + " is expected to be: " + field.getType().getName() +
-                                " but found: " + value.getClass().getName()
-                );
-            }
-        } catch (NoSuchFieldException e) {
-            throw new PrimitiveConditionValidationException(
-                    "Property: " + property + " is not found in the allowed search properties present in the bean " +
-                            "class: " + ResourceSearchBean.class.getName()
-            );
-        }
-    }
-
-    /**
-     * Map field name to the DB table identifier.
-     *
-     * @return
-     */
-    public static String getDBQualifiedFieldName(String fieldName) throws ConfigurationManagementException {
-
-        String dbQualifiedFieldName = null;
-        switch (fieldName) {
-            case "tenantId":
-                dbQualifiedFieldName = "R.TENANT_ID";
-                break;
-            case "resourceTypeId":
-                dbQualifiedFieldName = "T.ID";
-                break;
-            case "resourceTypeName":
-                dbQualifiedFieldName = "T.NAME";
-                break;
-            case "resourceId":
-                dbQualifiedFieldName = "R.ID";
-                break;
-            case "resourceName":
-                dbQualifiedFieldName = "R.NAME";
-                break;
-            case "attributeKey":
-                dbQualifiedFieldName = "A.ATTR_KEY";
-                break;
-            case "attributeValue":
-                dbQualifiedFieldName = "A.ATTR_VALUE";
-                break;
-        }
-        if (StringUtils.isEmpty(dbQualifiedFieldName)) {
-            throw ConfigurationUtils.handleClientException(ERROR_CODE_SEARCH_QUERY_PROPERTY_DOES_NOT_EXISTS, fieldName);
-        }
-        return dbQualifiedFieldName;
     }
 }

@@ -1,3 +1,19 @@
+/*
+ *  Copyright (c) 2018, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *  http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+
 package org.wso2.carbon.identity.configuration.mgt.core.dao.impl;
 
 import org.apache.commons.lang.StringUtils;
@@ -19,8 +35,9 @@ import org.wso2.carbon.identity.configuration.mgt.core.model.ResourceSearchBean;
 import org.wso2.carbon.identity.configuration.mgt.core.model.ResourceType;
 import org.wso2.carbon.identity.configuration.mgt.core.model.Resources;
 import org.wso2.carbon.identity.configuration.mgt.core.search.ComplexCondition;
+import org.wso2.carbon.identity.configuration.mgt.core.search.Condition;
 import org.wso2.carbon.identity.configuration.mgt.core.search.PrimitiveCondition;
-import org.wso2.carbon.identity.configuration.mgt.core.search.exception.PrimitiveConditionValidationException;
+import org.wso2.carbon.identity.configuration.mgt.core.exception.PrimitiveConditionValidationException;
 import org.wso2.carbon.identity.configuration.mgt.core.util.ConfigurationUtils;
 import org.wso2.carbon.identity.configuration.mgt.core.util.JdbcUtils;
 import org.wso2.carbon.identity.core.util.IdentityTenantUtil;
@@ -66,7 +83,7 @@ public class ConfigurationDAOImpl implements ConfigurationDAO {
         return 1;
     }
 
-    public Resources getTenantResources(ComplexCondition complexCondition) throws ConfigurationManagementException {
+    public Resources getTenantResources(Condition condition) throws ConfigurationManagementException {
 
         // To collect object and position for the preparedStatement.
         ArrayList<Object> fieldValueCollector = new ArrayList<>();
@@ -75,7 +92,7 @@ public class ConfigurationDAOImpl implements ConfigurationDAO {
 //        String placeholderSQL = validatePropertyAndBuildPlaceholderSQL(
 //                searchExpressionSQL, resourceFieldTypeMapper, fieldValueCollector
 //        );
-        String placeholderSQL = buildPlaceholderSQL(complexCondition, fieldValueCollector);
+        String placeholderSQL = buildPlaceholderSQL(condition, fieldValueCollector);
         if (placeholderSQL.length() > MAX_QUERY_LENGTH_SQL) {
             if (log.isDebugEnabled()) {
                 log.debug("Error building SQL query for the search. Search expression " +
@@ -135,21 +152,22 @@ public class ConfigurationDAOImpl implements ConfigurationDAO {
         return fieldTypeMapper;
     }
 
-    private String buildPlaceholderSQL(ComplexCondition complexCondition, ArrayList<Object> fieldValueCollector)
+    private String buildPlaceholderSQL(Condition condition, ArrayList<Object> fieldValueCollector)
             throws ConfigurationManagementException {
 
         StringBuilder sb = new StringBuilder();
         sb.append(GET_TENANT_RESOURCES_SELECT_COLLUMNS_MYSQL);
         sb.append("WHERE\n");
-        visitAndPrintPlaceholderSQL(sb, fieldValueCollector, complexCondition);
+        visitAndPrintPlaceholderSQL(sb, fieldValueCollector, condition);
         return sb.toString();
     }
 
     private void visitAndPrintPlaceholderSQL(StringBuilder sb, ArrayList<Object> fieldValueCollector,
-                                             ComplexCondition complexCondition)
+                                             Condition condition)
             throws ConfigurationManagementException {
 
-        PrimitiveCondition primitiveCondition = complexCondition.getPrimitiveCondition();
+        PrimitiveCondition primitiveCondition =
+                condition instanceof PrimitiveCondition ? (PrimitiveCondition) condition : null;
         if (primitiveCondition != null) {
             try {
                 ResourceSearchBean.validate(primitiveCondition);
@@ -168,15 +186,15 @@ public class ConfigurationDAOImpl implements ConfigurationDAO {
             fieldValueCollector.add(primitiveCondition.getValue());
         } else {
             boolean first = true;
-            for (Object condition : complexCondition.getComplexConditions()) {
-                ComplexCondition eachComplexCondition = (ComplexCondition) condition;
+            ComplexCondition complexCondition = (ComplexCondition) condition;
+            for (Condition eachCondition : complexCondition.getConditions()) {
                 if (!first) {
                     sb.append(" ").append(complexCondition.getOperation().toSQL()).append(" ");
                 } else {
                     first = false;
                 }
                 sb.append("(");
-                visitAndPrintPlaceholderSQL(sb, fieldValueCollector, eachComplexCondition);
+                visitAndPrintPlaceholderSQL(sb, fieldValueCollector, eachCondition);
                 sb.append(")");
             }
         }

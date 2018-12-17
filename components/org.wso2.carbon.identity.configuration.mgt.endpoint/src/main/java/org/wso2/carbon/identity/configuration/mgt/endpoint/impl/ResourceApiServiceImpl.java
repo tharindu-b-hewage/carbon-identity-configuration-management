@@ -1,3 +1,19 @@
+/*
+ *  Copyright (c) 2018, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *  http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+
 package org.wso2.carbon.identity.configuration.mgt.endpoint.impl;
 
 import org.apache.commons.logging.Log;
@@ -13,9 +29,10 @@ import org.wso2.carbon.identity.configuration.mgt.endpoint.dto.ResourceAddDTO;
 import org.wso2.carbon.identity.configuration.mgt.endpoint.dto.ResourcesDTO;
 
 import java.net.URI;
+import java.net.URISyntaxException;
 import javax.ws.rs.core.Response;
 
-import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.BASE_PATH;
+import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.RESOURCE_PATH;
 import static org.wso2.carbon.identity.configuration.mgt.endpoint.util.ConfigurationEndpointUtils.getAttributeDTO;
 import static org.wso2.carbon.identity.configuration.mgt.endpoint.util.ConfigurationEndpointUtils.getAttributeFromDTO;
 import static org.wso2.carbon.identity.configuration.mgt.endpoint.util.ConfigurationEndpointUtils.getConfigurationManager;
@@ -66,7 +83,7 @@ public class ResourceApiServiceImpl extends ResourceApiService {
 
         try {
             Resource resource = getConfigurationManager().updateResource(resourceType, getResourceAddFromDTO(resourceAddDTO));
-            return Response.created(new URI(BASE_PATH + resource.getResourceName())).entity(getResourceDTO(resource)).build();
+            return Response.ok().entity(getResourceDTO(resource)).build();
         } catch (ConfigurationManagementClientException e) {
             return handleBadRequestResponse(e, LOG);
         } catch (ConfigurationManagementException e) {
@@ -81,7 +98,7 @@ public class ResourceApiServiceImpl extends ResourceApiService {
 
         try {
             Resource resource = getConfigurationManager().addResource(resourceType, getResourceAddFromDTO(resourceAddDTO));
-            return Response.created(new URI(BASE_PATH + resource.getResourceName())).entity(getResourceDTO(resource)).build();
+            return Response.created(getResourceURI(resourceType, resource)).entity(getResourceDTO(resource)).build();
         } catch (ConfigurationManagementClientException e) {
             return handleBadRequestResponse(e, LOG);
         } catch (ConfigurationManagementException e) {
@@ -91,12 +108,17 @@ public class ResourceApiServiceImpl extends ResourceApiService {
         }
     }
 
+    private URI getResourceURI(String resourceType, Resource resource) throws URISyntaxException {
+
+        return new URI(RESOURCE_PATH + '/' + resourceType + '/' + resource.getResourceId());
+    }
+
     @Override
     public Response resourceResourceTypePut(String resourceType, ResourceAddDTO resourceAddDTO) {
 
         try {
             Resource resource = getConfigurationManager().replaceResource(resourceType, getResourceAddFromDTO(resourceAddDTO));
-            return Response.created(new URI(BASE_PATH + resource.getResourceName())).entity(getResourceDTO(resource)).build();
+            return Response.ok().entity(getResourceDTO(resource)).build();
         } catch (ConfigurationManagementClientException e) {
             return handleBadRequestResponse(e, LOG);
         } catch (ConfigurationManagementException e) {
@@ -186,8 +208,10 @@ public class ResourceApiServiceImpl extends ResourceApiService {
     public Response resourceResourceTypeResourceNamePost(String resourceName, String resourceType, AttributeDTO attributeDTO) {
 
         try {
-            Attribute attribute = getConfigurationManager().addAttribute(resourceType, resourceName, getAttributeFromDTO(attributeDTO));
-            return Response.created(new URI(BASE_PATH + resourceName)).entity(getAttributeDTO(attribute)).build();
+            Attribute attribute = getConfigurationManager().addAttribute(
+                    resourceType, resourceName, getAttributeFromDTO(attributeDTO));
+            return Response.created(getAttributeLocationURI(resourceType, resourceName, attribute)).entity(
+                    getAttributeDTO(attribute)).build();
         } catch (ConfigurationManagementClientException e) {
             return handleBadRequestResponse(e, LOG);
         } catch (ConfigurationManagementException e) {
@@ -197,13 +221,18 @@ public class ResourceApiServiceImpl extends ResourceApiService {
         }
     }
 
+    private URI getAttributeLocationURI(String resourceType, String resourceName, Attribute attribute) throws URISyntaxException {
+
+        return new URI(RESOURCE_PATH + '/' + resourceType + '/' + resourceName + '/' + attribute.getAttributeId());
+    }
+
     @Override
     public Response resourceResourceTypeResourceNamePut(String resourceName, String resourceType, AttributeDTO attributeDTO) {
 
         try {
             Attribute attribute = getConfigurationManager().replaceAttribute(
                     resourceType, resourceName, getAttributeFromDTO(attributeDTO));
-            return Response.created(new URI(BASE_PATH + resourceName)).entity(getAttributeDTO(attribute)).build();
+            return Response.ok().entity(getAttributeDTO(attribute)).build();
         } catch (ConfigurationManagementClientException e) {
             return handleBadRequestResponse(e, LOG);
         } catch (ConfigurationManagementException e) {

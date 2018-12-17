@@ -14,17 +14,12 @@
  *  limitations under the License.
  */
 
-package org.wso2.carbon.identity.configuration.mgt.endpoint.factories;
+package org.wso2.carbon.identity.configuration.mgt.core.exception;
 
-import org.wso2.carbon.identity.configuration.mgt.endpoint.ResourceTypeApiService;
-import org.wso2.carbon.identity.configuration.mgt.endpoint.impl.ResourceTypeApiServiceImpl;
+public class PrimitiveConditionValidationException extends Exception {
 
-public class ResourceTypeApiServiceFactory {
+    public PrimitiveConditionValidationException(String message) {
 
-    private final static ResourceTypeApiService service = new ResourceTypeApiServiceImpl();
-
-    public static ResourceTypeApiService getResourceTypeApi() {
-
-        return service;
+        super(message);
     }
 }

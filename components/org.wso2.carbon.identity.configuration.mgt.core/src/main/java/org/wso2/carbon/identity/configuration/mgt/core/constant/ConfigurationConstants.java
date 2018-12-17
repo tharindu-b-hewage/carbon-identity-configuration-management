@@ -1,3 +1,19 @@
+/*
+ *  Copyright (c) 2018, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *  http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+
 package org.wso2.carbon.identity.configuration.mgt.core.constant;
 
 import java.util.Random;
@@ -18,6 +34,8 @@ public class ConfigurationConstants {
     public static final String STATE_UPDATE_CONFIGURATION_CHANGE_RESPONSE = "update";
     public static final String STATE_REPLACE_CONFIGURATION_CHANGE_RESPONSE = "replace";
     public static final String BASE_PATH = "/api/identity/config-mgt/v1.0/resource/";
+    public static final String RESOURCE_PATH = "/resource";
+    public static final String RESOURCE_TYPE_PATH = "/resource-type";
     public static final String MY_SQL = "MySQL";
     public static final String POSTGRE_SQL = "PostgreSQL";
     public static final String DB2 = "DB2";
@@ -28,7 +46,7 @@ public class ConfigurationConstants {
     public static final String ODATA2_API_URI_EXPRESSION_PARSER_ERROR
             = "org.apache.olingo.odata2.api.uri.expression.ExpressionParserException";
     public static final String ODATA2_API_URI_EXPRESSION_PARSER_TOKENIZE_ERROR
-        = "org.apache.olingo.odata2.core.uri.expression.TokenizerException";
+            = "org.apache.olingo.odata2.core.uri.expression.TokenizerException";
     public static final String CXF_SEARCH_PARSER_ERROR = "org.apache.cxf.jaxrs.ext.search.SearchParseException";
     public static final String STATUS_ODATA_EXPRESSION_PARSER_ERROR_MESSAGE
             = "Error occurred while parsing the odata2 search expression. Please check the filter query syntax.";
@@ -110,7 +128,7 @@ public class ConfigurationConstants {
         }
     }
 
-    public enum OdataLogicalOperator{
+    public enum OdataLogicalOperator {
         eq,
         ne,
         lt,

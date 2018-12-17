@@ -1,17 +1,17 @@
 /*
- * Copyright (c) 2018, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2018, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *  http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
  */
 
 package org.wso2.carbon.identity.configuration.mgt.endpoint.util;
@@ -38,9 +38,10 @@ import org.wso2.carbon.identity.configuration.mgt.core.model.ResourceType;
 import org.wso2.carbon.identity.configuration.mgt.core.model.ResourceTypeAdd;
 import org.wso2.carbon.identity.configuration.mgt.core.model.Resources;
 import org.wso2.carbon.identity.configuration.mgt.core.search.ComplexCondition;
+import org.wso2.carbon.identity.configuration.mgt.core.search.Condition;
 import org.wso2.carbon.identity.configuration.mgt.core.search.PrimitiveCondition;
 import org.wso2.carbon.identity.configuration.mgt.core.search.constant.ConditionType;
-import org.wso2.carbon.identity.configuration.mgt.core.search.exception.PrimitiveConditionValidationException;
+import org.wso2.carbon.identity.configuration.mgt.core.exception.PrimitiveConditionValidationException;
 import org.wso2.carbon.identity.configuration.mgt.endpoint.dto.AttributeDTO;
 import org.wso2.carbon.identity.configuration.mgt.endpoint.dto.ErrorDTO;
 import org.wso2.carbon.identity.configuration.mgt.endpoint.dto.ResourceAddDTO;
@@ -358,15 +359,13 @@ public class ConfigurationEndpointUtils {
         return visitor.getQuery();
     }
 
-    public static <T> ComplexCondition getSearchCondition(SearchContext searchContext, Class<T> reference)
-            throws PrimitiveConditionValidationException{
+    public static <T> Condition getSearchCondition(SearchContext searchContext, Class<T> reference) {
 
         SearchCondition<T> searchCondition = searchContext.getCondition(reference);
         return buildSearchCondition(searchCondition);
     }
 
-    private static <T> ComplexCondition buildSearchCondition(SearchCondition searchCondition)
-            throws PrimitiveConditionValidationException {
+    private static Condition buildSearchCondition(SearchCondition searchCondition) {
 
         if (!(searchCondition.getStatement() == null)) {
             PrimitiveStatement primitiveStatement = searchCondition.getStatement();
@@ -376,23 +375,20 @@ public class ConfigurationEndpointUtils {
                         getConditionTypeFromOdata(primitiveStatement.getCondition()),
                         primitiveStatement.getValue()
                 );
-                return new ComplexCondition(
-                        getConditionTypeFromOdata(searchCondition.getConditionType()),
-                        primitiveCondition
-                );
-            }
+                return primitiveCondition;
+        }
             return null;
         } else {
-            List<ComplexCondition> complexConditions = new ArrayList<>();
+            List<Condition> conditions = new ArrayList<>();
             for (Object condition : searchCondition.getSearchConditions()) {
-                ComplexCondition buildCondition = buildSearchCondition((SearchCondition) condition);
+                Condition buildCondition = buildSearchCondition((SearchCondition) condition);
                 if (buildCondition != null) {
-                    complexConditions.add(buildCondition);
+                    conditions.add(buildCondition);
                 }
             }
             return new ComplexCondition(
                     getConditionTypeFromOdata(searchCondition.getConditionType()),
-                    complexConditions
+                    conditions
             );
         }
     }
