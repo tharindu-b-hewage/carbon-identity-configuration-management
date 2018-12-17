@@ -14,12 +14,32 @@
  *  limitations under the License.
  */
 
-package org.wso2.carbon.identity.configuration.mgt.core.exception;
+package org.wso2.carbon.identity.configuration.mgt.core.search;
 
-public class PrimitiveConditionValidationException extends Exception {
+import java.util.ArrayList;
 
-    public PrimitiveConditionValidationException(String message) {
+public class PlaceholderSQL {
 
-        super(message);
+    private String query;
+    private ArrayList<Object> data;
+
+    public String getQuery() {
+
+        return query;
+    }
+
+    public void setQuery(String query) {
+
+        this.query = query;
+    }
+
+    public ArrayList<Object> getData() {
+
+        return data;
+    }
+
+    public void setData(ArrayList<Object> data) {
+
+        this.data = data;
     }
 }

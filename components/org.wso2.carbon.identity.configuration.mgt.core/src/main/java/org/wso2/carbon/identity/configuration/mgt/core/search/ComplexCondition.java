@@ -17,7 +17,9 @@
 package org.wso2.carbon.identity.configuration.mgt.core.search;
 
 import org.wso2.carbon.identity.configuration.mgt.core.search.constant.ConditionType;
+import org.wso2.carbon.identity.configuration.mgt.core.search.exception.PrimitiveConditionValidationException;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -25,18 +27,45 @@ import java.util.List;
  * another complex conditions or a primitive condition. Ex: A sample complex condition with two complex conditions
  * as a list can represent the form, {@link ComplexCondition}[1] {@link ConditionType}[2] {@link ComplexCondition}[2].
  */
-public class ComplexCondition extends Condition {
+public class ComplexCondition implements Condition {
 
     private List<Condition> conditions;
+    private ConditionType.ComplexOperator operator;
 
-    public ComplexCondition(ConditionType operation, List<Condition> conditions) {
+    public ComplexCondition(ConditionType.ComplexOperator operator, List<Condition> conditions) {
 
-        super(operation);
+        this.operator = operator;
         this.conditions = conditions;
     }
 
     public List<Condition> getConditions() {
 
         return conditions;
+    }
+
+    public PlaceholderSQL buildQuery(PrimitiveConditionValidator primitiveConditionValidator)
+            throws PrimitiveConditionValidationException {
+
+        PlaceholderSQL placeholderSQL = new PlaceholderSQL();
+        ArrayList<Object> data = new ArrayList<>();
+        StringBuilder sb = new StringBuilder();
+
+        boolean first = true;
+        for (Condition condition : conditions) {
+            if (!first) {
+                sb.append(" ").append(operator.toSQL()).append(" ");
+            } else {
+                first = false;
+            }
+            sb.append("(");
+            PlaceholderSQL eachPlaceholderSQL = condition.buildQuery(primitiveConditionValidator);
+            sb.append(eachPlaceholderSQL.getQuery());
+            data.addAll(eachPlaceholderSQL.getData());
+            sb.append(")");
+        }
+
+        placeholderSQL.setQuery(sb.toString());
+        placeholderSQL.setData(data);
+        return placeholderSQL;
     }
 }

@@ -17,20 +17,34 @@
 package org.wso2.carbon.identity.configuration.mgt.core.search;
 
 import org.wso2.carbon.identity.configuration.mgt.core.search.constant.ConditionType;
+import org.wso2.carbon.identity.configuration.mgt.core.search.exception.PrimitiveConditionValidationException;
+
+import java.util.ArrayList;
 
 /**
  * Represents a primitive search expression. Ex: 'a > 5' where property is 'a', operator is '>' and value is '5'.
  */
-public class PrimitiveCondition extends Condition {
+public class PrimitiveCondition implements Condition {
 
     private String property;
     private Object value;
+    private ConditionType.PrimitiveOperator operator;
 
-    public PrimitiveCondition(String property, ConditionType operation, Object value) {
+    public PrimitiveCondition(String property, ConditionType.PrimitiveOperator operator, Object value) {
 
-        super(operation);
         this.property = property;
         this.value = value;
+        this.operator = operator;
+    }
+
+    public ConditionType.PrimitiveOperator getOperator() {
+
+        return operator;
+    }
+
+    public void setOperator(ConditionType.PrimitiveOperator operator) {
+
+        this.operator = operator;
     }
 
     public String getProperty() {
@@ -51,5 +65,26 @@ public class PrimitiveCondition extends Condition {
     public void setValue(Object value) {
 
         this.value = value;
+    }
+
+    public PlaceholderSQL buildQuery(PrimitiveConditionValidator primitiveConditionValidator)
+            throws PrimitiveConditionValidationException {
+
+        PlaceholderSQL placeholderSQL = new PlaceholderSQL();
+
+        //
+        PrimitiveCondition dbQualifiedPrimitiveCodition =
+                primitiveConditionValidator.validate(this);
+
+        placeholderSQL.setQuery(
+                dbQualifiedPrimitiveCodition.getProperty() + " " + dbQualifiedPrimitiveCodition.getOperator().toSQL()
+                        + " ?"
+        );
+
+        ArrayList<Object> data = new ArrayList<>();
+        data.add(dbQualifiedPrimitiveCodition.getValue());
+        placeholderSQL.setData(data);
+
+        return placeholderSQL;
     }
 }

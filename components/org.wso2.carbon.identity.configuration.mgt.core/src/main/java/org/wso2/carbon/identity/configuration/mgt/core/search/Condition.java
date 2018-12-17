@@ -16,27 +16,20 @@
 
 package org.wso2.carbon.identity.configuration.mgt.core.search;
 
-import org.wso2.carbon.identity.configuration.mgt.core.search.constant.ConditionType;
+import org.wso2.carbon.identity.configuration.mgt.core.search.exception.PrimitiveConditionValidationException;
 
 /**
  * Represent the base class for {@link PrimitiveCondition} and {@link ComplexCondition}.
  */
-public class Condition {
+public interface Condition {
 
-    private ConditionType operation;
-
-    public Condition(ConditionType operation) {
-
-        this.operation = operation;
-    }
-
-    public ConditionType getOperation() {
-
-        return operation;
-    }
-
-    public void setOperation(ConditionType operation) {
-
-        this.operation = operation;
-    }
+    /**
+     * Build while validating a placeholder sql query ready for a prepared statement alongside with a data array in the order of how the
+     * data should be inserted in to the prepared statement.
+     *
+     * @param primitiveConditionValidator Validator for primitive conditions.
+     * @return A {@link PlaceholderSQL} object with a placeholder sql and the ordered data array.
+     */
+    PlaceholderSQL buildQuery(PrimitiveConditionValidator primitiveConditionValidator)
+            throws PrimitiveConditionValidationException;
 }

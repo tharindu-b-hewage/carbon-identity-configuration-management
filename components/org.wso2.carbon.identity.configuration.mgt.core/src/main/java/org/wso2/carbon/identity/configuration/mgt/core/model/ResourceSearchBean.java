@@ -16,18 +16,16 @@
 
 package org.wso2.carbon.identity.configuration.mgt.core.model;
 
-import org.apache.commons.lang.StringUtils;
-import org.wso2.carbon.identity.configuration.mgt.core.exception.ConfigurationManagementException;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.identity.base.IdentityRuntimeException;
 import org.wso2.carbon.identity.configuration.mgt.core.search.PrimitiveCondition;
-import org.wso2.carbon.identity.configuration.mgt.core.search.constant.ConditionType;
-import org.wso2.carbon.identity.configuration.mgt.core.exception.PrimitiveConditionValidationException;
-import org.wso2.carbon.identity.configuration.mgt.core.util.ConfigurationUtils;
+import org.wso2.carbon.identity.configuration.mgt.core.search.SearchBean;
+import org.wso2.carbon.identity.core.util.IdentityTenantUtil;
 
-import java.lang.reflect.Field;
+import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.NON_EXISTING_TENANT_ID;
 
-import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_SEARCH_QUERY_PROPERTY_DOES_NOT_EXISTS;
-
-public class ResourceSearchBean {
+public class ResourceSearchBean implements SearchBean {
 
     private int tenantId;
     private String tenantDomain;
@@ -38,43 +36,14 @@ public class ResourceSearchBean {
     private String attributeKey;
     private String attributeValue;
 
-    public static void validate(PrimitiveCondition primitiveCondition)
-            throws PrimitiveConditionValidationException {
-
-        String property = primitiveCondition.getProperty();
-        ConditionType conditionType = primitiveCondition.getOperation();
-        Object value = primitiveCondition.getValue();
-
-        if (property == null || conditionType == null || value == null) {
-            throw new PrimitiveConditionValidationException(
-                    "Invalid primitive condition parameters found in: property = " + property
-                            + (conditionType == null ? ", condition = null" : "")
-                            + (value == null ? ", value = null" : "")
-                            + "."
-            );
-        }
-        try {
-            Field field = ResourceSearchBean.class.getDeclaredField(property);
-            if (!field.getType().getName().equals(value.getClass().getName())) {
-                throw new PrimitiveConditionValidationException(
-                        "Value for the property: " + property + " is expected to be: " + field.getType().getName() +
-                                " but found: " + value.getClass().getName()
-                );
-            }
-        } catch (NoSuchFieldException e) {
-            throw new PrimitiveConditionValidationException(
-                    "Property: " + property + " is not found in the allowed search properties present in the bean " +
-                            "class: " + ResourceSearchBean.class.getName()
-            );
-        }
-    }
+    private static final Log log = LogFactory.getLog(ResourceSearchBean.class);
 
     /**
      * Map field name to the DB table identifier.
      *
      * @return
      */
-    public static String getDBQualifiedFieldName(String fieldName) throws ConfigurationManagementException {
+    public String getDBQualifiedFieldName(String fieldName) {
 
         String dbQualifiedFieldName = null;
         switch (fieldName) {
@@ -100,10 +69,42 @@ public class ResourceSearchBean {
                 dbQualifiedFieldName = "A.ATTR_VALUE";
                 break;
         }
-        if (StringUtils.isEmpty(dbQualifiedFieldName)) {
-            throw ConfigurationUtils.handleClientException(ERROR_CODE_SEARCH_QUERY_PROPERTY_DOES_NOT_EXISTS, fieldName);
-        }
+//        if (StringUtils.isEmpty(dbQualifiedFieldName)) {
+//            throw ConfigurationUtils.handleClientException(ERROR_CODE_SEARCH_QUERY_PROPERTY_DOES_NOT_EXISTS, fieldName);
+//        }
         return dbQualifiedFieldName;
+    }
+
+    /**
+     * This method allow mapping of {@link PrimitiveCondition}.
+     *
+     * @param primitiveCondition Primitive search expression to be mapped.
+     */
+    public PrimitiveCondition mapPrimitiveCondition(PrimitiveCondition primitiveCondition) {
+
+        // Map tenant domain to tenant id
+        if (primitiveCondition.getProperty().equals("tenantDomain")) {
+            try {
+                primitiveCondition.setValue(IdentityTenantUtil.getTenantId(
+                        (String) primitiveCondition.getValue()
+                ));
+            } catch (IdentityRuntimeException e) {
+                /*
+                Search filter value for the tenant domain is possibly invalid. Therefore log the error and set
+                a non-existing tenant domain string as the primitive search expression value. This will preserve the
+                expected flow for an invalid search condition property value.
+                 */
+                if (log.isDebugEnabled()) {
+                    log.debug(
+                            "Error while retrieving tenant id for the tenant domain: "
+                                    + primitiveCondition.getValue() + ".", e
+                    );
+                }
+                primitiveCondition.setValue(NON_EXISTING_TENANT_ID);
+            }
+            primitiveCondition.setProperty("tenantId");
+        }
+        return primitiveCondition;
     }
 
     public String getTenantDomain() {

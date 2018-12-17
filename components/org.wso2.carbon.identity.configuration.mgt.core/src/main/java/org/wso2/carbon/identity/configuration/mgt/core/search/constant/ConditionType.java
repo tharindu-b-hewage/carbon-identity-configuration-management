@@ -16,51 +16,63 @@
 
 package org.wso2.carbon.identity.configuration.mgt.core.search.constant;
 
-public enum ConditionType {
+public class ConditionType {
 
-    EQUALS,
-    NOT_EQUALS,
-    LESS_THAN,
-    GREATER_THAN,
-    LESS_OR_EQUALS,
-    GREATER_OR_EQUALS,
-    OR,
-    AND,
-    NOT;
+    public enum ComplexOperator {
+        OR,
+        AND,
+        NOT;
 
-    // Logical SQL operator will be honoured.
-    public String toSQL() {
+        public String toSQL() {
 
-        String op = null;
-        switch (this) {
-            case EQUALS:
-                op = "=";
-                break;
-            case NOT_EQUALS:
-                op = "<>";
-                break;
-            case GREATER_THAN:
-                op = ">";
-                break;
-            case GREATER_OR_EQUALS:
-                op = ">=";
-                break;
-            case LESS_THAN:
-                op = "<";
-                break;
-            case LESS_OR_EQUALS:
-                op = "<=";
-                break;
-            case OR:
-                op = this.toString();
-                break;
-            case AND:
-                op = this.toString();
-                break;
-            case NOT:
-                op = this.toString();
-                break;
+            String op = null;
+            switch (this) {
+                case OR:
+                    op = this.toString();
+                    break;
+                case AND:
+                    op = this.toString();
+                    break;
+                case NOT:
+                    op = this.toString();
+                    break;
+            }
+            return op;
         }
-        return op;
+    }
+
+    public enum PrimitiveOperator {
+        EQUALS,
+        NOT_EQUALS,
+        LESS_THAN,
+        GREATER_THAN,
+        LESS_OR_EQUALS,
+        GREATER_OR_EQUALS;
+
+        public String toSQL() {
+
+            String op = null;
+            switch (this) {
+                case EQUALS:
+                    op = "=";
+                    break;
+                case NOT_EQUALS:
+                    op = "<>";
+                    break;
+                case GREATER_THAN:
+                    op = ">";
+                    break;
+                case GREATER_OR_EQUALS:
+                    op = ">=";
+                    break;
+                case LESS_THAN:
+                    op = "<";
+                    break;
+                case LESS_OR_EQUALS:
+                    op = "<=";
+                    break;
+            }
+            return op;
+        }
     }
 }

@@ -41,7 +41,7 @@ import org.wso2.carbon.identity.configuration.mgt.core.search.ComplexCondition;
 import org.wso2.carbon.identity.configuration.mgt.core.search.Condition;
 import org.wso2.carbon.identity.configuration.mgt.core.search.PrimitiveCondition;
 import org.wso2.carbon.identity.configuration.mgt.core.search.constant.ConditionType;
-import org.wso2.carbon.identity.configuration.mgt.core.exception.PrimitiveConditionValidationException;
+import org.wso2.carbon.identity.configuration.mgt.core.search.exception.PrimitiveConditionValidationException;
 import org.wso2.carbon.identity.configuration.mgt.endpoint.dto.AttributeDTO;
 import org.wso2.carbon.identity.configuration.mgt.endpoint.dto.ErrorDTO;
 import org.wso2.carbon.identity.configuration.mgt.endpoint.dto.ResourceAddDTO;
@@ -372,11 +372,11 @@ public class ConfigurationEndpointUtils {
             if (!(primitiveStatement.getProperty() == null)) {
                 PrimitiveCondition primitiveCondition = new PrimitiveCondition(
                         primitiveStatement.getProperty(),
-                        getConditionTypeFromOdata(primitiveStatement.getCondition()),
+                        getPrimitiveOperatorFromOdata(primitiveStatement.getCondition()),
                         primitiveStatement.getValue()
                 );
                 return primitiveCondition;
-        }
+            }
             return null;
         } else {
             List<Condition> conditions = new ArrayList<>();
@@ -387,42 +387,52 @@ public class ConfigurationEndpointUtils {
                 }
             }
             return new ComplexCondition(
-                    getConditionTypeFromOdata(searchCondition.getConditionType()),
+                    getComplexOperatorFromOdata(searchCondition.getConditionType()),
                     conditions
             );
         }
     }
 
-    private static ConditionType getConditionTypeFromOdata(org.apache.cxf.jaxrs.ext.search.ConditionType odataConditionType) {
+    public static ConditionType.PrimitiveOperator getPrimitiveOperatorFromOdata (
+            org.apache.cxf.jaxrs.ext.search.ConditionType odataConditionType) {
 
-        ConditionType conditionType = null;
+        ConditionType.PrimitiveOperator primitiveConditionType = null;
         switch (odataConditionType) {
-            case OR:
-                conditionType = ConditionType.OR;
-                break;
-            case AND:
-                conditionType = ConditionType.AND;
-                break;
             case EQUALS:
-                conditionType = ConditionType.EQUALS;
+                primitiveConditionType = ConditionType.PrimitiveOperator.EQUALS;
                 break;
             case GREATER_OR_EQUALS:
-                conditionType = ConditionType.GREATER_OR_EQUALS;
+                primitiveConditionType = ConditionType.PrimitiveOperator.GREATER_OR_EQUALS;
                 break;
             case LESS_OR_EQUALS:
-                conditionType = ConditionType.LESS_OR_EQUALS;
+                primitiveConditionType = ConditionType.PrimitiveOperator.LESS_OR_EQUALS;
                 break;
             case GREATER_THAN:
-                conditionType = ConditionType.GREATER_THAN;
+                primitiveConditionType = ConditionType.PrimitiveOperator.GREATER_THAN;
                 break;
             case NOT_EQUALS:
-                conditionType = ConditionType.NOT_EQUALS;
+                primitiveConditionType = ConditionType.PrimitiveOperator.NOT_EQUALS;
                 break;
             case LESS_THAN:
-                conditionType = ConditionType.LESS_THAN;
+                primitiveConditionType = ConditionType.PrimitiveOperator.LESS_THAN;
                 break;
         }
-        return conditionType;
+        return primitiveConditionType;
+    }
+
+    public static ConditionType.ComplexOperator getComplexOperatorFromOdata (
+            org.apache.cxf.jaxrs.ext.search.ConditionType odataConditionType) {
+
+        ConditionType.ComplexOperator complexConditionType = null;
+        switch (odataConditionType) {
+            case OR:
+                complexConditionType = ConditionType.ComplexOperator.OR;
+                break;
+            case AND:
+                complexConditionType = ConditionType.ComplexOperator.AND;
+                break;
+        }
+        return complexConditionType;
     }
 
     private static void logDebug(Log log, Throwable throwable) {

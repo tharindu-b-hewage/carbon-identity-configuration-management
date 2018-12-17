@@ -23,7 +23,6 @@ import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.database.utils.jdbc.JdbcTemplate;
 import org.wso2.carbon.database.utils.jdbc.exceptions.DataAccessException;
 import org.wso2.carbon.database.utils.jdbc.exceptions.TransactionException;
-import org.wso2.carbon.identity.base.IdentityRuntimeException;
 import org.wso2.carbon.identity.configuration.mgt.core.constant.SQLConstants;
 import org.wso2.carbon.identity.configuration.mgt.core.dao.ConfigurationDAO;
 import org.wso2.carbon.identity.configuration.mgt.core.exception.ConfigurationManagementClientException;
@@ -34,15 +33,14 @@ import org.wso2.carbon.identity.configuration.mgt.core.model.ResourceFile;
 import org.wso2.carbon.identity.configuration.mgt.core.model.ResourceSearchBean;
 import org.wso2.carbon.identity.configuration.mgt.core.model.ResourceType;
 import org.wso2.carbon.identity.configuration.mgt.core.model.Resources;
-import org.wso2.carbon.identity.configuration.mgt.core.search.ComplexCondition;
 import org.wso2.carbon.identity.configuration.mgt.core.search.Condition;
-import org.wso2.carbon.identity.configuration.mgt.core.search.PrimitiveCondition;
-import org.wso2.carbon.identity.configuration.mgt.core.exception.PrimitiveConditionValidationException;
+import org.wso2.carbon.identity.configuration.mgt.core.search.PlaceholderSQL;
+import org.wso2.carbon.identity.configuration.mgt.core.search.PrimitiveConditionValidator;
+import org.wso2.carbon.identity.configuration.mgt.core.search.exception.PrimitiveConditionValidationException;
 import org.wso2.carbon.identity.configuration.mgt.core.util.ConfigurationUtils;
 import org.wso2.carbon.identity.configuration.mgt.core.util.JdbcUtils;
 import org.wso2.carbon.identity.core.util.IdentityTenantUtil;
 
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -65,7 +63,6 @@ import static org.wso2.carbon.identity.configuration.mgt.core.constant.Configura
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_SEARCH_QUERY_SQL_PROPERTY_PARSE_ERROR;
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_SEARCH_TENANT_RESOURCES;
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_UPDATE_ATTRIBUTE;
-import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.NON_EXISTING_TENANT_ID;
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.SQLConstants.DELETE_ATTRIBUTE_SQL;
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.SQLConstants.GET_TENANT_RESOURCES_SELECT_COLLUMNS_MYSQL;
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.SQLConstants.MAX_QUERY_LENGTH_SQL;
@@ -85,18 +82,11 @@ public class ConfigurationDAOImpl implements ConfigurationDAO {
 
     public Resources getTenantResources(Condition condition) throws ConfigurationManagementException {
 
-        // To collect object and position for the preparedStatement.
-        ArrayList<Object> fieldValueCollector = new ArrayList<>();
-//        Map<String, String> resourceFieldTypeMapper = buildResourceSearchFieldTypeMapper();
-
-//        String placeholderSQL = validatePropertyAndBuildPlaceholderSQL(
-//                searchExpressionSQL, resourceFieldTypeMapper, fieldValueCollector
-//        );
-        String placeholderSQL = buildPlaceholderSQL(condition, fieldValueCollector);
-        if (placeholderSQL.length() > MAX_QUERY_LENGTH_SQL) {
+        PlaceholderSQL placeholderSQL = buildPlaceholderSQL(condition);
+        if (placeholderSQL.getQuery().length() > MAX_QUERY_LENGTH_SQL) {
             if (log.isDebugEnabled()) {
                 log.debug("Error building SQL query for the search. Search expression " +
-                        "query length: " + placeholderSQL.length() + " exceeds the maximum limit: " +
+                        "query length: " + placeholderSQL.getQuery().length() + " exceeds the maximum limit: " +
                         MAX_QUERY_LENGTH_SQL);
             }
             throw ConfigurationUtils.handleClientException(ERROR_CODE_QUERY_LENGTH_EXCEEDED, null);
@@ -105,7 +95,7 @@ public class ConfigurationDAOImpl implements ConfigurationDAO {
         JdbcTemplate jdbcTemplate = JdbcUtils.getNewTemplate();
         List<ConfigurationRawDataCollector> configurationRawDataCollectors;
         try {
-            configurationRawDataCollectors = jdbcTemplate.executeQuery(placeholderSQL,
+            configurationRawDataCollectors = jdbcTemplate.executeQuery(placeholderSQL.getQuery(),
                     (resultSet, rowNumber) -> new ConfigurationRawDataCollector.ConfigurationRawDataCollectorBuilder()
                             .setResourceId(resultSet.getString("ID"))
                             .setTenantId(resultSet.getInt("TENANT_ID"))
@@ -118,16 +108,16 @@ public class ConfigurationDAOImpl implements ConfigurationDAO {
                             .setAttributeValue(resultSet.getString("ATTR_VALUE"))
                             .setFileId(resultSet.getString("FILE_ID"))
                             .build(), preparedStatement -> {
-                        for (int count = 0; count < fieldValueCollector.size(); count++) {
-                            if (fieldValueCollector.get(count).getClass().equals(Integer.class)) {
+                        for (int count = 0; count < placeholderSQL.getData().size(); count++) {
+                            if (placeholderSQL.getData().get(count).getClass().equals(Integer.class)) {
                                 preparedStatement.setInt(
                                         count + 1,
-                                        (Integer) fieldValueCollector.get(count)
+                                        (Integer) placeholderSQL.getData().get(count)
                                 );
                             } else {
                                 preparedStatement.setString(
                                         count + 1,
-                                        (String) fieldValueCollector.get(count)
+                                        (String) placeholderSQL.getData().get(count)
                                 );
                             }
                         }
@@ -143,157 +133,24 @@ public class ConfigurationDAOImpl implements ConfigurationDAO {
         }
     }
 
-    private Map<String, String> buildResourceSearchFieldTypeMapper() {
-
-        Map<String, String> fieldTypeMapper = new HashMap<>();
-        for (Field field : ResourceSearchBean.class.getDeclaredFields()) {
-            fieldTypeMapper.put(field.getName(), field.getType().getName());
-        }
-        return fieldTypeMapper;
-    }
-
-    private String buildPlaceholderSQL(Condition condition, ArrayList<Object> fieldValueCollector)
+    private PlaceholderSQL buildPlaceholderSQL(Condition condition)
             throws ConfigurationManagementException {
 
         StringBuilder sb = new StringBuilder();
         sb.append(GET_TENANT_RESOURCES_SELECT_COLLUMNS_MYSQL);
         sb.append("WHERE\n");
-        visitAndPrintPlaceholderSQL(sb, fieldValueCollector, condition);
-        return sb.toString();
-    }
-
-    private void visitAndPrintPlaceholderSQL(StringBuilder sb, ArrayList<Object> fieldValueCollector,
-                                             Condition condition)
-            throws ConfigurationManagementException {
-
-        PrimitiveCondition primitiveCondition =
-                condition instanceof PrimitiveCondition ? (PrimitiveCondition) condition : null;
-        if (primitiveCondition != null) {
-            try {
-                ResourceSearchBean.validate(primitiveCondition);
-            } catch (PrimitiveConditionValidationException e) {
-                throw ConfigurationUtils.handleClientException(
-                        ERROR_CODE_SEARCH_QUERY_SQL_PROPERTY_PARSE_ERROR, e.getMessage(), e);
-            }
-            primitiveCondition = mapPrimitiveCondition(primitiveCondition);
-            sb.append(ResourceSearchBean.getDBQualifiedFieldName(
-                    primitiveCondition.getProperty()
-            ));
-            sb.append(" ");
-            sb.append(primitiveCondition.getOperation().toSQL());
-            sb.append(" ");
-            sb.append("?");
-            fieldValueCollector.add(primitiveCondition.getValue());
-        } else {
-            boolean first = true;
-            ComplexCondition complexCondition = (ComplexCondition) condition;
-            for (Condition eachCondition : complexCondition.getConditions()) {
-                if (!first) {
-                    sb.append(" ").append(complexCondition.getOperation().toSQL()).append(" ");
-                } else {
-                    first = false;
-                }
-                sb.append("(");
-                visitAndPrintPlaceholderSQL(sb, fieldValueCollector, eachCondition);
-                sb.append(")");
-            }
+        try {
+            PlaceholderSQL placeholderSQL = condition.buildQuery(
+                    new PrimitiveConditionValidator(new ResourceSearchBean())
+            );
+            placeholderSQL.setQuery(
+                    sb.append(placeholderSQL.getQuery()).toString()
+            );
+            return placeholderSQL;
+        } catch (PrimitiveConditionValidationException e) {
+            throw ConfigurationUtils.handleClientException(
+                    ERROR_CODE_SEARCH_QUERY_SQL_PROPERTY_PARSE_ERROR, e.getMessage(), e);
         }
-    }
-
-//    private String validatePropertyAndBuildPlaceholderSQL(String searchExpressionSQL,
-//                                                          Map<String, String> resourceFieldTypeMapper,
-//                                                          Map<Integer, Object> fieldValueCollector)
-//            throws ConfigurationManagementException {
-//
-//        StringBuilder sb = new StringBuilder(); // Build placeholder SQL.
-//        String[] splittedByParametersSQL = searchExpressionSQL.split(BEAN_FIELD_FLAG);
-//
-//        // First element of the array should start with 'SELECT'.
-//        if (StringUtils.isEmpty(splittedByParametersSQL[0]) || !splittedByParametersSQL[0].trim().startsWith("SELECT")) {
-//            throw ConfigurationUtils.handleClientException(
-//                    ERROR_CODE_SEARCH_SQL_EXPRESSION_INVALID,
-//                    searchExpressionSQL
-//            );
-//        }
-//
-//        sb.append(GET_TENANT_RESOURCES_SELECT_COLLUMNS_MYSQL);
-//
-//        // Then start building from 'WHERE' clause.
-//        sb.append(splittedByParametersSQL[0].split("TABLE", 2)[1]);
-//
-//        // Each substring has the form: "{fieldName} {operator} '{value}'---remainings".
-//        for (int count = 1; count < splittedByParametersSQL.length; count++) {
-//            String fieldName = splittedByParametersSQL[count].split("\\s+")[0];
-//            String operator = splittedByParametersSQL[count].split("\\s+")[1];
-//            String value = splittedByParametersSQL[count].split("\\s+")[2].split("'")[1]; // First one is empty
-//
-//            // remainings can contain "'" character. Therefore split on the first occurrence only.
-//            String remainings = splittedByParametersSQL[count].split("\\s+", 3)[2].split("'", 3)[2];
-//            if (StringUtils.isEmpty(fieldName) || StringUtils.isEmpty(value)) {
-//                if (log.isDebugEnabled()) {
-//                    log.debug("Could not find parameters field name and value from: "
-//                            + splittedByParametersSQL[count] + " while building placeholder SQL.");
-//                }
-//                throw ConfigurationUtils.handleClientException(
-//                        ERROR_CODE_SEARCH_SQL_EXPRESSION_INVALID, searchExpressionSQL);
-//            }
-//
-//            // Get mapped parameter values if parameter mapping available for the search expression.
-//            PrimitiveCondition mappedExpression
-//                    = mapPrimitiveCondition(new PrimitiveCondition(fieldName, operator, value));
-//            String dbQualifiedFieldName = ResourceSearchBean.getDBQualifiedFieldName(mappedExpression.getProperty());
-//            String fieldNameType = resourceFieldTypeMapper.get(mappedExpression.getProperty());
-//            fieldValueCollector.put(
-//                    count,
-//                    getValueFromString(
-//                            fieldNameType, mappedExpression.getValue()
-//                    )
-//            );
-//            sb.append(dbQualifiedFieldName);
-//            sb.append(' ');
-//            sb.append(operator);
-//            sb.append(' ');
-//            sb.append('?');
-//            sb.append(remainings);
-//        }
-//        return sb.toString();
-//    }
-
-    /**
-     * This method allow mapping of {@link PrimitiveCondition}.
-     *
-     * @param primitiveCondition Primitive search expression to be mapped.
-     */
-    PrimitiveCondition mapPrimitiveCondition(PrimitiveCondition primitiveCondition) {
-
-        // Map tenant domain to tenant id
-        if (primitiveCondition.getProperty().equals("tenantDomain")) {
-            try {
-                primitiveCondition.setValue(IdentityTenantUtil.getTenantId(
-                        (String) primitiveCondition.getValue()
-                ));
-            } catch (IdentityRuntimeException e) {
-                /*
-                Search filter value for the tenant domain is possibly invalid. Therefore log the error and set
-                a non-existing tenant domain string as the primitive search expression value. This will preserve the
-                expected flow for an invalid search condition property value.
-                 */
-                if (log.isDebugEnabled()) {
-                    log.debug(
-                            "Error while retrieving tenant id for the tenant domain: "
-                                    + primitiveCondition.getValue() + ".", e
-                    );
-                }
-                primitiveCondition.setValue(NON_EXISTING_TENANT_ID);
-            }
-            primitiveCondition.setProperty("tenantId");
-        }
-        return primitiveCondition;
-    }
-
-    private Object getValueFromString(String fieldType, String valueString) {
-
-        return fieldType.equals("int") ? Integer.valueOf(valueString) : valueString;
     }
 
     private Resources buildResourcesFromRawData(List<ConfigurationRawDataCollector> configurationRawDataCollectors) {
