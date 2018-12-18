@@ -30,86 +30,165 @@ import org.wso2.carbon.identity.configuration.mgt.core.search.Condition;
  */
 public interface ConfigurationManager {
 
-    // --------------------------------Search---------------------------------------------------------------------
-
     /**
-     * Get resources from all the tenants with optional search parameters;
+     * This API is used to get resources from all the tenants filtered with the {@link Condition}.
      *
-     * @return
-     * @throws ConfigurationManagementException
+     * @param searchCondition {@link Condition} representing a search filter for resources.
+     * @return {@link Resources} object with a collection of resources matching to the given {@link Condition}.
+     * @throws ConfigurationManagementException Configuration Management Exception.
      */
     Resources getTenantResources(Condition searchCondition) throws ConfigurationManagementException;
 
-    // --------------------------------Resource Type--------------------------------------------------------------
+    /**
+     * This API is used to store a new {@link ResourceType}.
+     *
+     * @param resourceTypeAdd {@link ResourceType} create request.
+     * @return 201 created. Returns created {@link ResourceType}.
+     * @throws ConfigurationManagementException Configuration Management Exception.
+     */
     ResourceType addResourceType(ResourceTypeAdd resourceTypeAdd) throws ConfigurationManagementException;
 
+    /**
+     * This API is used to replace an existing {@link ResourceType} with the given one or create if not.
+     *
+     * @param resourceTypeAdd Request to create the {@link ResourceType}.
+     * @return 200 ok. Returns replaced {@link ResourceType}.
+     * @throws ConfigurationManagementException Configuration Management Exception.
+     */
     ResourceType replaceResourceType(ResourceTypeAdd resourceTypeAdd) throws ConfigurationManagementException;
 
-    ResourceType updateResourceType(ResourceTypeAdd resourceTypeAdd) throws ConfigurationManagementException;
-
-    ResourceType getResourceType(String name)
+    /**
+     * This API is used to retrieve the {@link ResourceType}.
+     *
+     * @param resourceTypeName Name of the {@link ResourceType}.
+     * @return 200 ok. Returns the corresponding {@link ResourceType}.
+     * @throws ConfigurationManagementException Configuration Management Exception.
+     */
+    ResourceType getResourceType(String resourceTypeName)
             throws ConfigurationManagementException;
 
-    void deleteResourceType(String name) throws ConfigurationManagementException;
-
-    // --------------------------------Resources-------------------------------------------------------------------
+    /**
+     * This API is used to delete the {@link ResourceType}.
+     *
+     * @param resourceTypeName Name of the {@link ResourceType}.
+     * @throws ConfigurationManagementException Configuration Management Exception.
+     */
+    void deleteResourceType(String resourceTypeName) throws ConfigurationManagementException;
 
     /**
-     * Get all the resources of the current tenant based with a SearchContext object
+     * Get all the resources of the current tenant.
      *
-     * @return
-     * @throws ConfigurationManagementException
+     * @return 200 ok. {@link Resources} object with all the tenant resources.
+     * @throws ConfigurationManagementException Configuration Management Exception.
      */
     Resources getResources() throws ConfigurationManagementException;
 
-    Resources getResourcesByType(String resourceType)
+    /**
+     * Get all the resources belongs to the given {@link ResourceType}.
+     *
+     * @param resourceTypeName {@link ResourceType} object name.
+     * @return 200 ok. @link Resources} object with all the resources of the given resource type name.
+     * @throws ConfigurationManagementException Configuration Management Exception.
+     */
+    Resources getResourcesByType(String resourceTypeName)
             throws ConfigurationManagementException;
 
-    // --------------------------------Resource---------------------------------------------------------------------
-
     /**
-     * This API is used to add the given resource.
+     * This API is used to create the given resource.
      *
-     * @return 201 created. Returns resource change response with resource name, tenant domain and change state.
+     * @param resourceTypeName Name of the {@link ResourceType}.
+     * @param resourceAdd      Request to create the {@link Resource}.
+     * @return 201 created. Returns {@link Resource} created.
      * @throws ConfigurationManagementException Resource management exception.
      */
     Resource addResource(String resourceTypeName, ResourceAdd resourceAdd) throws ConfigurationManagementException;
 
     /**
-     * This API is used to replace the existing resource with the given resource or add the given
-     * resource if an existing resource is not available.
+     * This API is used to replace the given resource or create if not exists.
      *
-     * @return 201 created. Returns resource change response with resource name, tenant domain and change state.
+     * @param resourceTypeName Name of the {@link ResourceType}.
+     * @param resourceAdd      Request to replace the {@link Resource}.
+     * @return 201 created. Returns {@link Resource} created.
      * @throws ConfigurationManagementException Resource management exception.
      */
     Resource replaceResource(String resourceTypeName, ResourceAdd resourceAdd) throws ConfigurationManagementException;
 
     /**
-     * This API is used to update the existing resource with the given resource.
+     * This API is used to retrieve the given resource.
      *
-     * @return 201 created. Returns resource change response with resource name, tenant domain and change state.
+     * @param resourceTypeName Name of the {@link ResourceType}.
+     * @param resourceName     Name of the {@link Resource}.
+     * @return 200 ok. Returns {@link Resource} requested.
      * @throws ConfigurationManagementException Resource management exception.
      */
-    Resource updateResource(String resourceTypeName, ResourceAdd resourceAdd) throws ConfigurationManagementException;
-
     Resource getResource(String resourceTypeName, String resourceName)
             throws ConfigurationManagementException;
 
+    /**
+     * This API is used to delete the given resource.
+     *
+     * @param resourceTypeName Name of the {@link ResourceType}.
+     * @param resourceName     Request to delete the {@link Resource}.
+     * @throws ConfigurationManagementException Resource management exception.
+     */
     void deleteResource(String resourceTypeName, String resourceName) throws ConfigurationManagementException;
 
-    // -------------------------------- Attribute-------------------------------------------------------------------
+    /**
+     * This API is used to create the given attribute.
+     *
+     * @param resourceTypeName Name of the {@link ResourceType}.
+     * @param resourceName     Name of the {@link Resource}.
+     * @param attribute        Request to create the {@link Attribute}.
+     * @return 201 created. Returns {@link Attribute} created.
+     * @throws ConfigurationManagementException Resource management exception.
+     */
     Attribute addAttribute(String resourceTypeName, String resourceName, Attribute attribute)
             throws ConfigurationManagementException;
 
-    Attribute replaceAttribute(String resourceTypeName, String resourceName, Attribute attribute)
-            throws ConfigurationManagementException;
-
+    /**
+     * This API is used to update the given attribute.
+     *
+     * @param resourceTypeName Name of the {@link ResourceType}.
+     * @param resourceName     Name of the {@link Resource}.
+     * @param attribute        Request to update the {@link Attribute}.
+     * @return 200 ok. Returns {@link Attribute} updated.
+     * @throws ConfigurationManagementException Resource management exception.
+     */
     Attribute updateAttribute(String resourceTypeName, String resourceName, Attribute attribute)
             throws ConfigurationManagementException;
 
+    /**
+     * This API is used to replace the given attribute or create if exists.
+     *
+     * @param resourceTypeName Name of the {@link ResourceType}.
+     * @param resourceName     Name of the {@link Resource}.
+     * @param attribute        Request to replace the {@link Attribute}.
+     * @return 200 ok. Returns {@link Attribute} replaced.
+     * @throws ConfigurationManagementException Resource management exception.
+     */
+    Attribute replaceAttribute(String resourceTypeName, String resourceName, Attribute attribute)
+            throws ConfigurationManagementException;
+
+    /**
+     * This API is used to retrieve the given attribute.
+     *
+     * @param resourceTypeName Name of the {@link ResourceType}.
+     * @param resourceName     Name of the {@link Resource}.
+     * @param attributeKey     Key of the {@link Attribute}.
+     * @return 200 ok. Returns {@link Attribute} requested.
+     * @throws ConfigurationManagementException Resource management exception.
+     */
     Attribute getAttribute(String resourceTypeName, String resourceName, String attributeKey)
             throws ConfigurationManagementException;
 
+    /**
+     * This API is used to retrieve the given attribute.
+     *
+     * @param resourceTypeName Name of the {@link ResourceType}.
+     * @param resourceName     Name of the {@link Resource}.
+     * @param attributeKey     Key of the {@link Attribute}.
+     * @throws ConfigurationManagementException Resource management exception.
+     */
     void deleteAttribute(String resourceTypeName, String resourceName, String attributeKey)
             throws ConfigurationManagementException;
 }

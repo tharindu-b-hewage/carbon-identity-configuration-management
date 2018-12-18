@@ -21,23 +21,23 @@ package org.wso2.carbon.identity.configuration.mgt.core.exception;
  */
 public class ConfigurationManagementRuntimeException extends RuntimeException {
 
-    private String erroCode;
+    private String errorCode;
 
     public ConfigurationManagementRuntimeException() {
 
         super();
     }
 
-    public ConfigurationManagementRuntimeException(String message, String erroCode) {
+    public ConfigurationManagementRuntimeException(String message, String errorCode) {
 
         super(message);
-        this.erroCode = erroCode;
+        this.errorCode = errorCode;
     }
 
-    public ConfigurationManagementRuntimeException(String message, String erroCode, Throwable cause) {
+    public ConfigurationManagementRuntimeException(String message, String errorCode, Throwable cause) {
 
         super(message, cause);
-        this.erroCode = erroCode;
+        this.errorCode = errorCode;
     }
 
     public ConfigurationManagementRuntimeException(Throwable cause) {
@@ -45,13 +45,13 @@ public class ConfigurationManagementRuntimeException extends RuntimeException {
         super(cause);
     }
 
-    protected String getErroCode() {
+    protected String getErrorCode() {
 
-        return erroCode;
+        return errorCode;
     }
 
-    protected void setErroCode(String erroCode) {
+    protected void setErrorCode(String errorCode) {
 
-        this.erroCode = erroCode;
+        this.errorCode = errorCode;
     }
 }

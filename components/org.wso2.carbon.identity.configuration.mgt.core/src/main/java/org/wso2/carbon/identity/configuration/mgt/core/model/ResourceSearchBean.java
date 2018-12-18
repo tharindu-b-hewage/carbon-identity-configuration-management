@@ -69,9 +69,6 @@ public class ResourceSearchBean implements SearchBean {
                 dbQualifiedFieldName = "A.ATTR_VALUE";
                 break;
         }
-//        if (StringUtils.isEmpty(dbQualifiedFieldName)) {
-//            throw ConfigurationUtils.handleClientException(ERROR_CODE_SEARCH_QUERY_PROPERTY_DOES_NOT_EXISTS, fieldName);
-//        }
         return dbQualifiedFieldName;
     }
 

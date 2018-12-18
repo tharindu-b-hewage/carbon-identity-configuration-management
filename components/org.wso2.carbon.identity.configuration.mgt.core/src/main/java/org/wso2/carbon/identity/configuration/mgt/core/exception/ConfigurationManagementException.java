@@ -21,7 +21,6 @@ package org.wso2.carbon.identity.configuration.mgt.core.exception;
  */
 public class ConfigurationManagementException extends Exception {
 
-    // private static final long serialVersionUID = 2806215535431246551L; todo: Find a suitable serialVersionUID
     private String errorCode;
 
     public ConfigurationManagementException() {

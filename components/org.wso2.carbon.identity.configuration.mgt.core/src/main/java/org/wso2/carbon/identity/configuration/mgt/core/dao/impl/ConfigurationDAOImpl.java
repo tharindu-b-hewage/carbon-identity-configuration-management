@@ -52,19 +52,40 @@ import java.util.Set;
 import java.util.TimeZone;
 
 import static java.time.ZoneOffset.UTC;
-import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_ADD_RESOURCE;
-import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_ADD_RESOURCE_TYPE;
-import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_DELETE_ATTRIBUTE;
-import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_DELETE_RESOURCE_TYPE;
-import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_GET_RESOURCE;
-import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_QUERY_LENGTH_EXCEEDED;
-import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_REPLACE_ATTRIBUTE;
-import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_RETRIEVE_RESOURCE_TYPE;
-import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_SEARCH_QUERY_SQL_PROPERTY_PARSE_ERROR;
-import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_SEARCH_TENANT_RESOURCES;
-import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_UPDATE_ATTRIBUTE;
+import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages
+        .ERROR_CODE_ADD_RESOURCE;
+import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages
+        .ERROR_CODE_ADD_RESOURCE_TYPE;
+import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages
+        .ERROR_CODE_DELETE_ATTRIBUTE;
+import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages
+        .ERROR_CODE_DELETE_RESOURCE_TYPE;
+import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages
+        .ERROR_CODE_GET_ATTRIBUTE;
+import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages
+        .ERROR_CODE_GET_RESOURCE;
+import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages
+        .ERROR_CODE_INSERT_ATTRIBUTE;
+import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages
+        .ERROR_CODE_QUERY_LENGTH_EXCEEDED;
+import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages
+        .ERROR_CODE_REPLACE_ATTRIBUTE;
+import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages
+        .ERROR_CODE_REPLACE_RESOURCE;
+import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages
+        .ERROR_CODE_RETRIEVE_RESOURCE_TYPE;
+import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages
+        .ERROR_CODE_SEARCH_QUERY_SQL_PROPERTY_PARSE_ERROR;
+import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages
+        .ERROR_CODE_SEARCH_TENANT_RESOURCES;
+import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages
+        .ERROR_CODE_UPDATE_ATTRIBUTE;
+import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages
+        .ERROR_CODE_UPDATE_RESOURCE_TYPE;
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.SQLConstants.DELETE_ATTRIBUTE_SQL;
-import static org.wso2.carbon.identity.configuration.mgt.core.constant.SQLConstants.GET_TENANT_RESOURCES_SELECT_COLLUMNS_MYSQL;
+import static org.wso2.carbon.identity.configuration.mgt.core.constant.SQLConstants
+        .GET_TENANT_RESOURCES_SELECT_COLLUMNS_MYSQL;
+import static org.wso2.carbon.identity.configuration.mgt.core.constant.SQLConstants.INSERT_OR_UPDATE_ATTRIBUTES_MYSQL;
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.SQLConstants.MAX_QUERY_LENGTH_SQL;
 
 public class ConfigurationDAOImpl implements ConfigurationDAO {
@@ -106,6 +127,7 @@ public class ConfigurationDAOImpl implements ConfigurationDAO {
                             .setResourceTypeDescription(resultSet.getString("DESCRIPTION"))
                             .setAttributeKey(resultSet.getString("ATTR_KEY"))
                             .setAttributeValue(resultSet.getString("ATTR_VALUE"))
+                            .setAttributeId(resultSet.getString("ATTR_ID"))
                             .setFileId(resultSet.getString("FILE_ID"))
                             .build(), preparedStatement -> {
                         for (int count = 0; count < placeholderSQL.getData().size(); count++) {
@@ -168,6 +190,8 @@ public class ConfigurationDAOImpl implements ConfigurationDAO {
                 resource.setResourceId(configurationRawDataCollector.getResourceId());
                 resource.setResourceName(configurationRawDataCollector.getResourceName());
                 resource.setResourceType(configurationRawDataCollector.getResourceTypeName());
+                resource.setHasFile(configurationRawDataCollector.isHasFile());
+                resource.setHasAttribute(configurationRawDataCollector.isHasAttribute());
                 resource.setLastModified(configurationRawDataCollector.getLastModified());
                 resource.setTenantDomain(
                         IdentityTenantUtil.getTenantDomain(configurationRawDataCollector.getTenantId())
@@ -187,7 +211,8 @@ public class ConfigurationDAOImpl implements ConfigurationDAO {
                 if (configurationRawDataCollector.getAttributeKey() != null) {
                     attributes.get(eachResourceId).add(new Attribute(
                             configurationRawDataCollector.getAttributeKey(),
-                            configurationRawDataCollector.getAttributeValue()
+                            configurationRawDataCollector.getAttributeValue(),
+                            configurationRawDataCollector.getAttributeId()
                     ));
                 }
             }
@@ -208,13 +233,13 @@ public class ConfigurationDAOImpl implements ConfigurationDAO {
     /**
      * {@inheritDoc}
      */
-    public Resource getResource(int tenantId, String resourceTypeId, String resourceName)
+    public Resource getResourceByName(int tenantId, String resourceTypeId, String resourceName)
             throws ConfigurationManagementException {
 
         JdbcTemplate jdbcTemplate = JdbcUtils.getNewTemplate();
         List<ConfigurationRawDataCollector> configurationRawDataCollectors;
         try {
-            configurationRawDataCollectors = jdbcTemplate.executeQuery(SQLConstants.GET_RESOURCE_MYSQL,
+            configurationRawDataCollectors = jdbcTemplate.executeQuery(SQLConstants.GET_RESOURCE_BY_NAME_MYSQL,
                     (resultSet, rowNumber) -> new ConfigurationRawDataCollector.ConfigurationRawDataCollectorBuilder()
                             .setResourceId(resultSet.getString("ID"))
                             .setTenantId(resultSet.getInt("TENANT_ID"))
@@ -225,7 +250,10 @@ public class ConfigurationDAOImpl implements ConfigurationDAO {
                             .setResourceTypeDescription(resultSet.getString("DESCRIPTION"))
                             .setAttributeKey(resultSet.getString("ATTR_KEY"))
                             .setAttributeValue(resultSet.getString("ATTR_VALUE"))
+                            .setAttributeId(resultSet.getString("ATTR_ID"))
                             .setFileId(resultSet.getString("FILE_ID"))
+                            .setHasFile(resultSet.getBoolean("HAS_FILE"))
+                            .setHasAttribute(resultSet.getBoolean("HAS_ATTRIBUTE"))
                             .build(), preparedStatement -> {
                         preparedStatement.setString(1, resourceName);
                         preparedStatement.setInt(2, tenantId);
@@ -242,6 +270,42 @@ public class ConfigurationDAOImpl implements ConfigurationDAO {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    public Resource getResourceById(String resourceId)
+            throws ConfigurationManagementException {
+
+        JdbcTemplate jdbcTemplate = JdbcUtils.getNewTemplate();
+        List<ConfigurationRawDataCollector> configurationRawDataCollectors;
+        try {
+            configurationRawDataCollectors = jdbcTemplate.executeQuery(SQLConstants.GET_RESOURCE_BY_ID_MYSQL,
+                    (resultSet, rowNumber) -> new ConfigurationRawDataCollector.ConfigurationRawDataCollectorBuilder()
+                            .setResourceId(resultSet.getString("ID"))
+                            .setTenantId(resultSet.getInt("TENANT_ID"))
+                            .setResourceName(resultSet.getString("NAME"))
+                            .setLastModified(resultSet.getString("LAST_MODIFIED"))
+                            .setResourceName(resultSet.getString("NAME"))
+                            .setResourceTypeName(resultSet.getString("RESOURCE_TYPE"))
+                            .setResourceTypeDescription(resultSet.getString("DESCRIPTION"))
+                            .setAttributeKey(resultSet.getString("ATTR_KEY"))
+                            .setAttributeValue(resultSet.getString("ATTR_VALUE"))
+                            .setAttributeId(resultSet.getString("ATTR_ID"))
+                            .setHasFile(resultSet.getBoolean("HAS_FILE"))
+                            .setHasAttribute(resultSet.getBoolean("HAS_ATTRIBUTE"))
+                            .setFileId(resultSet.getString("FILE_ID"))
+                            .build(), preparedStatement -> preparedStatement.setString(1, resourceId));
+            /*
+            Database call can contain duplicate data for some columns. Need to filter them in order to build the
+            resource.
+            */
+            return configurationRawDataCollectors == null || configurationRawDataCollectors.size() == 0 ?
+                    null : buildResourceFromRawData(configurationRawDataCollectors);
+        } catch (DataAccessException e) {
+            throw ConfigurationUtils.handleServerException(ERROR_CODE_GET_RESOURCE, "id = " + resourceId, e);
+        }
+    }
+
     private Resource buildResourceFromRawData(List<ConfigurationRawDataCollector> configurationRawDataCollectors) {
 
         Resource resource = new Resource();
@@ -252,25 +316,22 @@ public class ConfigurationDAOImpl implements ConfigurationDAO {
         configurationRawDataCollectors.forEach(configurationRawDataCollector -> {
             if (resource.getResourceId() == null) {
                 resource.setResourceId(configurationRawDataCollector.getResourceId());
-            }
-            if (resource.getResourceName() == null) {
+                resource.setHasFile(configurationRawDataCollector.isHasFile());
+                resource.setHasAttribute(configurationRawDataCollector.isHasAttribute());
                 resource.setResourceName(configurationRawDataCollector.getResourceName());
-            }
-            if (resource.getResourceType() == null) {
                 resource.setResourceType(configurationRawDataCollector.getResourceTypeName());
-            }
-            if (resource.getLastModified() == null) {
                 resource.setLastModified(configurationRawDataCollector.getLastModified());
+                resource.setTenantDomain(
+                        IdentityTenantUtil.getTenantDomain(configurationRawDataCollector.getTenantId()));
             }
-            if (resource.getTenantDomain() == null) {
-                resource.setTenantDomain(IdentityTenantUtil.getTenantDomain(configurationRawDataCollector.getTenantId()));
-            }
+
             if (!attributeKeySet.contains(configurationRawDataCollector.getAttributeKey())) {
                 attributeKeySet.add(configurationRawDataCollector.getAttributeKey());
                 if (configurationRawDataCollector.getAttributeKey() != null) {
                     attributes.add(new Attribute(
                             configurationRawDataCollector.getAttributeKey(),
-                            configurationRawDataCollector.getAttributeValue()
+                            configurationRawDataCollector.getAttributeValue(),
+                            configurationRawDataCollector.getAttributeId()
                     ));
                 }
             }
@@ -289,11 +350,10 @@ public class ConfigurationDAOImpl implements ConfigurationDAO {
     /**
      * {@inheritDoc}
      */
-    public void deleteResource(String resourceTypeName, String resourceName) throws ConfigurationManagementException {
+    public void deleteResourceByName(int tenantId, String resourceTypeId, String resourceName)
+            throws ConfigurationManagementException {
 
         JdbcTemplate jdbcTemplate = JdbcUtils.getNewTemplate();
-        String resourceTypeId = getResourceTypeByName(resourceTypeName).getId();
-        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
         try {
             jdbcTemplate.executeUpdate(SQLConstants.DELETE_RESOURCE_SQL, preparedStatement -> {
                 preparedStatement.setString(1, resourceName);
@@ -302,6 +362,57 @@ public class ConfigurationDAOImpl implements ConfigurationDAO {
             });
         } catch (DataAccessException e) {
             throw ConfigurationUtils.handleServerException(ERROR_CODE_DELETE_RESOURCE_TYPE, resourceName, e);
+        }
+    }
+
+    public void replaceResource(Resource resource)
+            throws ConfigurationManagementException {
+
+        String resourceTypeId = getResourceTypeByName(resource.getResourceType()).getId();
+
+        JdbcTemplate jdbcTemplate = JdbcUtils.getNewTemplate();
+        try {
+            jdbcTemplate.withTransaction(template -> {
+                boolean isAttributeExists = resource.getAttributes() != null;
+
+                // Insert resource metadata.
+                template.executeInsert(SQLConstants.INSERT_OR_UPDATE_RESOURCE_MYSQL, preparedStatement -> {
+                    preparedStatement.setString(1, resource.getResourceId());
+                    preparedStatement.setInt(2, PrivilegedCarbonContext.getThreadLocalCarbonContext()
+                            .getTenantId());
+                    preparedStatement.setString(3, resource.getResourceName());
+                    preparedStatement.setTimestamp(4, new java.sql.Timestamp(new Date().getTime()),
+                            Calendar.getInstance(TimeZone.getTimeZone(UTC)));
+                    /*
+                    Resource files are uploaded using a separate endpoint. Therefore resource creation does not create
+                    files. It is allowed to create a resource without files or attributes in order to allow file upload
+                    after resource creation.
+                     */
+                    preparedStatement.setBoolean(5, false);
+                    preparedStatement.setBoolean(6, isAttributeExists);
+                    preparedStatement.setString(7, resourceTypeId);
+                }, resource, false);
+
+                // Insert attributes.
+                if (isAttributeExists) {
+                    // Create sql query for attribute parameters.
+                    String attributesQuery = buildQueryForAttributes(resource) + INSERT_OR_UPDATE_ATTRIBUTES_MYSQL;
+                    template.executeInsert(attributesQuery, preparedStatement -> {
+                        int attributeCount = 0;
+                        for (Attribute attribute : resource.getAttributes()) {
+                            preparedStatement.setString(++attributeCount,
+                                    attribute.getAttributeId() == null ? ConfigurationUtils.generateUniqueID() :
+                                            attribute.getAttributeId());
+                            preparedStatement.setString(++attributeCount, resource.getResourceId());
+                            preparedStatement.setString(++attributeCount, attribute.getKey());
+                            preparedStatement.setString(++attributeCount, attribute.getValue());
+                        }
+                    }, resource, false);
+                }
+                return null;
+            });
+        } catch (TransactionException e) {
+            throw ConfigurationUtils.handleServerException(ERROR_CODE_REPLACE_RESOURCE, resource.getResourceName(), e);
         }
     }
 
@@ -364,7 +475,7 @@ public class ConfigurationDAOImpl implements ConfigurationDAO {
         // Since attributes exist, query is already built for the first attribute.
         for (int i = 1; i < resource.getAttributes().size(); i++) {
             sb.append(SQLConstants.INSERT_ATTRIBUTE_KEY_VALUE_SQL);
-            if (sb.length() > MAX_QUERY_LENGTH_SQL) {
+            if (sb.toString().getBytes().length > MAX_QUERY_LENGTH_SQL) {
                 if (log.isDebugEnabled()) {
                     log.debug("Error building SQL query for the attribute insert. Number of attributes: " +
                             resource.getAttributes().size() + " exceeds the maximum limit: " +
@@ -378,25 +489,6 @@ public class ConfigurationDAOImpl implements ConfigurationDAO {
 
     /**
      * {@inheritDoc}
-     */
-    public void replaceResource(String resourceName, Resource resource) throws ConfigurationManagementException {
-
-//        return new Resource("test", "test");
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public void updateResource(String resourceName, Resource resource) throws ConfigurationManagementException {
-
-//        return new Resource("test", "test");
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @param resourceType
-     * @throws ConfigurationManagementException
      */
     public void addResourceType(ResourceType resourceType) throws ConfigurationManagementException {
 
@@ -414,20 +506,19 @@ public class ConfigurationDAOImpl implements ConfigurationDAO {
 
     /**
      * {@inheritDoc}
-     *
-     * @param resourceType
-     * @throws ConfigurationManagementException
      */
     public void replaceResourceType(ResourceType resourceType) throws ConfigurationManagementException {
 
-//        JdbcTemplate jdbcTemplate = JdbcUtils.getNewTemplate();
-//        try {
-//            jdbcTemplate.executeInsert(SQLConstants.REPLACE_RESOURCE_TYPE_SQL, preparedStatement -> {
-//
-//            })
-//        } catch (DataAccessException e) {
-//
-//        }
+        JdbcTemplate jdbcTemplate = JdbcUtils.getNewTemplate();
+        try {
+            jdbcTemplate.executeInsert(SQLConstants.INSERT_OR_UPDATE_RESOURCE_TYPE_MYSQL, preparedStatement -> {
+                preparedStatement.setString(1, resourceType.getId());
+                preparedStatement.setString(2, resourceType.getName());
+                preparedStatement.setString(3, resourceType.getDescription());
+            }, resourceType, false);
+        } catch (DataAccessException e) {
+            throw ConfigurationUtils.handleServerException(ERROR_CODE_UPDATE_RESOURCE_TYPE, resourceType.getName(), e);
+        }
     }
 
     @Override
@@ -474,9 +565,8 @@ public class ConfigurationDAOImpl implements ConfigurationDAO {
 
         JdbcTemplate jdbcTemplate = JdbcUtils.getNewTemplate();
         try {
-            jdbcTemplate.executeUpdate(selectDeleteResourceTypeQuery(null), (preparedStatement -> {
-                preparedStatement.setString(1, resourceTypeName);
-            }
+            jdbcTemplate.executeUpdate(selectDeleteResourceTypeQuery(null), (
+                    preparedStatement -> preparedStatement.setString(1, resourceTypeName)
             ));
         } catch (DataAccessException e) {
             throw ConfigurationUtils.handleServerException(ERROR_CODE_DELETE_RESOURCE_TYPE, resourceTypeName, e);
@@ -489,33 +579,99 @@ public class ConfigurationDAOImpl implements ConfigurationDAO {
                 SQLConstants.DELETE_RESOURCE_TYPE_BY_ID_SQL;
     }
 
-    public void deleteAttribute(String attributeId, String attributeKey) throws ConfigurationManagementException {
+    public void deleteAttribute(String attributeId, String resourceId, String attributeKey)
+            throws ConfigurationManagementException {
 
         JdbcTemplate jdbcTemplate = JdbcUtils.getNewTemplate();
         try {
-            jdbcTemplate.executeUpdate(DELETE_ATTRIBUTE_SQL, (preparedStatement -> {
-                preparedStatement.setString(1, attributeId);
-            }
-            ));
-        } catch (DataAccessException e) {
+            jdbcTemplate.withTransaction(template -> {
+                template.executeUpdate(DELETE_ATTRIBUTE_SQL, (
+                        preparedStatement -> preparedStatement.setString(1, attributeId)
+                ));
+                template.executeUpdate(SQLConstants.UPDATE_LAST_MODIFIED_SQL, preparedStatement -> {
+                    preparedStatement.setTimestamp(1, new java.sql.Timestamp(new Date().getTime()),
+                            Calendar.getInstance(TimeZone.getTimeZone(UTC)));
+                    preparedStatement.setString(2, resourceId);
+                });
+                return null;
+            });
+        } catch (TransactionException e) {
             throw ConfigurationUtils.handleServerException(ERROR_CODE_DELETE_ATTRIBUTE, attributeKey, e);
         }
     }
 
-    public void updateAttribute(String attributeId, Attribute attribute) throws ConfigurationManagementException {
+    public void updateAttribute(String attributeId, String resourceId, Attribute attribute)
+            throws ConfigurationManagementException {
 
         JdbcTemplate jdbcTemplate = JdbcUtils.getNewTemplate();
         try {
-            jdbcTemplate.executeUpdate(SQLConstants.UPDATE_ATTRIBUTE_MYSQL, preparedStatement -> {
-                preparedStatement.setString(1, attribute.getValue());
-                preparedStatement.setString(2, attributeId);
+            jdbcTemplate.withTransaction(template -> {
+                template.executeUpdate(SQLConstants.UPDATE_ATTRIBUTE_MYSQL, preparedStatement -> {
+                    preparedStatement.setString(1, attribute.getValue());
+                    preparedStatement.setString(2, attributeId);
+                });
+                template.executeUpdate(SQLConstants.UPDATE_LAST_MODIFIED_SQL, preparedStatement -> {
+                    preparedStatement.setTimestamp(1, new java.sql.Timestamp(new Date().getTime()),
+                            Calendar.getInstance(TimeZone.getTimeZone(UTC)));
+                    preparedStatement.setString(2, resourceId);
+                });
+                return null;
             });
-        } catch (DataAccessException e) {
+        } catch (TransactionException e) {
             throw ConfigurationUtils.handleServerException(ERROR_CODE_UPDATE_ATTRIBUTE, attribute.getKey(), e);
         }
     }
 
-    public Attribute getAttribute(String resourceId, String attributeKey) throws ConfigurationManagementException {
+    public void addAttribute(String attributeId, String resourceId, Attribute attribute)
+            throws ConfigurationManagementException {
+
+        JdbcTemplate jdbcTemplate = JdbcUtils.getNewTemplate();
+        try {
+            jdbcTemplate.withTransaction(template -> {
+                template.executeUpdate(SQLConstants.INSERT_ATTRIBUTE_MYSQL, preparedStatement -> {
+                    preparedStatement.setString(1, attributeId);
+                    preparedStatement.setString(2, resourceId);
+                    preparedStatement.setString(3, attribute.getKey());
+                    preparedStatement.setString(4, attribute.getValue());
+
+                });
+                template.executeUpdate(SQLConstants.UPDATE_LAST_MODIFIED_SQL, preparedStatement -> {
+                    preparedStatement.setTimestamp(1, new java.sql.Timestamp(new Date().getTime()),
+                            Calendar.getInstance(TimeZone.getTimeZone(UTC)));
+                    preparedStatement.setString(2, resourceId);
+                });
+                return null;
+            });
+        } catch (TransactionException e) {
+            throw ConfigurationUtils.handleServerException(ERROR_CODE_INSERT_ATTRIBUTE, attribute.getKey(), e);
+        }
+    }
+
+    public void replaceAttribute(String attributeId, String resourceId, Attribute attribute)
+            throws ConfigurationManagementException {
+
+        JdbcTemplate jdbcTemplate = JdbcUtils.getNewTemplate();
+        try {
+            jdbcTemplate.withTransaction(template -> {
+                template.executeUpdate(SQLConstants.INSERT_OR_UPDATE_ATTRIBUTE_MYSQL, preparedStatement -> {
+                    preparedStatement.setString(1, attributeId);
+                    preparedStatement.setString(2, resourceId);
+                    preparedStatement.setString(3, attribute.getKey());
+                    preparedStatement.setString(4, attribute.getValue());
+                });
+                template.executeUpdate(SQLConstants.UPDATE_LAST_MODIFIED_SQL, preparedStatement -> {
+                    preparedStatement.setTimestamp(1, new java.sql.Timestamp(new Date().getTime()),
+                            Calendar.getInstance(TimeZone.getTimeZone(UTC)));
+                    preparedStatement.setString(2, resourceId);
+                });
+                return null;
+            });
+        } catch (TransactionException e) {
+            throw ConfigurationUtils.handleServerException(ERROR_CODE_REPLACE_ATTRIBUTE, attribute.getKey(), e);
+        }
+    }
+
+    public Attribute getAttributeByKey(String resourceId, String attributeKey) throws ConfigurationManagementException {
 
         JdbcTemplate jdbcTemplate = JdbcUtils.getNewTemplate();
         try {
@@ -530,7 +686,7 @@ public class ConfigurationDAOImpl implements ConfigurationDAO {
                         preparedStatement.setString(2, resourceId);
                     });
         } catch (DataAccessException e) {
-            throw ConfigurationUtils.handleServerException(ERROR_CODE_REPLACE_ATTRIBUTE, attributeKey, e);
+            throw ConfigurationUtils.handleServerException(ERROR_CODE_GET_ATTRIBUTE, attributeKey, e);
         }
     }
 }

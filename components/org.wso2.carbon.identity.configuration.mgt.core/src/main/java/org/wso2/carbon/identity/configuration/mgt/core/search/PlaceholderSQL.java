@@ -18,6 +18,9 @@ package org.wso2.carbon.identity.configuration.mgt.core.search;
 
 import java.util.ArrayList;
 
+/**
+ * This class holds both sql query and the data to be injected for a prepared statement.
+ */
 public class PlaceholderSQL {
 
     private String query;

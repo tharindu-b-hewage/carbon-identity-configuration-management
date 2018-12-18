@@ -28,14 +28,19 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import javax.ws.rs.core.Response;
 
-import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.RESOURCE_PATH;
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.RESOURCE_TYPE_PATH;
-import static org.wso2.carbon.identity.configuration.mgt.endpoint.util.ConfigurationEndpointUtils.getConfigurationManager;
-import static org.wso2.carbon.identity.configuration.mgt.endpoint.util.ConfigurationEndpointUtils.getResourceTypeAddFromDTO;
-import static org.wso2.carbon.identity.configuration.mgt.endpoint.util.ConfigurationEndpointUtils.getResourceTypeDTO;
-import static org.wso2.carbon.identity.configuration.mgt.endpoint.util.ConfigurationEndpointUtils.handleBadRequestResponse;
-import static org.wso2.carbon.identity.configuration.mgt.endpoint.util.ConfigurationEndpointUtils.handleServerErrorResponse;
-import static org.wso2.carbon.identity.configuration.mgt.endpoint.util.ConfigurationEndpointUtils.handleUnexpectedServerError;
+import static org.wso2.carbon.identity.configuration.mgt.endpoint.util.ConfigurationEndpointUtils
+        .getConfigurationManager;
+import static org.wso2.carbon.identity.configuration.mgt.endpoint.util.ConfigurationEndpointUtils
+        .getResourceTypeAddFromDTO;
+import static org.wso2.carbon.identity.configuration.mgt.endpoint.util.ConfigurationEndpointUtils
+        .getResourceTypeDTO;
+import static org.wso2.carbon.identity.configuration.mgt.endpoint.util.ConfigurationEndpointUtils
+        .handleBadRequestResponse;
+import static org.wso2.carbon.identity.configuration.mgt.endpoint.util.ConfigurationEndpointUtils
+        .handleServerErrorResponse;
+import static org.wso2.carbon.identity.configuration.mgt.endpoint.util.ConfigurationEndpointUtils
+        .handleUnexpectedServerError;
 
 public class ResourceTypeApiServiceImpl extends ResourceTypeApiService {
 
@@ -45,7 +50,7 @@ public class ResourceTypeApiServiceImpl extends ResourceTypeApiService {
     public Response resourceTypePatch(ResourceTypeAddDTO resourceTypeAddDTO) {
 
         try {
-            ResourceType resourceType = getConfigurationManager().updateResourceType(getResourceTypeAddFromDTO(resourceTypeAddDTO));
+            ResourceType resourceType = getConfigurationManager().replaceResourceType(getResourceTypeAddFromDTO(resourceTypeAddDTO));
             return Response.ok().entity(getResourceTypeDTO(resourceType)).build();
         } catch (ConfigurationManagementClientException e) {
             return handleBadRequestResponse(e, LOG);
@@ -60,8 +65,10 @@ public class ResourceTypeApiServiceImpl extends ResourceTypeApiService {
     public Response resourceTypePost(ResourceTypeAddDTO resourceTypeAddDTO) {
 
         try {
-            ResourceType resourceType = getConfigurationManager().addResourceType(getResourceTypeAddFromDTO(resourceTypeAddDTO));
-            return Response.created(getResourceTypeURI(resourceType)).entity(getResourceTypeDTO(resourceType)).build(); // TODO: 12/9/18 Validate 200 OK created path in whole project
+            ResourceType resourceType = getConfigurationManager()
+                    .addResourceType(getResourceTypeAddFromDTO(resourceTypeAddDTO));
+            return Response.created(getResourceTypeURI(resourceType))
+                    .entity(getResourceTypeDTO(resourceType)).build();
         } catch (ConfigurationManagementClientException e) {
             return handleBadRequestResponse(e, LOG);
         } catch (ConfigurationManagementException e) {
@@ -80,7 +87,8 @@ public class ResourceTypeApiServiceImpl extends ResourceTypeApiService {
     public Response resourceTypePut(ResourceTypeAddDTO resourceTypeAddDTO) {
 
         try {
-            ResourceType resourceType = getConfigurationManager().replaceResourceType(getResourceTypeAddFromDTO(resourceTypeAddDTO));
+            ResourceType resourceType = getConfigurationManager()
+                    .replaceResourceType(getResourceTypeAddFromDTO(resourceTypeAddDTO));
             return Response.ok().entity(getResourceTypeDTO(resourceType)).build();
         } catch (ConfigurationManagementClientException e) {
             return handleBadRequestResponse(e, LOG);

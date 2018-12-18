@@ -82,7 +82,8 @@ public class ResourceApiServiceImpl extends ResourceApiService {
     public Response resourceResourceTypePatch(String resourceType, ResourceAddDTO resourceAddDTO) {
 
         try {
-            Resource resource = getConfigurationManager().updateResource(resourceType, getResourceAddFromDTO(resourceAddDTO));
+            Resource resource = getConfigurationManager()
+                    .replaceResource(resourceType, getResourceAddFromDTO(resourceAddDTO));
             return Response.ok().entity(getResourceDTO(resource)).build();
         } catch (ConfigurationManagementClientException e) {
             return handleBadRequestResponse(e, LOG);
@@ -97,7 +98,8 @@ public class ResourceApiServiceImpl extends ResourceApiService {
     public Response resourceResourceTypePost(String resourceType, ResourceAddDTO resourceAddDTO) {
 
         try {
-            Resource resource = getConfigurationManager().addResource(resourceType, getResourceAddFromDTO(resourceAddDTO));
+            Resource resource = getConfigurationManager()
+                    .addResource(resourceType, getResourceAddFromDTO(resourceAddDTO));
             return Response.created(getResourceURI(resourceType, resource)).entity(getResourceDTO(resource)).build();
         } catch (ConfigurationManagementClientException e) {
             return handleBadRequestResponse(e, LOG);
@@ -117,7 +119,8 @@ public class ResourceApiServiceImpl extends ResourceApiService {
     public Response resourceResourceTypePut(String resourceType, ResourceAddDTO resourceAddDTO) {
 
         try {
-            Resource resource = getConfigurationManager().replaceResource(resourceType, getResourceAddFromDTO(resourceAddDTO));
+            Resource resource = getConfigurationManager()
+                    .replaceResource(resourceType, getResourceAddFromDTO(resourceAddDTO));
             return Response.ok().entity(getResourceDTO(resource)).build();
         } catch (ConfigurationManagementClientException e) {
             return handleBadRequestResponse(e, LOG);
@@ -129,7 +132,8 @@ public class ResourceApiServiceImpl extends ResourceApiService {
     }
 
     @Override
-    public Response resourceResourceTypeResourceNameAttributeKeyDelete(String resourceName, String resourceType, String attributeKey) {
+    public Response resourceResourceTypeResourceNameAttributeKeyDelete(
+            String resourceName, String resourceType, String attributeKey) {
 
         try {
             getConfigurationManager().deleteAttribute(resourceType, resourceName, attributeKey);
@@ -190,10 +194,12 @@ public class ResourceApiServiceImpl extends ResourceApiService {
     }
 
     @Override
-    public Response resourceResourceTypeResourceNamePatch(String resourceName, String resourceType, AttributeDTO attributeDTO) {
+    public Response resourceResourceTypeResourceNamePatch(
+            String resourceName, String resourceType, AttributeDTO attributeDTO) {
 
         try {
-            Attribute attribute = getConfigurationManager().updateAttribute(resourceType, resourceName, getAttributeFromDTO(attributeDTO));
+            Attribute attribute = getConfigurationManager().updateAttribute(resourceType, resourceName,
+                    getAttributeFromDTO(attributeDTO));
             return Response.ok().entity(getAttributeDTO(attribute)).build();
         } catch (ConfigurationManagementClientException e) {
             return handleBadRequestResponse(e, LOG);
@@ -205,7 +211,8 @@ public class ResourceApiServiceImpl extends ResourceApiService {
     }
 
     @Override
-    public Response resourceResourceTypeResourceNamePost(String resourceName, String resourceType, AttributeDTO attributeDTO) {
+    public Response resourceResourceTypeResourceNamePost(
+            String resourceName, String resourceType, AttributeDTO attributeDTO) {
 
         try {
             Attribute attribute = getConfigurationManager().addAttribute(
@@ -221,13 +228,15 @@ public class ResourceApiServiceImpl extends ResourceApiService {
         }
     }
 
-    private URI getAttributeLocationURI(String resourceType, String resourceName, Attribute attribute) throws URISyntaxException {
+    private URI getAttributeLocationURI(String resourceType, String resourceName, Attribute attribute)
+            throws URISyntaxException {
 
         return new URI(RESOURCE_PATH + '/' + resourceType + '/' + resourceName + '/' + attribute.getAttributeId());
     }
 
     @Override
-    public Response resourceResourceTypeResourceNamePut(String resourceName, String resourceType, AttributeDTO attributeDTO) {
+    public Response resourceResourceTypeResourceNamePut(
+            String resourceName, String resourceType, AttributeDTO attributeDTO) {
 
         try {
             Attribute attribute = getConfigurationManager().replaceAttribute(

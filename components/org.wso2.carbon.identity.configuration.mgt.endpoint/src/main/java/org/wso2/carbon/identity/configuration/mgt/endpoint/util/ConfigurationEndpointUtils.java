@@ -21,9 +21,6 @@ import org.apache.cxf.jaxrs.ext.search.PrimitiveStatement;
 import org.apache.cxf.jaxrs.ext.search.SearchCondition;
 import org.apache.cxf.jaxrs.ext.search.SearchContext;
 import org.apache.cxf.jaxrs.ext.search.SearchParseException;
-import org.apache.cxf.jaxrs.ext.search.sql.SQLPrinterVisitor;
-import org.apache.cxf.jaxrs.ext.search.visitor.PropertyValidationException;
-import org.apache.olingo.odata2.api.uri.expression.ExpressionParserException;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.identity.configuration.mgt.core.ConfigurationManager;
 import org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants;
@@ -33,7 +30,6 @@ import org.wso2.carbon.identity.configuration.mgt.core.model.Attribute;
 import org.wso2.carbon.identity.configuration.mgt.core.model.Resource;
 import org.wso2.carbon.identity.configuration.mgt.core.model.ResourceAdd;
 import org.wso2.carbon.identity.configuration.mgt.core.model.ResourceFile;
-import org.wso2.carbon.identity.configuration.mgt.core.model.ResourceSearchBean;
 import org.wso2.carbon.identity.configuration.mgt.core.model.ResourceType;
 import org.wso2.carbon.identity.configuration.mgt.core.model.ResourceTypeAdd;
 import org.wso2.carbon.identity.configuration.mgt.core.model.Resources;
@@ -55,29 +51,31 @@ import org.wso2.carbon.identity.configuration.mgt.endpoint.exception.ConflictReq
 import org.wso2.carbon.identity.configuration.mgt.endpoint.exception.ForbiddenException;
 import org.wso2.carbon.identity.configuration.mgt.endpoint.exception.InternalServerErrorException;
 import org.wso2.carbon.identity.configuration.mgt.endpoint.exception.NotFoundException;
-import org.wso2.carbon.identity.configuration.mgt.endpoint.util.validator.ResourceSearchBeanPropertyValidator;
 
-import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 import javax.ws.rs.core.Response;
 
-import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.BEAN_FIELD_FLAG;
-import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.CXF_SEARCH_PARSER_ERROR;
-import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_RESOURCES_DOES_NOT_EXISTS;
-import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_RESOURCE_ALREADY_EXISTS;
-import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_RESOURCE_DOES_NOT_EXISTS;
-import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_RESOURCE_TYPE_ALREADY_EXISTS;
-import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_RESOURCE_TYPE_DOES_NOT_EXISTS;
-import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_SEARCH_QUERY_PROPERTY_DOES_NOT_EXISTS;
-import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_SEARCH_QUERY_SQL_PARSE_ERROR;
-import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_SEARCH_QUERY_SQL_PROPERTY_PARSE_ERROR;
-import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_UNEXPECTED;
-import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ODATA2_API_URI_EXPRESSION_PARSER_ERROR;
-import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ODATA2_API_URI_EXPRESSION_PARSER_TOKENIZE_ERROR;
+import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages.ERROR_CODE_ATTRIBUTE_ALREADY_EXISTS;
+import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages
+        .ERROR_CODE_RESOURCES_DOES_NOT_EXISTS;
+import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages
+        .ERROR_CODE_RESOURCE_ALREADY_EXISTS;
+import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages
+        .ERROR_CODE_RESOURCE_DOES_NOT_EXISTS;
+import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages
+        .ERROR_CODE_RESOURCE_TYPE_ALREADY_EXISTS;
+import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages
+        .ERROR_CODE_RESOURCE_TYPE_DOES_NOT_EXISTS;
+import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages
+        .ERROR_CODE_SEARCH_QUERY_PROPERTY_DOES_NOT_EXISTS;
+import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages
+        .ERROR_CODE_SEARCH_QUERY_SQL_PARSE_ERROR;
+import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages
+        .ERROR_CODE_SEARCH_QUERY_SQL_PROPERTY_PARSE_ERROR;
+import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages
+        .ERROR_CODE_UNEXPECTED;
 
 /**
  * Utility functions required for configuration endpoint
@@ -153,13 +151,6 @@ public class ConfigurationEndpointUtils {
                 .map(ConfigurationEndpointUtils::getAttributeFromDTO)
                 .collect(Collectors.toList()));
         return resourceAdd;
-    }
-
-    public static ResourceFile getResourceFileFromDTO(ResourceFileDTO resourceFileDTO) {
-
-        ResourceFile resourceFile = new ResourceFile();
-        resourceFile.setValue(resourceFileDTO.getPath());
-        return resourceFile;
     }
 
     public static ResourceTypeAdd getResourceTypeAddFromDTO(ResourceTypeAddDTO resourceTypeAddDTO) {
@@ -245,7 +236,8 @@ public class ConfigurationEndpointUtils {
     private static boolean isConflictError(ConfigurationManagementClientException e) {
 
         return ERROR_CODE_RESOURCE_TYPE_ALREADY_EXISTS.getCode().equals(e.getErrorCode()) ||
-                ERROR_CODE_RESOURCE_ALREADY_EXISTS.getCode().equals(e.getErrorCode());
+                ERROR_CODE_RESOURCE_ALREADY_EXISTS.getCode().equals(e.getErrorCode()) ||
+                ERROR_CODE_ATTRIBUTE_ALREADY_EXISTS.getCode().equals(e.getErrorCode());
     }
 
     private static boolean isForbiddenError(ConfigurationManagementClientException e) {
@@ -315,48 +307,13 @@ public class ConfigurationEndpointUtils {
     public static InternalServerErrorException buildInternalServerErrorException(String code,
                                                                                  Log log, Throwable e) {
 
-        String description = generateInternalServerErrorDescription(e.getMessage());
         ErrorDTO errorDTO = getErrorDTO(
                 ConfigurationConstants.STATUS_INTERNAL_SERVER_ERROR_MESSAGE_DEFAULT,
-                description != null ? description : ConfigurationConstants.STATUS_INTERNAL_SERVER_ERROR_MESSAGE_DEFAULT,
+                ConfigurationConstants.STATUS_INTERNAL_SERVER_ERROR_MESSAGE_DEFAULT,
                 code
         );
         logError(log, e);
         return new InternalServerErrorException(errorDTO);
-    }
-
-    /*
-    This method will generate use-case specific description messages for the error message.
-     */
-    private static String generateInternalServerErrorDescription(String errorMessage) {
-
-        // Handle errors while parsing Odata expressions with apache cxf support for jax-rs search.
-        if (errorMessage.equals(ODATA2_API_URI_EXPRESSION_PARSER_ERROR) ||
-                errorMessage.equals(ODATA2_API_URI_EXPRESSION_PARSER_TOKENIZE_ERROR) ||
-                errorMessage.equals(CXF_SEARCH_PARSER_ERROR)) {
-            return ConfigurationConstants.STATUS_ODATA_EXPRESSION_PARSER_ERROR_MESSAGE;
-        }
-        return null;
-    }
-
-    public static String buildFlaggedSQLFromSearchExpression(SearchContext searchContext)
-            throws PropertyValidationException, ExpressionParserException {
-
-        if (searchContext.getSearchExpression() == null) {
-            return null;
-        }
-
-        // With an unchecked ExpressionParserException.
-        SearchCondition<ResourceSearchBean> searchCondition = searchContext.getCondition(ResourceSearchBean.class);
-
-        Map<String, String> fieldMap = new HashMap<>();
-        for (Field field : ResourceSearchBean.class.getDeclaredFields()) {
-            fieldMap.put(field.getName(), BEAN_FIELD_FLAG + field.getName());
-        }
-        SQLPrinterVisitor<ResourceSearchBean> visitor = new SQLPrinterVisitor<>(fieldMap, "TABLE", null);
-        visitor.setValidator(new ResourceSearchBeanPropertyValidator<>());
-        searchCondition.accept(visitor);
-        return visitor.getQuery();
     }
 
     public static <T> Condition getSearchCondition(SearchContext searchContext, Class<T> reference) {
@@ -370,12 +327,11 @@ public class ConfigurationEndpointUtils {
         if (!(searchCondition.getStatement() == null)) {
             PrimitiveStatement primitiveStatement = searchCondition.getStatement();
             if (!(primitiveStatement.getProperty() == null)) {
-                PrimitiveCondition primitiveCondition = new PrimitiveCondition(
+                return new PrimitiveCondition(
                         primitiveStatement.getProperty(),
                         getPrimitiveOperatorFromOdata(primitiveStatement.getCondition()),
                         primitiveStatement.getValue()
                 );
-                return primitiveCondition;
             }
             return null;
         } else {
@@ -393,7 +349,7 @@ public class ConfigurationEndpointUtils {
         }
     }
 
-    public static ConditionType.PrimitiveOperator getPrimitiveOperatorFromOdata (
+    private static ConditionType.PrimitiveOperator getPrimitiveOperatorFromOdata(
             org.apache.cxf.jaxrs.ext.search.ConditionType odataConditionType) {
 
         ConditionType.PrimitiveOperator primitiveConditionType = null;
@@ -420,7 +376,7 @@ public class ConfigurationEndpointUtils {
         return primitiveConditionType;
     }
 
-    public static ConditionType.ComplexOperator getComplexOperatorFromOdata (
+    private static ConditionType.ComplexOperator getComplexOperatorFromOdata(
             org.apache.cxf.jaxrs.ext.search.ConditionType odataConditionType) {
 
         ConditionType.ComplexOperator complexConditionType = null;

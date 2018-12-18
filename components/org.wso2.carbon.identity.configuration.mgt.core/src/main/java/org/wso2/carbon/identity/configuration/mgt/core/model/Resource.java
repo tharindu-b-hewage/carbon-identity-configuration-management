@@ -30,6 +30,28 @@ public class Resource {
     private String lastModified;
     private List<ResourceFile> files;
     private List<Attribute> attributes;
+    private boolean hasFile;
+    private boolean hasAttribute;
+
+    public boolean isHasFile() {
+
+        return hasFile;
+    }
+
+    public void setHasFile(boolean hasFile) {
+
+        this.hasFile = hasFile;
+    }
+
+    public boolean isHasAttribute() {
+
+        return hasAttribute;
+    }
+
+    public void setHasAttribute(boolean hasAttribute) {
+
+        this.hasAttribute = hasAttribute;
+    }
 
     /**
      * Initialize a Resource object.

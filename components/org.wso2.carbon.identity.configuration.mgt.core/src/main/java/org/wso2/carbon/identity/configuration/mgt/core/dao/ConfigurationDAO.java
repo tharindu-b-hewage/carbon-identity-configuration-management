@@ -21,8 +21,9 @@ import org.wso2.carbon.identity.configuration.mgt.core.model.Attribute;
 import org.wso2.carbon.identity.configuration.mgt.core.model.Resource;
 import org.wso2.carbon.identity.configuration.mgt.core.model.ResourceType;
 import org.wso2.carbon.identity.configuration.mgt.core.model.Resources;
-import org.wso2.carbon.identity.configuration.mgt.core.search.ComplexCondition;
 import org.wso2.carbon.identity.configuration.mgt.core.search.Condition;
+
+import java.util.List;
 
 /**
  * Perform CRUD operations for {@link Resource}.
@@ -38,67 +39,142 @@ public interface ConfigurationDAO {
      */
     int getPriority();
 
+    /**
+     * Get a {@link Resources} object across tenants based on the search filter described by a {@link Condition}.
+     *
+     * @param condition Search condition.
+     * @return Collection of {@link Resource} objects based on the search condition.
+     * @throws ConfigurationManagementException Configuration Management Exception.
+     */
     Resources getTenantResources(Condition condition) throws ConfigurationManagementException;
 
     /**
-     * Returns {@link Resource} by name;
+     * Returns {@link Resource} by name.
      *
-     * @param name Name id of the {@link Resource} to retrieve.
+     * @param tenantId       Tenant id of the {@link Resource}.
+     * @param resourceTypeId Id of the {@link ResourceType} for the {@link Resource}.
+     * @param name           Name of the {@link Resource}.
      * @return {@link Resource} for the given name.
+     * @throws ConfigurationManagementException Configuration Management Exception.
      */
-    Resource getResource(int tenantId, String resourceTypeId, String name) throws ConfigurationManagementException;
+    Resource getResourceByName(int tenantId, String resourceTypeId, String name)
+            throws ConfigurationManagementException;
 
     /**
      * Delete {@link Resource} by the given resourceName.
      *
-     * @param resourceName Name id of the {@link Resource} to delete.
-     * @return Name id of the deleted {@link Resource}.
-     * @throws ConfigurationManagementException Resource management exception.
+     * @param tenantId       Tenant id of the {@link Resource}.
+     * @param resourceTypeId Id of the {@link ResourceType} for the {@link Resource}.
+     * @param name           Name of the {@link Resource}.
+     * @throws ConfigurationManagementException Configuration Management Exception.
      */
-    void deleteResource(String resourceTypeName, String resourceName) throws ConfigurationManagementException;
+    void deleteResourceByName(int tenantId, String resourceTypeId, String name) throws ConfigurationManagementException;
 
     /**
-     * Add given {@link Resource}.
+     * Add {@link Resource}.
      *
      * @param resource {@link Resource} to be added.
-     * @return Name id of the added {@link Resource}.
-     * @throws ConfigurationManagementException Resource management exception.
+     * @throws ConfigurationManagementException Configuration Management Exception.
      */
     void addResource(Resource resource) throws ConfigurationManagementException;
 
     /**
-     * Replace given {@link Resource} or add if existing {@link Resource} is not present.
+     * Replace {@link Resource} or create not exists.
      *
-     * @param resourceName Name id of the {@link Resource}
-     * @param resource     New {@link Resource} to replace the existing.
-     * @return Name id of the added {@link Resource}.
-     * @throws ConfigurationManagementException Resource management exception.
+     * @param resource {@link Resource} to be added.
+     * @throws ConfigurationManagementException Configuration Management Exception.
      */
-    void replaceResource(String resourceName, Resource resource) throws ConfigurationManagementException;
+    void replaceResource(Resource resource) throws ConfigurationManagementException;
 
     /**
-     * Update given {@link Resource}.
+     * Add {@link ResourceType}.
      *
-     * @param resourceName Name id of the {@link Resource}
-     * @param resource     New {@link Resource} to update the existing.
-     * @return Name id of the added {@link Resource}.
-     * @throws ConfigurationManagementException Resource management exception.
+     * @param resourceType {@link ResourceType} to be added.
+     * @throws ConfigurationManagementException Configuration Management Exception.
      */
-    void updateResource(String resourceName, Resource resource) throws ConfigurationManagementException;
-
     void addResourceType(ResourceType resourceType) throws ConfigurationManagementException;
 
+    /**
+     * Replace {@link ResourceType}.
+     *
+     * @param resourceType {@link ResourceType} to be replaced.
+     * @throws ConfigurationManagementException Configuration Management Exception.
+     */
     void replaceResourceType(ResourceType resourceType) throws ConfigurationManagementException;
 
+    /**
+     * Get {@link ResourceType} by name.
+     *
+     * @param resourceTypeName Name of the {@link ResourceType}.
+     * @return {@link ResourceType} for the given name.
+     * @throws ConfigurationManagementException Configuration Management Exception.
+     */
     ResourceType getResourceTypeByName(String resourceTypeName) throws ConfigurationManagementException;
 
+    /**
+     * Get {@link ResourceType} by id.
+     *
+     * @param resourceTypeId Id of the {@link ResourceType}.
+     * @return {@link ResourceType} for the given id.
+     * @throws ConfigurationManagementException Configuration Management Exception.
+     */
     ResourceType getResourceTypeById(String resourceTypeId) throws ConfigurationManagementException;
 
+    /**
+     * Delete {@link ResourceType} by name.
+     *
+     * @param resourceTypeName Name of the {@link ResourceType}.
+     * @throws ConfigurationManagementException Configuration Management Exception.
+     */
     void deleteResourceTypeByName(String resourceTypeName) throws ConfigurationManagementException;
 
-    Attribute getAttribute(String resourceId, String attributeKey) throws ConfigurationManagementException;
+    /**
+     * Get {@link Attribute} by name.
+     *
+     * @param resourceId   Id of the {@link ResourceType}.
+     * @param attributeKey Key of the {@link Attribute}.
+     * @return {@link Attribute} for the given name.
+     * @throws ConfigurationManagementException Configuration Management Exception.
+     */
+    Attribute getAttributeByKey(String resourceId, String attributeKey) throws ConfigurationManagementException;
 
-    void updateAttribute(String attributeId, Attribute attribute) throws ConfigurationManagementException;
+    /**
+     * Update {@link Attribute} by Id.
+     *
+     * @param attributeId Id of the {@link Attribute}.
+     * @param attribute   {@link Attribute} to be updated.
+     * @param resourceId Id of the {@link Resource} this {@link Attribute} belongs to.
+     * @throws ConfigurationManagementException Configuration Management Exception.
+     */
+    void updateAttribute(String attributeId, String resourceId, Attribute attribute)
+            throws ConfigurationManagementException;
 
-    void deleteAttribute(String attributeId, String attributeKey) throws ConfigurationManagementException;
+    /**
+     * Add {@link Attribute}.
+     *
+     * @param attributeId Id of the {@link Attribute}.
+     * @param attribute   {@link Attribute} to be created.
+     * @throws ConfigurationManagementException Configuration Management Exception.
+     */
+    void addAttribute(String attributeId, String resourceId, Attribute attribute)
+            throws ConfigurationManagementException;
+
+    /**
+     * Replace {@link Attribute}.
+     *
+     * @param attributeId Id of the {@link Attribute}.
+     * @param attribute   {@link Attribute} to be replaced.
+     * @throws ConfigurationManagementException Configuration Management Exception.
+     */
+    void replaceAttribute(String attributeId, String resourceId, Attribute attribute)
+            throws ConfigurationManagementException;
+
+    /**
+     * Delete {@link Attribute} by key.
+     *
+     * @param attributeId  Id of the {@link Attribute}.
+     * @param attributeKey Key of the {@link Attribute} to be updated.
+     * @throws ConfigurationManagementException Configuration Management Exception.
+     */
+    void deleteAttribute(String attributeId, String resourceId, String attributeKey) throws ConfigurationManagementException;
 }

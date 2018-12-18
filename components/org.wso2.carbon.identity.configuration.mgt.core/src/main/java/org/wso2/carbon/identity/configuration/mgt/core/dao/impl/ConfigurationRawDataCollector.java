@@ -16,6 +16,9 @@
 
 package org.wso2.carbon.identity.configuration.mgt.core.dao.impl;
 
+/**
+ * This class is a collector to collect a single row of data from a database call.
+ */
 class ConfigurationRawDataCollector {
 
     private int tenantId;
@@ -26,7 +29,10 @@ class ConfigurationRawDataCollector {
     private String resourceTypeDescription;
     private String attributeKey;
     private String attributeValue;
+    private String attributeId;
     private String fileId;
+    private boolean hasFile;
+    private boolean hasAttribute;
 
     public ConfigurationRawDataCollector(ConfigurationRawDataCollectorBuilder builder) {
 
@@ -39,6 +45,14 @@ class ConfigurationRawDataCollector {
         this.attributeKey = builder.getAttributeKey();
         this.attributeValue = builder.getAttributeValue();
         this.fileId = builder.getFileId();
+        this.hasFile = builder.isHasFile();
+        this.hasAttribute = builder.isHasAttribute();
+        this.attributeId = builder.getAttributeId();
+    }
+
+    public String getAttributeId() {
+
+        return attributeId;
     }
 
     public int getTenantId() {
@@ -86,6 +100,16 @@ class ConfigurationRawDataCollector {
         return fileId;
     }
 
+    public boolean isHasFile() {
+
+        return hasFile;
+    }
+
+    public boolean isHasAttribute() {
+
+        return hasAttribute;
+    }
+
     public static class ConfigurationRawDataCollectorBuilder {
 
         private int tenantId;
@@ -96,7 +120,43 @@ class ConfigurationRawDataCollector {
         private String resourceTypeDescription;
         private String attributeKey;
         private String attributeValue;
+        private String attributeId;
         private String fileId;
+        private boolean hasFile;
+        private boolean hasAttribute;
+
+        public String getAttributeId() {
+
+            return attributeId;
+        }
+
+        public ConfigurationRawDataCollectorBuilder setAttributeId(String attributeId) {
+
+            this.attributeId = attributeId;
+            return this;
+        }
+
+        public boolean isHasFile() {
+
+            return hasFile;
+        }
+
+        public ConfigurationRawDataCollectorBuilder setHasFile(boolean hasFile) {
+
+            this.hasFile = hasFile;
+            return this;
+        }
+
+        public boolean isHasAttribute() {
+
+            return hasAttribute;
+        }
+
+        public ConfigurationRawDataCollectorBuilder setHasAttribute(boolean hasAttribute) {
+
+            this.hasAttribute = hasAttribute;
+            return this;
+        }
 
         int getTenantId() {
 
